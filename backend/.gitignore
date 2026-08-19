@@ -1,0 +1,33 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# Python / Byte-code
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Variables de entorno y secretos
+.env
+.env.local
+
+# FastAPI / Base de datos local
+*.db
+*.sqlite3
+
+# IDEs y Editores de código
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Node / Frontend (para cuando trabajes el cliente)
+node_modules/
+.next/
+dist/
+build/
+*.log
