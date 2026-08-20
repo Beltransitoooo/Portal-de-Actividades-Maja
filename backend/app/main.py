@@ -4,4 +4,4 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
-    return "Prueba de despliegue en FastAPI"
+    return "Primera prueba de despliegue en FastAPI"
