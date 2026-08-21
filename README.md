@@ -2,7 +2,9 @@
 
 API RESTful para la gestión y asignación de tareas diarias en tiempo real. Diseñada con una arquitectura limpia en tres capas y control de acceso basado en roles (RBAC).
 
+
 ---
+
 
 ## ⚡ Características Principales
 
@@ -14,7 +16,9 @@ API RESTful para la gestión y asignación de tareas diarias en tiempo real. Dis
 * **Validación Estricta:** Garantizada mediante esquemas de Pydantic.
 * **Documentación Automática:** Swagger UI y ReDoc integrados nativamente.
 
+
 ---
+
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -27,9 +31,9 @@ API RESTful para la gestión y asignación de tareas diarias en tiempo real. Dis
 | Seguridad | Passlib, PyJWT, Cryptography |
 | Servidor ASGI | Uvicorn |
 
----
 
 ---
+
 
 ## 🔒 Rutas Principales
 
