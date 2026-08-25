@@ -8,14 +8,24 @@ router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 @router.post("/registrar", response_model=schemas.UsuarioResponse, status_code=status.HTTP_201_CREATED)
 def registrar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
-    if db.query(models.Usuario).filter(models.Usuario.email == usuario.email).first():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El usuario ya existe")
+    usuario_existente = (
+        db.query(models.Usuario)
+        .filter(models.Usuario.usuario == usuario.usuario)
+        .first()
+    )
+
+    if usuario_existente:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El usuario ya existe",
+        )
 
     nuevo_usuario = models.Usuario(
-        nombre=usuario.nombre,
-        contrasena_hash=security.security.hash_password(usuario.contrasena),
-        es_admin=False
+        usuario=usuario.usuario,
+        contrasena=security.hash_contrasena(usuario.contrasena),
+        es_admin=False,
     )
+
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)

@@ -14,7 +14,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def hash_contrasena(contrasena: str) -> str:
-    return pwd_context.hash(contrasena)
+    contrasena_bytes = contrasena.encode('utf-8')[:72]
+    return pwd_context.hash(contrasena_bytes.decode('utf-8', errors='ignore'))
 
 def verificar_contrasena(contrasena_plana: str, contrasena_hasheada: str) -> bool:
     return pwd_context.verify(contrasena_plana, contrasena_hasheada)
