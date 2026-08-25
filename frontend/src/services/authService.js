@@ -1,7 +1,6 @@
-const API_URL = "http:
+const API_URL = "http://localhost:8000"; 
 
 export const loginService = async (username, password) => {
-    
     const formData = new URLSearchParams();
     formData.append("username", username);
     formData.append("password", password);
@@ -18,16 +17,12 @@ export const loginService = async (username, password) => {
         throw new Error("Usuario o contraseña incorrectos");
     }
 
-    
     const data = await response.json();
     return data; 
 };
 
 
-
-export const registerService = async (email, password) => {
-    
-    
+export const registerService = async (email, password) => {   
     const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: {
