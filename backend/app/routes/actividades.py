@@ -4,6 +4,7 @@ from typing import List
 from app.database import get_db
 from app import models, schemas, security
 from typing import Optional
+from datetime import date
 
 router = APIRouter(prefix="/actividades", tags=["Actividades"],)
 
@@ -14,13 +15,23 @@ router = APIRouter(prefix="/actividades", tags=["Actividades"],)
 @router.get("/", response_model=List[schemas.ActividadResponse])
 def listar_actividades(
     equipo: Optional[str] = None,
+    fecha_inicio: Optional[date] = None,
+    fecha_fin: Optional[date] = None,
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
 ):
+    query = db.query(models.Actividad)
 
     if equipo:
-        return db.query(models.Actividad).filter(models.Actividad.equipo == equipo).all()
-    return db.query(models.Actividad).all()
+        query = query.filter(models.Actividad.equipo == equipo)
+
+    if fecha_inicio:
+        query = query.filter(models.Actividad.fecha_creacion >= fecha_inicio)
+
+    if fecha_fin:
+        query = query.filter(models.Actividad.fecha_creacion <= fecha_fin)
+
+    return query.all()
 
 
 @router.post("/", response_model=schemas.ActividadResponse, status_code=status.HTTP_201_CREATED)
