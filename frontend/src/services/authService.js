@@ -1,10 +1,7 @@
-// src/services/authService.js
-
-// Definimos la URL base. Más adelante podemos moverla a un archivo .env
-const API_URL = "http://localhost:8000"; 
+const API_URL = "http:
 
 export const loginService = async (username, password) => {
-    // Transformamos los datos al formato que espera FastAPI
+    
     const formData = new URLSearchParams();
     formData.append("username", username);
     formData.append("password", password);
@@ -21,7 +18,30 @@ export const loginService = async (username, password) => {
         throw new Error("Usuario o contraseña incorrectos");
     }
 
-    // Retorna el objeto { access_token: "...", token_type: "bearer" }
+    
     const data = await response.json();
     return data; 
+};
+
+
+
+export const registerService = async (email, password) => {
+    
+    
+    const response = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+            usuario: email, 
+            contrasena: password 
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error("No se pudo completar el registro. Intenta con otro correo.");
+    }
+
+    return await response.json();
 };

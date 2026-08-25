@@ -1,4 +1,3 @@
-// src/components/TaskCard.jsx
 export const TaskCard = ({ titulo, descripcion, completada }) => {
     return (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-maja-border hover:shadow-md transition-shadow duration-300">

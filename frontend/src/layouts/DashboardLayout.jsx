@@ -1,4 +1,3 @@
-// src/layouts/DashboardLayout.jsx
 import { useNavigate } from 'react-router-dom';
 
 export const DashboardLayout = ({ children }) => {
@@ -12,7 +11,6 @@ export const DashboardLayout = ({ children }) => {
     return (
         <div className="min-h-screen bg-maja-bg flex font-sans">
             
-            {/* Sidebar (Menú lateral oscuro) */}
             <aside className="w-64 bg-maja-primary text-white hidden md:flex flex-col shadow-xl z-20">
                 <div className="p-6 border-b border-gray-800">
                     <h2 className="text-3xl font-extrabold tracking-tight">MAJA</h2>
@@ -38,12 +36,10 @@ export const DashboardLayout = ({ children }) => {
                 </div>
             </aside>
 
-            {/* Contenido Principal */}
             <main className="flex-1 flex flex-col h-screen overflow-hidden">
-                {/* Barra superior (Topbar) */}
                 <header className="bg-white border-b border-maja-border h-20 flex items-center justify-between px-8 shadow-sm z-10">
                     <div className="md:hidden font-extrabold text-2xl text-maja-primary">MAJA</div>
-                    <div className="hidden md:block"></div> {/* Espaciador */}
+                    <div className="hidden md:block"></div>
                     
                     <div className="flex items-center gap-4">
                         <div className="text-right hidden sm:block">
@@ -56,7 +52,6 @@ export const DashboardLayout = ({ children }) => {
                     </div>
                 </header>
                 
-                {/* Área de la página (aquí va el Dashboard) */}
                 <div className="flex-1 overflow-auto p-6 md:p-10">
                     {children}
                 </div>
