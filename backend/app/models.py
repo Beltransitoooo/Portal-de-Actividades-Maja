@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -24,8 +24,6 @@ class Actividad(Base):
     descripcion = Column(String, nullable=True)
     completada = Column(Boolean, default=False)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
-    horas_estimadas = Column(Float, default=0)
-    equipo = Column(String, default="QA")
     
     creador_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     creador = relationship("Usuario", foreign_keys=[creador_id], back_populates="actividades_creadas")

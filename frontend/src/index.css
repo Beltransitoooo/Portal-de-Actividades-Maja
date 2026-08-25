@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-maja-bg: #f8fafc;
+  --color-maja-card: #ffffff;
+  --color-maja-primary: #0f172a;
+  --color-maja-accent: #0284c7;
+  --color-maja-text: #334155;
+  --color-maja-border: #e2e8f0;
+}
+
+body {
+  background-color: var(--color-maja-bg);
+  color: var(--color-maja-text);
+}

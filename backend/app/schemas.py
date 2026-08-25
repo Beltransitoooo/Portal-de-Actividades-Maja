@@ -21,8 +21,6 @@ class ActividadBase(BaseModel):
     titulo: str
     descripcion: Optional[str] = None
     completada: bool = False
-    horas_estimadas: float = 0.0
-    equipo: str = "QA"
 
 class ActividadCreate(ActividadBase):
     asignado_a_id: Optional[int] = None
@@ -32,8 +30,6 @@ class ActividadUpdate(BaseModel):
     descripcion: Optional[str] = None
     completada: Optional[bool] = None
     asignado_a_id: Optional[int] = None
-    horas_estimadas: Optional[float] = None
-    equipo: Optional[str] = None
 
 class ActividadResponse(ActividadBase):
     id: int
