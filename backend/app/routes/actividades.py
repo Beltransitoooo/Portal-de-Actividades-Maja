@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.database import get_db
 from app import models, schemas, security
+from typing import Optional
 
 router = APIRouter(prefix="/actividades", tags=["Actividades"],)
 
@@ -12,9 +13,13 @@ router = APIRouter(prefix="/actividades", tags=["Actividades"],)
 
 @router.get("/", response_model=List[schemas.ActividadResponse])
 def listar_actividades(
+    equipo: Optional[str] = None,
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
 ):
+
+    if equipo:
+        return db.query(models.Actividad).filter(models.Actividad.equipo == equipo).all()
     return db.query(models.Actividad).all()
 
 
