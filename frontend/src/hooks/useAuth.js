@@ -11,6 +11,7 @@ export const useAuth = () => {
         try {
             const data = await loginService(username, password);
             localStorage.setItem('token', data.access_token);
+            localStorage.setItem('username', username); 
             return true;
         } catch (err) {
             setError(err.message);

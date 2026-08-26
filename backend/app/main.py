@@ -3,7 +3,16 @@ from app.routes.auth import router as auth_router
 from app.routes.actividades import router as actividades_router
 from app.database import get_db
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], # Tu puerto de Vite
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(actividades_router)
