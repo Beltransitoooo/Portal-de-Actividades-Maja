@@ -20,6 +20,7 @@ class UsuarioResponse(UsuarioBase):
         from_attributes = True
 
 
+
 class ActividadBase(BaseModel):
     titulo: str
     descripcion: Optional[str] = None
@@ -39,6 +40,22 @@ class ActividadResponse(ActividadBase):
     fecha_creacion: datetime
     creador_id: int
     asignado_a_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+
+class AreaBase(BaseModel):
+    nombre: str
+    descripcion: str | None = None
+
+class AreaCreate(AreaBase):
+    pass  
+
+class AreaResponse(AreaBase):
+    id: int
+    activa: bool
 
     class Config:
         from_attributes = True

@@ -32,4 +32,16 @@ class Actividad(Base):
     asignado_a_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
     asignado_a = relationship("Usuario", foreign_keys=[asignado_a_id], back_populates="actividades_asignadas")
 
+    area_id = Column(Integer, ForeignKey("areas.id"), nullable=True)
+    area = relationship("Area", back_populates="actividades")
 
+
+class Area(Base):
+    __tablename__ = "areas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, unique=True, nullable=False, index=True)
+    descripcion = Column(String, nullable=True)
+    activa = Column(Boolean, default=True)
+
+    actividades = relationship("Actividad", back_populates="area")
