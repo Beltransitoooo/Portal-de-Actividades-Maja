@@ -21,6 +21,7 @@ def registrar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_
         )
 
     nuevo_usuario = models.Usuario(
+        name_users=usuario.name_users,
         usuario=usuario.usuario,
         contrasena=security.hash_contrasena(usuario.contrasena),
         es_admin=False,

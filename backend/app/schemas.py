@@ -4,9 +4,12 @@ from typing import Optional
 
 
 class UsuarioBase(BaseModel):
+    name_users: str | None = None
     usuario: str
 
 class UsuarioCreate(UsuarioBase):
+    name_users: str
+    usuario: str
     contrasena: str
 
 class UsuarioResponse(UsuarioBase):

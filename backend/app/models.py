@@ -7,6 +7,7 @@ class Usuario(Base):
     __tablename__ = "usuarios"
 
     id = Column(Integer, primary_key=True, index=True)
+    name_users = Column(String, nullable=True)
     usuario = Column(String, unique=True, nullable=False, index=True)
     contrasena = Column(String, nullable=False)
     es_admin = Column(Boolean, default=False)
@@ -30,3 +31,5 @@ class Actividad(Base):
 
     asignado_a_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
     asignado_a = relationship("Usuario", foreign_keys=[asignado_a_id], back_populates="actividades_asignadas")
+
+
