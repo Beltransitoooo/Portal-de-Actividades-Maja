@@ -76,7 +76,6 @@ def actualizar_actividad(
 
     if "asignado_a_id" in datos_actualizar:
         nuevo_asignado = datos_actualizar["asignado_a_id"]
-        # Si el valor cambió y el usuario NO es admin, se rechaza
         if nuevo_asignado != actividad_db.asignado_a_id and not usuario_actual.es_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -94,6 +93,13 @@ def eliminar_actividad(
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
 ):
+
+    if not usuario_actual.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo el administrador puede eliminar actividades"
+        )
+    
     actividad = db.query(models.Actividad).filter(models.Actividad.id == actividad_id).first()
     if not actividad:
         raise HTTPException(status_code=404, detail="Actividad no encontrada")
