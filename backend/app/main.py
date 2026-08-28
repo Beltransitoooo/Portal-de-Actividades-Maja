@@ -20,7 +20,7 @@ app.include_router(actividades_router)
 @app.get("/db-check")
 def test_db_connection(db: Session = Depends(get_db)):
     try:
-        db.execute(text("SELECT 1"))
+        db.execute("SELECT 1") 
         return {"status": "ok", "message": "Conexión a PostgreSQL exitosa!"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error de conexión: {str(e)}")

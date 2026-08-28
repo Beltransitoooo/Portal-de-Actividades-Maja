@@ -16,6 +16,9 @@ class Usuario(Base):
     actividades_creadas = relationship("Actividad", foreign_keys="Actividad.creador_id", back_populates="creador")
     actividades_asignadas = relationship("Actividad", foreign_keys="Actividad.asignado_a_id", back_populates="asignado_a")
 
+    area_id = Column(Integer, ForeignKey("areas.id"), nullable=True)
+    area = relationship("Area", back_populates="usuarios")
+    
 
 class Actividad(Base):
     __tablename__ = "actividades"
@@ -41,7 +44,8 @@ class Area(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, nullable=False, index=True)
-    descripcion = Column(String, nullable=True)
     activa = Column(Boolean, default=True)
 
     actividades = relationship("Actividad", back_populates="area")
+    usuarios = relationship("Usuario", back_populates="area")  
+
