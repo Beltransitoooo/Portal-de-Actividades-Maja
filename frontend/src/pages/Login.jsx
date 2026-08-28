@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { LoginForm } from '../components/LoginForm';
 import { RegisterForm } from '../components/RegisterForm';
+import { Loader } from '../components/Loader'; // <-- Importamos el componente nuevo
 
 export const Login = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -38,6 +39,17 @@ export const Login = () => {
 
     return (
         <AuthLayout>
+            
+            {/* Pantalla superpuesta del loader */}
+            {loading && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-200/60 backdrop-blur-sm rounded-[40px]">
+                    <Loader />
+                    <p className="mt-8 text-sm font-bold tracking-widest text-[#0B132B] uppercase animate-pulse">
+                        Procesando...
+                    </p>
+                </div>
+            )}
+
             {isLogin ? (
                 <LoginForm 
                     email={email} setEmail={setEmail}
