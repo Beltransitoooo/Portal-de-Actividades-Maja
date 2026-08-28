@@ -22,20 +22,22 @@ export const loginService = async (username, password) => {
 };
 
 
-export const registerService = async (email, password) => {   
+export const registerService = async (nameUsers, email, password) => {   
     const response = await fetch(`${API_URL}/auth/registrar`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({ 
+            name_users: nameUsers, // <-- Campo requerido por la actualización del backend
             usuario: email, 
             contrasena: password 
         }),
     });
 
     if (!response.ok) {
-        throw new Error("No se pudo completar el registro. Intenta con otro correo.");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || "No se pudo completar el registro. Intenta con otro correo.");
     }
 
     return await response.json();

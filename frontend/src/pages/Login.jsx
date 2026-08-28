@@ -1,33 +1,59 @@
-// src/pages/Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { LoginForm } from '../components/LoginForm';
+import { RegisterForm } from '../components/RegisterForm';
 
 export const Login = () => {
-    const [username, setUsername] = useState('');
+    const [isLogin, setIsLogin] = useState(true);
+    const [nameUsers, setNameUsers] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login, loading, error } = useAuth();
+    
+    const { login, register, loading, error } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = await login(username, password);
-        if (success) navigate('/dashboard');
+        
+        if (isLogin) {
+            const success = await login(email, password);
+            if (success) navigate('/dashboard');
+        } else {
+            const success = await register(nameUsers, email, password);
+            if (success) {
+                localStorage.setItem('username', nameUsers);
+                navigate('/dashboard');
+            }
+        }
+    };
+
+    const toggleMode = () => {
+        setIsLogin(!isLogin);
+        setNameUsers('');
+        setEmail('');
+        setPassword('');
     };
 
     return (
         <AuthLayout>
-            <LoginForm 
-                username={username}
-                setUsername={setUsername}
-                password={password}
-                setPassword={setPassword}
-                handleSubmit={handleSubmit}
-                loading={loading}
-                error={error}
-            />
+            {isLogin ? (
+                <LoginForm 
+                    email={email} setEmail={setEmail}
+                    password={password} setPassword={setPassword}
+                    onSubmit={handleSubmit} onToggle={toggleMode}
+                    loading={loading} error={error}
+                />
+            ) : (
+                <RegisterForm 
+                    nameUsers={nameUsers} setNameUsers={setNameUsers}
+                    email={email} setEmail={setEmail}
+                    password={password} setPassword={setPassword}
+                    onSubmit={handleSubmit} onToggle={toggleMode}
+                    loading={loading} error={error}
+                />
+            )}
         </AuthLayout>
     );
 };
