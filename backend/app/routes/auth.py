@@ -41,3 +41,9 @@ def Iniciar_Sesion(form_data: OAuth2PasswordRequestForm = Depends(), db: Session
     
     token = security.crear_token_acceso(datos={"sub": usuario_db.usuario})
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/mostrar_usuarios", response_model=list[schemas.UsuarioResponse])
+def Mostrar_Usuarios(db: Session = Depends(get_db)):
+    usuarios = db.query(models.Usuario).all()
+    return usuarios
