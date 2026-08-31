@@ -11,7 +11,6 @@ router = APIRouter(prefix="/actividades", tags=["Actividades"],)
 @router.get("/", response_model=List[schemas.ActividadResponse])
 
 
-
 @router.get("/", response_model=List[schemas.ActividadResponse])
 def listar_actividades(
     equipo: Optional[str] = None,
