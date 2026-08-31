@@ -1,7 +1,10 @@
+import { useNavigate } from 'react-router-dom'; // 1. Importamos el hook de navegación
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ModuleCard } from '../components/ModuleCard';
 
 export const Dashboard = () => {
+    const navigate = useNavigate(); // 2. Inicializamos el hook
+
     const modules = [
         { 
             id: 'qa', 
@@ -24,7 +27,12 @@ export const Dashboard = () => {
     ];
 
     const handleModuleClick = (moduleName) => {
-        console.log(`Navegar a la ruta del módulo: ${moduleName}`);
+        // 3. Añadimos la lógica de redirección
+        if (moduleName === 'qa') {
+            navigate('/qa');
+        } else {
+            console.log(`El módulo ${moduleName} aún está en construcción.`);
+        }
     };
 
     return (
@@ -52,7 +60,7 @@ export const Dashboard = () => {
                     </p>
                 </div>
 
-                {/* Grid de Módulos (El ModuleCard se queda con el diseño que le hicimos antes) */}
+                {/* Grid de Módulos */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {modules.map((mod) => (
                         <ModuleCard 
@@ -60,7 +68,7 @@ export const Dashboard = () => {
                             title={mod.title}
                             description={mod.description}
                             icon={mod.icon}
-                            onClick={() => handleModuleClick(mod.id)}
+                            onClick={() => handleModuleClick(mod.id)} // Llama a nuestra función actualizada
                         />
                     ))}
                 </div>
