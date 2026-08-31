@@ -68,3 +68,8 @@ class AreaResponse(AreaBase):
 
     class Config:
         from_attributes = True
+
+
+class LoginRequest(BaseModel):
+    usuario: str
+    contrasena: str

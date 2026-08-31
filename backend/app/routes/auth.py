@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app import models, schemas, security
@@ -33,17 +34,19 @@ def registrar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_
     return nuevo_usuario
 
 @router.post("/login")
-def Iniciar_Sesion(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    usuario_db = db.query(models.Usuario).filter(models.Usuario.usuario == form_data.username).first()
+def Iniciar_Sesion(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
+    usuario_db = db.query(models.Usuario).filter(func.lower(models.Usuario.usuario) == func.lower(login_data.usuario)).first()
     
-    if not usuario_db or not security.verificar_contrasena(form_data.password, usuario_db.contrasena):
-        raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
+    if not usuario_db:
+        raise HTTPException(status_code=400, detail="El usuario no existe en la base de datos")
+        
+    if not security.verificar_contrasena(login_data.contrasena, usuario_db.contrasena):
+        raise HTTPException(status_code=400, detail="La contraseña no coincide")
     
-    token = security.crear_token_acceso(datos={"sub": usuario_db.usuario})
-    return {"access_token": token, "token_type": "bearer"}
-
-
-@router.get("/mostrar_usuarios", response_model=list[schemas.UsuarioResponse])
-def Mostrar_Usuarios(db: Session = Depends(get_db)):
-    usuarios = db.query(models.Usuario).all()
-    return usuarios
+    token = security.crear_token_acceso(datos={"sub": str(usuario_db.id)})
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "es_admin": usuario_db.es_admin,
+        "area_id": usuario_db.area_id
+    }
