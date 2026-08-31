@@ -1,39 +1,39 @@
 import { useState } from 'react';
-import { loginService, registerService } from '../services/authService';
+import { loginApi } from '../services/authService';
 
 export const useAuth = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const login = async (username, password) => {
+    const login = async (usuario, contrasena) => {
         setLoading(true);
         setError(null);
         try {
-            const data = await loginService(username, password);
-            localStorage.setItem('token', data.access_token);
-            localStorage.setItem('username', username); 
-            return true;
-        } catch (err) {
-            setError(err.message);
-            return false; 
-        } finally {
-            setLoading(false);
-        }
-    };
+            const data = await loginApi(usuario, contrasena);
+            
+            // Guardamos los datos de la nueva respuesta en localStorage
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('token_type', data.token_type);
+            localStorage.setItem('es_admin', String(data.es_admin));
+            localStorage.setItem('area_id', String(data.area_id));
+            localStorage.setItem('username', usuario);
 
-    const register = async (nameUsers, email, password) => {
-        setLoading(true);
-        setError(null);
-        try {
-            await registerService(nameUsers, email, password);
+            setLoading(false);
             return true;
         } catch (err) {
             setError(err.message);
+            setLoading(false);
             return false;
-        } finally {
-            setLoading(false);
         }
     };
 
-    return { login, register, loading, error };
+    const logout = () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('token_type');
+        localStorage.removeItem('es_admin');
+        localStorage.removeItem('area_id');
+        localStorage.removeItem('username');
+    };
+
+    return { login, logout, loading, error };
 };

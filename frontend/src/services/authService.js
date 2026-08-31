@@ -1,44 +1,42 @@
-const API_URL = "http://localhost:8000"; 
+const API_URL = 'http://localhost:8000'; // Ajusta a tu URL base
 
-export const loginService = async (username, password) => {
-    const formData = new URLSearchParams();
-    formData.append("username", username);
-    formData.append("password", password);
-
+export const loginApi = async (usuario, contrasena) => {
     const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            'Content-Type': 'application/json',
         },
-        body: formData,
-    });
-
-    if (!response.ok) {
-        throw new Error("Usuario o contraseña incorrectos");
-    }
-
-    const data = await response.json();
-    return data; 
-};
-
-
-export const registerService = async (nameUsers, email, password) => {   
-    const response = await fetch(`${API_URL}/auth/registrar`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-            name_users: nameUsers, // <-- Campo requerido por la actualización del backend
-            usuario: email, 
-            contrasena: password 
-        }),
+        body: JSON.stringify({ usuario, contrasena }),
     });
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || "No se pudo completar el registro. Intenta con otro correo.");
+        throw new Error(errorData.detail || 'Error al iniciar sesión');
     }
 
     return await response.json();
+};
+
+// Helper centralizado para peticiones autenticadas
+export const fetchWithAuth = async (endpoint, options = {}) => {
+    const token = localStorage.getItem('access_token');
+    
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    };
+
+    const response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers,
+    });
+
+    if (response.status === 401) {
+        localStorage.clear();
+        window.location.href = '/';
+        throw new Error('Sesión expirada');
+    }
+
+    return response;
 };
