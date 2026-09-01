@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000'; // Ajusta a tu URL base
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'; // VITE_API_URL falta definir en servidor interno
 
 export const loginApi = async (usuario, contrasena) => {
     const response = await fetch(`${API_URL}/auth/login`, {
