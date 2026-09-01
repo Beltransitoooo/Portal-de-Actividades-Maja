@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { loginApi } from '../services/authService';
+import { loginApi, registerApi } from '../services/authService';
 
 export const useAuth = () => {
     const [loading, setLoading] = useState(false);
@@ -11,7 +11,6 @@ export const useAuth = () => {
         try {
             const data = await loginApi(usuario, contrasena);
             
-            // Guardamos los datos de la nueva respuesta en localStorage
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('token_type', data.token_type);
             localStorage.setItem('es_admin', String(data.es_admin));
@@ -27,6 +26,22 @@ export const useAuth = () => {
         }
     };
 
+    const register = async (nameUsers, email, password) => {
+        setLoading(true);
+        setError(null);
+        try {
+            // Llamamos a la API conectando los campos de React con los de FastAPI
+            await registerApi(nameUsers, email, password);
+            
+            setLoading(false);
+            return true;
+        } catch (err) {
+            setError(err.message || 'Error al registrar usuario');
+            setLoading(false);
+            return false;
+        }
+    };
+
     const logout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('token_type');
@@ -35,5 +50,5 @@ export const useAuth = () => {
         localStorage.removeItem('username');
     };
 
-    return { login, logout, loading, error };
+    return { login, register, logout, loading, error };
 };

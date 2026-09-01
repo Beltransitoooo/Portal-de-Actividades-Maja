@@ -1,26 +1,25 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { Loader } from './Loader';
 
 export const Sidebar = ({ username, initials }) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const displayName = username?.split('@')[0] || 'Usuario';
 
     const handleLogout = () => {
-        setIsLoggingOut(true); // Mostramos el loader
-        
-        // Retrasamos la limpieza y redirección por 2 segundos (2000 ms)
+        setIsLoggingOut(true);
         setTimeout(() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
+            localStorage.clear();
             navigate('/');
         }, 2000);
     };
 
     const navItems = [
         {
-            id: 'dashboard',
+            id: 'portal',
+            path: '/qa',
             label: 'Portal Principal',
             svg: (
                 <svg className="peer-hover/expand:scale-125 peer-hover/expand:text-[#00A3FF] peer-hover/expand:fill-[#00A3FF] peer-checked/expand:text-[#00A3FF] peer-checked/expand:fill-[#00A3FF] text-2xl peer-checked/expand:scale-125 ease-in-out duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -29,7 +28,18 @@ export const Sidebar = ({ username, initials }) => {
             )
         },
         {
+            id: 'activities',
+            path: '/qa/actividades',
+            label: 'Gestor de Actividades',
+            svg: (
+                <svg className="peer-hover/expand:scale-125 peer-hover/expand:text-[#00A3FF] peer-hover/expand:fill-[#00A3FF] peer-checked/expand:text-[#00A3FF] peer-checked/expand:fill-[#00A3FF] text-2xl peer-checked/expand:scale-125 ease-in-out duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zm-7 3c1.654 0 3 1.346 3 3s-1.346 3-3 3-3-1.346-3-3 1.346-3 3-3zm5 12H7v-1c0-2.206 2.691-3 5-3s5 .794 5 3v1z"></path>
+                </svg>
+            )
+        },
+        {
             id: 'profile',
+            path: '/profile',
             label: 'Mi Perfil',
             svg: (
                 <svg className="peer-hover/expand:scale-125 peer-hover/expand:text-[#00A3FF] peer-hover/expand:fill-[#00A3FF] peer-checked/expand:text-[#00A3FF] peer-checked/expand:fill-[#00A3FF] text-2xl peer-checked/expand:scale-125 ease-in-out duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -39,6 +49,7 @@ export const Sidebar = ({ username, initials }) => {
         },
         {
             id: 'messages',
+            path: '/messages',
             label: 'Mensajes',
             svg: (
                 <svg className="peer-hover/expand:scale-125 peer-hover/expand:text-[#00A3FF] peer-hover/expand:fill-[#00A3FF] peer-checked/expand:text-[#00A3FF] peer-checked/expand:fill-[#00A3FF] text-2xl peer-checked/expand:scale-125 ease-in-out duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -49,6 +60,7 @@ export const Sidebar = ({ username, initials }) => {
         },
         {
             id: 'help',
+            path: '/help',
             label: 'Soporte',
             svg: (
                 <svg className="peer-hover/expand:scale-125 peer-hover/expand:text-[#00A3FF] peer-hover/expand:fill-[#00A3FF] peer-checked/expand:text-[#00A3FF] peer-checked/expand:fill-[#00A3FF] text-2xl peer-checked/expand:scale-125 ease-in-out duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -59,6 +71,7 @@ export const Sidebar = ({ username, initials }) => {
         },
         {
             id: 'settings',
+            path: '/settings',
             label: 'Configuración',
             svg: (
                 <svg className="peer-hover/expand:scale-125 peer-hover/expand:text-[#00A3FF] peer-hover/expand:fill-[#00A3FF] peer-checked/expand:text-[#00A3FF] peer-checked/expand:fill-[#00A3FF] text-2xl peer-checked/expand:scale-125 ease-in-out duration-300" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -71,7 +84,6 @@ export const Sidebar = ({ username, initials }) => {
 
     return (
         <>
-            {/* Overlay de Cierre de Sesión a Pantalla Completa */}
             {isLoggingOut && (
                 <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gray-200/70 backdrop-blur-md">
                     <Loader />
@@ -82,14 +94,11 @@ export const Sidebar = ({ username, initials }) => {
             )}
 
             <aside className="w-72 bg-white flex flex-col justify-between hidden sm:flex border-r border-gray-200 relative overflow-hidden shadow-sm z-10">
-                
-                {/* Fondo Mallado (Mesh) */}
                 <div 
                     className="absolute inset-0 opacity-[0.03] z-0 pointer-events-none" 
                     style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '16px 16px' }}
                 ></div>
 
-                {/* Contenedor Superior (Navegación) */}
                 <div className="flex flex-col h-full relative z-10">
                     <div className="p-6 mt-2">
                         <div className="flex items-center gap-2 mb-6 text-gray-400">
@@ -99,32 +108,35 @@ export const Sidebar = ({ username, initials }) => {
                             <p className="text-[10px] font-bold tracking-[0.2em] uppercase">Navegación</p>
                         </div>
 
-                        {/* Menú Interactivo */}
                         <article className="w-full flex flex-col gap-1 transition-all duration-[450ms] ease-in-out">
-                            {navItems.map((item, index) => (
-                                <label
-                                    key={item.id}
-                                    htmlFor={item.id}
-                                    className="has-[:checked]:shadow-sm relative w-full h-14 px-4 ease-in-out duration-300 border border-transparent has-[:checked]:border-gray-200 has-[:checked]:bg-slate-50 group flex flex-row gap-4 items-center text-gray-400 rounded-xl cursor-pointer hover:bg-gray-50/50"
-                                >
-                                    <input
-                                        className="hidden peer/expand"
-                                        type="radio"
-                                        name="sidebar-path"
-                                        id={item.id}
-                                        defaultChecked={index === 0}
-                                    />
-                                    {item.svg}
-                                    <span className="font-bold text-xs uppercase tracking-widest peer-checked/expand:text-[#0B132B] transition-colors mt-0.5">
-                                        {item.label}
-                                    </span>
-                                </label>
-                            ))}
+                            {navItems.map((item) => {
+                                const isActive = location.pathname === item.path;
+                                return (
+                                    <label
+                                        key={item.id}
+                                        htmlFor={item.id}
+                                        onClick={() => navigate(item.path)}
+                                        className="has-[:checked]:shadow-sm relative w-full h-14 px-4 ease-in-out duration-300 border border-transparent has-[:checked]:border-gray-200 has-[:checked]:bg-slate-50 group flex flex-row gap-4 items-center text-gray-400 rounded-xl cursor-pointer hover:bg-gray-50/50"
+                                    >
+                                        <input
+                                            className="hidden peer/expand"
+                                            type="radio"
+                                            name="sidebar-path"
+                                            id={item.id}
+                                            checked={isActive}
+                                            onChange={() => {}}
+                                        />
+                                        {item.svg}
+                                        <span className="font-bold text-xs uppercase tracking-widest peer-checked/expand:text-[#0B132B] transition-colors mt-0.5">
+                                            {item.label}
+                                        </span>
+                                    </label>
+                                );
+                            })}
                         </article>
                     </div>
                 </div>
                 
-                {/* Tarjeta de Perfil Inferior */}
                 <div className="p-4 mx-4 mb-6 rounded-2xl bg-white border border-gray-100 shadow-md relative overflow-hidden group z-10">
                     <div className="absolute top-0 left-0 w-1.5 h-full bg-[#00A3FF]"></div>
                     <div className="flex items-center gap-3 pl-2">
@@ -140,7 +152,6 @@ export const Sidebar = ({ username, initials }) => {
                             </p>
                         </div>
                     </div>
-                    {/* Botón de cierre de sesión */}
                     <button 
                         onClick={handleLogout}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-red-500 transition-colors"

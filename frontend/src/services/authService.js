@@ -1,5 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'; // VITE_API_URL falta definir en servidor interno
+const API_URL = 'http://localhost:8000'; // Asegúrate de que coincida con tu backend
 
+// --- LOGIN ---
 export const loginApi = async (usuario, contrasena) => {
     const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -12,6 +13,25 @@ export const loginApi = async (usuario, contrasena) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || 'Error al iniciar sesión');
+    }
+
+    return await response.json();
+};
+
+// --- REGISTRO (NUEVO) ---
+export const registerApi = async (name_users, usuario, contrasena) => {
+    const response = await fetch(`${API_URL}/auth/registrar`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        // Enviamos exactamente los campos que tu esquema de FastAPI espera
+        body: JSON.stringify({ name_users, usuario, contrasena }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Error al registrar usuario');
     }
 
     return await response.json();

@@ -1,75 +1,110 @@
-import { useState } from 'react'; // <-- ESTA ES LA LÍNEA QUE FALTABA
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { QAHeader } from '../components/QA/QAHeader';
 import { QAUserFilter } from '../components/QA/QAUserFilter';
 import { QAKpiPanel } from '../components/QA/QAKpiPanel';
 import { QACalendar } from '../components/QA/QACalendar';
 import { QANewTicketModal } from '../components/QA/QANewTicketModal';
-import { QATicketPanel } from '../components/QA/QATicketPanel'; // Importación del panel lateral
+import { QATicketPanel } from '../components/QA/QATicketPanel';
+import { fetchWithAuth } from '../services/authService'; // <-- Importamos tu servicio de autenticación
 
 export const QADashboard = () => {
-    // Estados principales
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedTicket, setSelectedTicket] = useState(null); // Estado del panel lateral
+    const [selectedTicket, setSelectedTicket] = useState(null);
 
-    // Mock de usuarios
-    const teamUsers = [
-        { id: 'AB', name: 'Angel Beltrán', role: 'Frontend' },
-        { id: 'LM', name: 'Luis Martínez', role: 'Backend' },
-        { id: 'JD', name: 'Jane Doe', role: 'QA Tester' }
+    // Estados para los datos reales
+    const [teamUsers, setTeamUsers] = useState([]);
+    const [tasks, setTasks] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Paleta de colores corporativos para asignar a los usuarios
+    const colorPalettes = [
+        { main: 'bg-[#00A3FF]', light: 'bg-blue-50', border: 'border-[#00A3FF]' },
+        { main: 'bg-emerald-500', light: 'bg-emerald-50', border: 'border-emerald-500' },
+        { main: 'bg-purple-500', light: 'bg-purple-50', border: 'border-purple-500' },
+        { main: 'bg-amber-500', light: 'bg-amber-50', border: 'border-amber-500' },
+        { main: 'bg-rose-500', light: 'bg-rose-50', border: 'border-rose-500' }
     ];
-    
-    // Mock de tareas iniciales
-    const [tasks, setTasks] = useState([
-        { id: 'QA-1042', title: 'Fallo en pasarela Stripe', startDate: '2026-08-25', dueDate: '2026-08-25', priority: 'CRÍTICA', assignee: 'AB', type: 'BUG', description: 'El endpoint de Stripe devuelve 500.' },
-        { id: 'QA-1043', title: 'Alineación de logo en navbar', startDate: '2026-08-25', dueDate: '2026-08-26', priority: 'BAJA', assignee: 'LM', type: 'TAREA', description: 'Alinear a la izquierda según nuevo diseño.' },
-        { id: 'QA-1044', title: 'Error 500 al registrar usuario', startDate: '2026-08-28', dueDate: '2026-08-28', priority: 'ALTA', assignee: 'AB', type: 'BUG', description: 'No se envían las cabeceras CORS.' },
-        { id: 'QA-1045', title: 'Actividad de prueba multinivel', startDate: '2026-09-01', dueDate: '2026-09-06', priority: 'MEDIA', assignee: 'JD', type: 'PRUEBAS', maxHours: '12', description: 'Validar los 4 entornos de prueba.' },
-    ]);
 
-    // Función para crear nueva incidencia y mapear TODOS los campos del modal
-    const handleCreateTicket = (newTicketData) => {
+    // Función auxiliar para extraer iniciales (ej. "Luis Martínez" -> "LM")
+    const getInitials = (name) => {
+        if (!name) return 'US';
+        const words = name.trim().split(' ');
+        if (words.length >= 2) {
+            return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    };
+
+    // Cargar datos reales al montar la pantalla
+    useEffect(() => {
+        const loadRealData = async () => {
+            setIsLoading(true);
+            try {
+                // 1. Obtener usuarios de la base de datos
+                const resUsers = await fetchWithAuth('/usuarios'); 
+                if (resUsers.ok) {
+                    const usersData = await resUsers.json();
+                    
+                    // Transformar los datos del backend al formato que necesita nuestro diseño
+                    const formattedUsers = usersData.map((user, index) => ({
+                        // Usamos las iniciales como ID para que el avatar se vea bien en el UI
+                        id: getInitials(user.name_users || user.usuario), 
+                        name: user.name_users || user.usuario,
+                        role: user.es_admin ? 'Administrador' : 'QA Tester',
+                        theme: colorPalettes[index % colorPalettes.length], // Asigna color según su posición
+                        email: user.usuario // Guardamos el email original por si acaso
+                    }));
+                    setTeamUsers(formattedUsers);
+                }
+
+                // 2. Obtener actividades (Si el endpoint aún no existe, fallará de forma segura y dejará el arreglo vacío)
+                const resTasks = await fetchWithAuth('/actividades');
+                if (resTasks.ok) {
+                    const tasksData = await resTasks.json();
+                    setTasks(tasksData);
+                } else {
+                    console.warn('El endpoint de actividades aún no devuelve datos válidos.');
+                }
+            } catch (error) {
+                console.error("Error al cargar los datos del dashboard:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadRealData();
+    }, []);
+
+    const handleCreateTicket = async (newTicketData) => {
+        // TODO: Aquí enviarás el POST a tu backend para guardar la actividad real.
+        // Por ahora lo simulamos actualizando la vista local:
         const newTask = {
             id: `QA-${Math.floor(Math.random() * 1000) + 2000}`, 
-            title: newTicketData.title,
-            startDate: newTicketData.startDate, 
+            ...newTicketData,
             dueDate: newTicketData.dueDate || newTicketData.startDate,
-            priority: newTicketData.priority,
-            assignee: newTicketData.assignee,
-            type: newTicketData.type,
-            area: newTicketData.area,
-            techLead: newTicketData.techLead,
-            minHours: newTicketData.minHours,
-            maxHours: newTicketData.maxHours,
-            description: newTicketData.description
         };
         setTasks([...tasks, newTask]);
     };
 
-    // Filtro por usuario
-    const filteredTasks = selectedUser 
-        ? tasks.filter(task => task.assignee === selectedUser) 
-        : tasks;
+    const filteredTasks = selectedUser ? tasks.filter(task => task.assignee === selectedUser) : tasks;
 
-    // Control del mes
-    const handlePrevMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-    };
-
-    const handleNextMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
-    };
+    const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
     return (
         <DashboardLayout>
             <div className="max-w-[1500px] mx-auto flex flex-col lg:flex-row gap-6">
                 
-                {/* Panel lateral izquierdo (Filtros) */}
-                <QAUserFilter teamUsers={teamUsers} selectedUser={selectedUser} onSelectUser={setSelectedUser} />
+                {/* Filtro Lateral */}
+                <QAUserFilter 
+                    teamUsers={teamUsers} 
+                    selectedUser={selectedUser} 
+                    onSelectUser={setSelectedUser} 
+                />
 
-                {/* Contenido Central */}
                 <div className="flex-1 min-w-0">
                     <QAHeader 
                         onNewTicketClick={() => setIsModalOpen(true)}
@@ -77,24 +112,32 @@ export const QADashboard = () => {
                         onPrevMonth={handlePrevMonth}
                         onNextMonth={handleNextMonth}
                     />
+                    
                     <QAKpiPanel filteredTasks={filteredTasks} />
                     
-                    <QACalendar 
-                        tasks={filteredTasks} 
-                        currentDate={currentDate} 
-                        onTicketClick={(ticket) => setSelectedTicket(ticket)} 
-                    />
+                    {/* Si está cargando, mostramos un mensaje sutil; si no, el calendario */}
+                    {isLoading ? (
+                        <div className="w-full h-64 flex items-center justify-center bg-white border border-gray-200 mt-6 rounded-sm">
+                            <p className="text-sm font-bold text-gray-400 tracking-widest uppercase animate-pulse">Sincronizando con base de datos...</p>
+                        </div>
+                    ) : (
+                        <QACalendar 
+                            tasks={filteredTasks} 
+                            currentDate={currentDate} 
+                            teamUsers={teamUsers}
+                            onTicketClick={(ticket) => setSelectedTicket(ticket)} 
+                        />
+                    )}
                 </div>
             </div>
 
-            {/* Modal de Creación */}
             <QANewTicketModal 
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
                 onSubmit={handleCreateTicket} 
+                teamUsers={teamUsers} // <- Recomendación: Pásale los usuarios reales al modal para que el select sea dinámico
             />
-
-            {/* Modal/Panel Lateral de Detalles */}
+            
             <QATicketPanel 
                 ticket={selectedTicket} 
                 onClose={() => setSelectedTicket(null)} 

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
+import { QAPortal } from './pages/QAPortal'; 
 import { QADashboard } from './pages/QADashboard'; 
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -8,10 +9,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta pública unificada */}
+        {/* Ruta pública */}
         <Route path="/" element={<Login />} />
         
-        {/* Ruta Privada: Dashboard Principal */}
+        {/* Selección de Módulo post-login */}
         <Route 
           path="/dashboard" 
           element={
@@ -21,9 +22,19 @@ function App() {
           } 
         />
 
-        {/* Ruta Privada: Módulo QA */}
+        {/* Portal Principal de QA (Rendimiento) */}
         <Route 
           path="/qa" 
+          element={
+            <ProtectedRoute>
+              <QAPortal />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Gestor de Actividades de QA (Calendario) */}
+        <Route 
+          path="/qa/actividades" 
           element={
             <ProtectedRoute>
               <QADashboard />
