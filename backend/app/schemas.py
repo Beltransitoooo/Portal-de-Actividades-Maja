@@ -1,6 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, date
 from typing import Optional
+import re
 
 
 class UsuarioBase(BaseModel):
@@ -10,11 +11,19 @@ class UsuarioBase(BaseModel):
 
 
 class UsuarioCreate(UsuarioBase):
-    name_users: str
-    usuario: str
-    contrasena: str
-    area_id: int | None = None
+    contrasena: str = Field(..., min_length=8, description="Mínimo 8 caracteres")
 
+    @field_validator("contrasena")
+    @classmethod
+    def validar_fortaleza_contrasena(cls, value: str) -> str:
+        if not re.search(r"[A-Z]", value):
+            raise ValueError("La contraseña debe contener al menos una letra mayúscula")
+
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
+            raise ValueError("La contraseña debe contener al menos un carácter especial")
+
+        return value
+    
 
 class UsuarioResponse(UsuarioBase):
     id: int
