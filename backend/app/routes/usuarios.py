@@ -46,3 +46,28 @@ def Actualizar_Usuarios(
     db.commit()
     db.refresh(db_usuario)
     return db_usuario
+
+@router.delete("/usuarios/{usuario_id}", status_code=status.HTTP_204_NO_CONTENT)
+def Eliminar_Usuario(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+
+    if not usuario_actual.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo el administrador puede eliminar usuarios"
+        )
+
+    usuario_db = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+        
+    if not usuario_db:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuario no encontrado"
+        )
+
+    db.delete(usuario_db)
+    db.commit()
+    return None
