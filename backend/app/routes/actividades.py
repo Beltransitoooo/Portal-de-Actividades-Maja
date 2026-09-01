@@ -33,29 +33,26 @@ def listar_actividades(
     return query.all()
 
 
-@router.post("/", response_model=schemas.ActividadResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=schemas.ActividadResponse)
 def crear_actividad(
     actividad: schemas.ActividadCreate,
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
 ):
-    if actividad.asignado_a_id is not None and not usuario_actual.es_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Solo el administrador puede asignar tareas a otros usuarios"
-        )
+    datos_actividad = actividad.model_dump()
+    
+    if not datos_actividad.get("area_id"):
+        datos_actividad["area_id"] = usuario_actual.area_id
 
-    nueva = models.Actividad(
-        titulo=actividad.titulo,
-        descripcion=actividad.descripcion,
-        completada=actividad.completada,
-        creador_id=usuario_actual.id,
-        asignado_a_id=actividad.asignado_a_id
+    nueva_actividad = models.Actividad(
+        **datos_actividad,
+        creador_id=usuario_actual.id
     )
-    db.add(nueva)
+    
+    db.add(nueva_actividad)
     db.commit()
-    db.refresh(nueva)
-    return nueva
+    db.refresh(nueva_actividad)
+    return nueva_actividad
 
 
 @router.put("/{actividad_id}", response_model=schemas.ActividadResponse)
