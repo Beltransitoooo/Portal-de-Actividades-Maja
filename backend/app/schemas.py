@@ -9,18 +9,29 @@ class UsuarioBase(BaseModel):
     usuario: str
     area_id: int | None = None
 
+    @field_validator("usuario")
+    @classmethod
+    def validar_formato_correo(cls, value: str) -> str:
+        patron_correo = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        if not re.match(patron_correo, value):
+            raise ValueError("El usuario debe ser un correo electrónico válido")
+        return value
+
 
 class UsuarioCreate(UsuarioBase):
-    contrasena: str = Field(..., min_length=8, description="Mínimo 8 caracteres")
+    contrasena: str
 
     @field_validator("contrasena")
     @classmethod
     def validar_fortaleza_contrasena(cls, value: str) -> str:
+        if len(value) < 8:
+            raise ValueError("La contraseña debe tener al menos 8 caracteres")
+
         if not re.search(r"[A-Z]", value):
             raise ValueError("La contraseña debe contener al menos una letra mayúscula")
 
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
-            raise ValueError("La contraseña debe contener al menos un carácter especial")
+            raise ValueError("La contraseña debe contener al menos un carácter especial (!@#$%^&*)")
 
         return value
     
