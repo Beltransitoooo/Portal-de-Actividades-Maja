@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { loginApi, registerApi } from '../services/authService';
+import { loginApi, registerApi, loginWithGoogleApi } from '../services/authService';
 
 export const useAuth = () => {
     const [loading, setLoading] = useState(false);
@@ -59,5 +59,28 @@ export const useAuth = () => {
         window.location.href = '/login';
     };
 
-    return { login, register, logout, loading, error };
+    const loginWithGoogle = async (googleToken) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await loginWithGoogleApi(googleToken);
+            
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('token_type', data.token_type);
+            localStorage.setItem('es_admin', String(data.es_admin));
+            if (data.area_id) localStorage.setItem('area_id', String(data.area_id));
+            
+            const displayName = data.name_users || 'Usuario de Google';
+            localStorage.setItem('username', displayName);
+
+            setLoading(false);
+            return true;
+        } catch (err) {
+            setError(err.message);
+            setLoading(false);
+            return false;
+        }
+    };
+
+    return { login, register, loginWithGoogle, logout, loading, error };
 };

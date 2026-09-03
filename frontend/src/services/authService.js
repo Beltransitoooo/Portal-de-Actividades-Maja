@@ -50,3 +50,20 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
 
     return fetch(`${API_URL}${endpoint}`, { ...options, headers });
 };
+
+
+export const loginWithGoogleApi = async (token) => {
+    // IMPORTANTE: Confirma con tu dev de backend si la ruta es exactamente /auth/google
+    const response = await fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: token }) // Enviamos el token de Google al backend
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.detail || 'Error en el inicio de sesión con Google');
+    }
+
+    return await response.json();
+};
