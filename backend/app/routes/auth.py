@@ -13,3 +13,9 @@ def registrar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_
 @router.post("/login")
 def iniciar_sesion(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
     return auth_service.login(db, login_data)
+
+@router.post("/google")
+def login_google(
+    datos: schemas.GoogleLoginRequest, db: Session = Depends(get_db)
+):
+    return auth_service.autenticar_con_google(db, datos.token)

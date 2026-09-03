@@ -105,3 +105,8 @@ class AreaResponse(AreaBase):
 class LoginRequest(BaseModel):
     usuario: str
     contrasena: str
+
+
+
+class GoogleLoginRequest(BaseModel):
+    token: str

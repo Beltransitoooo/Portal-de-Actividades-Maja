@@ -2,6 +2,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi import HTTPException, status
 from app import models, schemas, security
+from google.auth.transport import requests
+from google.oauth2 import id_token
+import os
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID","367751508872-rjkgo0i8e8natof9ucvod5ijer936a2e.apps.googleusercontent.com",)
 
 def registrar(db: Session, usuario_in: schemas.UsuarioCreate):
     usuario_existente = (
@@ -49,4 +54,53 @@ def login(db: Session, login_data: schemas.LoginRequest):
         "token_type": "bearer",
         "es_admin": usuario_db.es_admin,
         "area_id": usuario_db.area_id
+    }
+
+
+def autenticar_con_google(db: Session, token_google: str):
+    try:
+        id_info = id_token.verify_oauth2_token(
+            token_google, requests.Request(), GOOGLE_CLIENT_ID
+        )
+
+        email = id_info.get("email")
+        nombre = id_info.get("name", email.split("@")[0] if email else "")
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El token de Google no contiene un correo válido",
+            )
+
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de Google inválido o expirado",
+        )
+
+    usuario_db = (
+        db.query(models.Usuario)
+        .filter(func.lower(models.Usuario.usuario) == func.lower(email))
+        .first()
+    )
+
+    if not usuario_db:
+        usuario_db = models.Usuario(
+            name_users=nombre,
+            usuario=email,
+            contrasena="",
+            es_admin=False,
+            area_id=None,
+        )
+        db.add(usuario_db)
+        db.commit()
+        db.refresh(usuario_db)
+
+    token = security.crear_token_acceso(datos={"sub": str(usuario_db.id)})
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "es_admin": usuario_db.es_admin,
+        "area_id": usuario_db.area_id,
     }
