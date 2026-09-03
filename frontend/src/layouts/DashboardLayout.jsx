@@ -3,27 +3,39 @@ import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
 
 export const DashboardLayout = ({ children }) => {
-    const [username, setUsername] = useState('Usuario');
+    const [userState, setUserState] = useState({
+        username: 'Usuario',
+        initials: 'US'
+    });
+
+    const getInitials = (name) => {
+        if (!name) return 'US';
+        const words = name.trim().split(' ');
+        if (words.length >= 2) {
+            return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    };
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('username');
-        if (storedUser) {
-            setUsername(storedUser);
-        }
+        const storedUser = localStorage.getItem('username') || 'Usuario';
+        setUserState({
+            username: storedUser,
+            initials: getInitials(storedUser)
+        });
     }, []);
 
-    const initials = username.split('@')[0].substring(0, 2).toUpperCase();
-
     return (
-        <div className="flex flex-col h-screen bg-slate-50 font-sans relative">
-            <Header username={username} initials={initials} />
+        <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased text-[#0B132B]">
+            {/* Header global con el nuevo UserDropdown */}
+            <Header username={userState.username} initials={userState.initials} />
 
-            <div className="flex flex-1 overflow-hidden">
-                <Sidebar username={username} initials={initials} />
-                
-                <main className="flex-1 p-8 lg:p-12 overflow-y-auto relative z-10">
-                    {/* Brillo de fondo para el main */}
-                    <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#041D3B]/5 to-transparent pointer-events-none -z-10"></div>
+            <div className="flex flex-1 min-h-[calc(100vh-64px)]">
+                {/* Sidebar global limpio (sin la tarjeta repetida de usuario abajo) */}
+                <Sidebar />
+
+                {/* Contenido principal */}
+                <main className="flex-1 p-6 lg:p-8 min-w-0 overflow-y-auto">
                     {children}
                 </main>
             </div>

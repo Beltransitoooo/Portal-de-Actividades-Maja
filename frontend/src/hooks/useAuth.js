@@ -14,8 +14,14 @@ export const useAuth = () => {
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('token_type', data.token_type);
             localStorage.setItem('es_admin', String(data.es_admin));
-            localStorage.setItem('area_id', String(data.area_id));
-            localStorage.setItem('username', usuario);
+            if (data.area_id) localStorage.setItem('area_id', String(data.area_id));
+            
+            let displayName = data.name_users;
+            if (!displayName) {
+                displayName = usuario.includes('@') ? usuario.split('@')[0] : usuario;
+                displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+            }
+            localStorage.setItem('username', displayName);
 
             setLoading(false);
             return true;
@@ -26,28 +32,31 @@ export const useAuth = () => {
         }
     };
 
-    const register = async (nameUsers, email, password) => {
+    const register = async (nameUsers, usuario, contrasena) => {
         setLoading(true);
         setError(null);
         try {
-            // Llamamos a la API conectando los campos de React con los de FastAPI
-            await registerApi(nameUsers, email, password);
-            
+            // Mapeo exacto del esquema UsuarioCreate de FastAPI: name_users, usuario, contrasena
+            const data = await registerApi({
+                name_users: nameUsers,
+                usuario: usuario,
+                contrasena: contrasena
+            });
+
+            // Auto-login o guardado de datos tras registro
+            localStorage.setItem('username', data.name_users || nameUsers);
             setLoading(false);
             return true;
         } catch (err) {
-            setError(err.message || 'Error al registrar usuario');
+            setError(err.message);
             setLoading(false);
             return false;
         }
     };
 
     const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('token_type');
-        localStorage.removeItem('es_admin');
-        localStorage.removeItem('area_id');
-        localStorage.removeItem('username');
+        localStorage.clear();
+        window.location.href = '/login';
     };
 
     return { login, register, logout, loading, error };

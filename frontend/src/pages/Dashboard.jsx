@@ -1,79 +1,52 @@
-import { useNavigate } from 'react-router-dom'; // 1. Importamos el hook de navegación
-import { DashboardLayout } from '../layouts/DashboardLayout';
-import { ModuleCard } from '../components/ModuleCard';
+// src/pages/Dashboard.jsx (o como se llame tu vista de módulos)
+import { Link } from 'react-router-dom';
+import { HomeLayout } from '../layouts/HomeLayout'; // Importamos el layout sin Sidebar
 
 export const Dashboard = () => {
-    const navigate = useNavigate(); // 2. Inicializamos el hook
-
-    const modules = [
-        { 
-            id: 'qa', 
-            title: 'QA', 
-            description: 'Aseguramiento de calidad, reporte de incidencias y métricas de software.', 
-            icon: '🎯' 
-        },
-        { 
-            id: 'ecommerce', 
-            title: 'E-COMMERCE', 
-            description: 'Gestión de catálogo, ventas en línea y analíticas de mercado.', 
-            icon: '🛍️' 
-        },
-        { 
-            id: 'desarrollo', 
-            title: 'DESARROLLO', 
-            description: 'Administración de despliegues, repositorios y sprints técnicos.', 
-            icon: '⚡' 
-        }
-    ];
-
-    const handleModuleClick = (moduleName) => {
-        // 3. Añadimos la lógica de redirección
-        if (moduleName === 'qa') {
-            navigate('/qa');
-        } else {
-            console.log(`El módulo ${moduleName} aún está en construcción.`);
-        }
-    };
-
     return (
-        <DashboardLayout>
-            <div className="max-w-6xl mx-auto mt-4">
-                
-                {/* Encabezado Principal Totalmente Rediseñado */}
-                <div className="mb-12 relative">
-                    {/* Etiqueta Badge superior */}
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100/50 border border-blue-200 text-blue-700 mb-4 shadow-sm">
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                        </span>
-                        <span className="text-[10px] font-bold tracking-widest uppercase">Portal Principal</span>
-                    </div>
-                    
-                    {/* Título con gradiente */}
-                    <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#041D3B] to-blue-600 tracking-tight mb-4">
-                        Selección de Módulo
-                    </h1>
-                    
-                    <p className="text-gray-500 font-medium text-lg max-w-2xl leading-relaxed">
-                        Bienvenido al sistema integrado de MAJA. Selecciona el área de trabajo a la que deseas acceder para continuar con tus operaciones.
-                    </p>
+        <HomeLayout>
+            <div className="mb-10">
+                <div className="flex items-center gap-2 mb-4">
+                    <span className="w-2 h-2 rounded-full bg-[#00A3FF]"></span>
+                    <span className="text-[10px] font-bold text-[#00A3FF] uppercase tracking-widest">Portal Principal</span>
                 </div>
-
-                {/* Grid de Módulos */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {modules.map((mod) => (
-                        <ModuleCard 
-                            key={mod.id}
-                            title={mod.title}
-                            description={mod.description}
-                            icon={mod.icon}
-                            onClick={() => handleModuleClick(mod.id)} // Llama a nuestra función actualizada
-                        />
-                    ))}
-                </div>
-
+                <h1 className="text-4xl font-black text-[#0B132B] tracking-tight mb-3">Selección de Módulo</h1>
+                <p className="text-gray-500 max-w-2xl text-sm leading-relaxed">
+                    Bienvenido al sistema integrado de MAJA. Selecciona el área de trabajo a la que deseas acceder para continuar con tus operaciones.
+                </p>
             </div>
-        </DashboardLayout>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* TARJETA DE QA */}
+                <Link to="/qa" className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm hover:shadow-xl hover:border-[#00A3FF]/30 transition-all duration-300 group">
+                    <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <span className="text-xl">🎯</span>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xl font-black text-[#0B132B]">QA</h2>
+                        <svg className="w-4 h-4 text-gray-300 group-hover:text-[#00A3FF] group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed">Aseguramiento de calidad, reporte de incidencias y métricas de software.</p>
+                </Link>
+
+                {/* TARJETA E-COMMERCE */}
+                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm opacity-60 cursor-not-allowed">
+                    <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center mb-6">
+                        <span className="text-xl">🛍️</span>
+                    </div>
+                    <h2 className="text-xl font-black text-[#0B132B] mb-2">E-COMMERCE</h2>
+                    <p className="text-xs text-gray-500 leading-relaxed">Gestión de catálogo, ventas en línea y analíticas de mercado.</p>
+                </div>
+
+                {/* TARJETA DESARROLLO */}
+                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm opacity-60 cursor-not-allowed">
+                    <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center mb-6">
+                        <span className="text-xl">⚡</span>
+                    </div>
+                    <h2 className="text-xl font-black text-[#0B132B] mb-2">DESARROLLO</h2>
+                    <p className="text-xs text-gray-500 leading-relaxed">Administración de despliegues, repositorios y sprints técnicos.</p>
+                </div>
+            </div>
+        </HomeLayout>
     );
 };
