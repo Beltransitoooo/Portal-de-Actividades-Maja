@@ -4,9 +4,8 @@ from fastapi import HTTPException, status
 from app import models, schemas, security
 from google.auth.transport import requests
 from google.oauth2 import id_token
-import os
+from app.config import settings
 
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID","367751508872-rjkgo0i8e8natof9ucvod5ijer936a2e.apps.googleusercontent.com",)
 
 def registrar(db: Session, usuario_in: schemas.UsuarioCreate):
     usuario_existente = (
@@ -40,27 +39,29 @@ def login(db: Session, login_data: schemas.LoginRequest):
         .filter(func.lower(models.Usuario.usuario) == func.lower(login_data.usuario))
         .first()
     )
-    
-    if not usuario_db or not security.verificar_contrasena(login_data.contrasena, usuario_db.contrasena):
+
+    if not usuario_db or not security.verificar_contrasena(
+        login_data.contrasena, usuario_db.contrasena
+    ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Credenciales incorrectas"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Credenciales incorrectas",
         )
-    
+
     token = security.crear_token_acceso(datos={"sub": str(usuario_db.id)})
-    
+
     return {
         "access_token": token,
         "token_type": "bearer",
         "es_admin": usuario_db.es_admin,
-        "area_id": usuario_db.area_id
+        "area_id": usuario_db.area_id,
     }
 
 
 def autenticar_con_google(db: Session, token_google: str):
     try:
         id_info = id_token.verify_oauth2_token(
-            token_google, requests.Request(), GOOGLE_CLIENT_ID
+            token_google, requests.Request(), settings.GOOGLE_CLIENT_ID
         )
 
         email = id_info.get("email")

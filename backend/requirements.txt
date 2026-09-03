@@ -10,3 +10,4 @@ python-dotenv
 bcrypt==4.0.1
 alembic
 google-auth
+requests
