@@ -6,7 +6,7 @@ import { QAKpiPanel } from '../components/QA/QAKpiPanel';
 import { QACalendar } from '../components/QA/QACalendar';
 import { QANewTicketModal } from '../components/QA/QANewTicketModal';
 import { QATicketPanel } from '../components/QA/QATicketPanel';
-import { fetchWithAuth } from '../services/authService'; // <-- Importamos tu servicio de autenticación
+import { fetchWithAuth } from '../services/authService'; 
 
 export const QADashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +28,7 @@ export const QADashboard = () => {
         { main: 'bg-rose-500', light: 'bg-rose-50', border: 'border-rose-500' }
     ];
 
-    // Función auxiliar para extraer iniciales (ej. "Luis Martínez" -> "LM")
+    // Función auxiliar para extraer iniciales
     const getInitials = (name) => {
         if (!name) return 'US';
         const words = name.trim().split(' ');
@@ -43,24 +43,22 @@ export const QADashboard = () => {
         const loadRealData = async () => {
             setIsLoading(true);
             try {
-                // 1. Obtener usuarios de la base de datos
+                // 1. Obtener usuarios
                 const resUsers = await fetchWithAuth('/usuarios'); 
                 if (resUsers.ok) {
                     const usersData = await resUsers.json();
                     
-                    // Transformar los datos del backend al formato que necesita nuestro diseño
                     const formattedUsers = usersData.map((user, index) => ({
-                        // Usamos las iniciales como ID para que el avatar se vea bien en el UI
                         id: getInitials(user.name_users || user.usuario), 
                         name: user.name_users || user.usuario,
                         role: user.es_admin ? 'Administrador' : 'QA Tester',
-                        theme: colorPalettes[index % colorPalettes.length], // Asigna color según su posición
-                        email: user.usuario // Guardamos el email original por si acaso
+                        theme: colorPalettes[index % colorPalettes.length],
+                        email: user.usuario
                     }));
                     setTeamUsers(formattedUsers);
                 }
 
-                // 2. Obtener actividades (Si el endpoint aún no existe, fallará de forma segura y dejará el arreglo vacío)
+                // 2. Obtener actividades
                 const resTasks = await fetchWithAuth('/actividades');
                 if (resTasks.ok) {
                     const tasksData = await resTasks.json();
@@ -79,8 +77,7 @@ export const QADashboard = () => {
     }, []);
 
     const handleCreateTicket = async (newTicketData) => {
-        // TODO: Aquí enviarás el POST a tu backend para guardar la actividad real.
-        // Por ahora lo simulamos actualizando la vista local:
+        // Simulación visual temporal antes del POST real
         const newTask = {
             id: `QA-${Math.floor(Math.random() * 1000) + 2000}`, 
             ...newTicketData,
@@ -96,16 +93,17 @@ export const QADashboard = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-[1500px] mx-auto flex flex-col lg:flex-row gap-6">
+            <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 animate-fade-in">
                 
-                {/* Filtro Lateral */}
+                {/* Filtro Lateral (Ahora es un Monitor de Carga) */}
                 <QAUserFilter 
                     teamUsers={teamUsers} 
                     selectedUser={selectedUser} 
                     onSelectUser={setSelectedUser} 
                 />
 
-                <div className="flex-1 min-w-0">
+                {/* Columna Principal (Header, Progreso y Calendario) */}
+                <div className="flex-1 min-w-0 flex flex-col">
                     <QAHeader 
                         onNewTicketClick={() => setIsModalOpen(true)}
                         currentDate={currentDate}
@@ -115,10 +113,13 @@ export const QADashboard = () => {
                     
                     <QAKpiPanel filteredTasks={filteredTasks} />
                     
-                    {/* Si está cargando, mostramos un mensaje sutil; si no, el calendario */}
+                    {/* Estado de carga premium o Calendario interactivo */}
                     {isLoading ? (
-                        <div className="w-full h-64 flex items-center justify-center bg-white border border-gray-200 mt-6 rounded-sm">
-                            <p className="text-sm font-bold text-gray-400 tracking-widest uppercase animate-pulse">Sincronizando con base de datos...</p>
+                        <div className="w-full h-[500px] flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2">
+                            <div className="w-10 h-10 border-[3px] border-gray-100 border-t-[#1296E8] rounded-full animate-spin mb-4"></div>
+                            <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase animate-pulse">
+                                Sincronizando operaciones...
+                            </p>
                         </div>
                     ) : (
                         <QACalendar 
@@ -135,7 +136,7 @@ export const QADashboard = () => {
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
                 onSubmit={handleCreateTicket} 
-                teamUsers={teamUsers} // <- Recomendación: Pásale los usuarios reales al modal para que el select sea dinámico
+                teamUsers={teamUsers}
             />
             
             <QATicketPanel 

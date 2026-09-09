@@ -34,24 +34,34 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers }) => 
         return Math.ceil(Math.abs(endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
     };
 
-    // Obtenemos el color según el usuario. Si no está asignado, usamos gris corporativo.
     const getUserTheme = (assigneeId) => {
         const user = teamUsers.find(u => u.id === assigneeId);
-        return user ? user.theme : { main: 'bg-gray-500', light: 'bg-gray-50', border: 'border-gray-500' };
+        return user ? user.theme : { main: 'bg-slate-600', light: 'bg-slate-50', border: 'border-slate-200' };
+    };
+
+    // CORRECCIÓN: Ahora el estado manda sobre el color del punto. La prioridad (crítica) ya se maneja en el borde lateral de la tarjeta.
+    const getStatusColor = (status) => {
+        switch(status?.toUpperCase()) {
+            case 'EN PROGRESO': return 'bg-[#1296E8]';
+            case 'EN REVISIÓN': return 'bg-amber-400';
+            case 'COMPLETADA':  return 'bg-emerald-500';
+            case 'BLOQUEADA':   return 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]';
+            default:            return 'bg-slate-300'; // Pendiente
+        }
     };
 
     return (
-        <div className="w-full bg-white border border-gray-200 flex flex-col shadow-sm rounded-sm overflow-hidden mt-6">
+        <div className="w-full bg-white border border-gray-200 rounded-xl flex flex-col shadow-sm overflow-hidden mt-6 animate-fade-in flex-1">
             
-            <div className="grid grid-cols-7 border-b border-gray-200 bg-slate-50">
+            <div className="grid grid-cols-7 border-b border-gray-100 bg-slate-50/80">
                 {weekDays.map(day => (
-                    <div key={day} className="p-3 text-center text-[10px] font-black text-[#0B132B] tracking-widest uppercase">
+                    <div key={day} className="py-4 text-center text-xs font-bold text-gray-500 tracking-widest uppercase">
                         {day}
                     </div>
                 ))}
             </div>
 
-            <div className="grid grid-cols-7 grid-rows-6 auto-rows-fr bg-gray-200 gap-px border-t border-gray-200">
+            <div className="grid grid-cols-7 grid-rows-6 auto-rows-[minmax(180px,1fr)] bg-gray-100 gap-px flex-1">
                 {calendarCells.map((cell, index) => {
                     const isToday = cell.dateStr === todayStr;
                     
@@ -62,14 +72,35 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers }) => 
                     });
 
                     return (
-                        <div key={index} className={`min-h-[140px] p-2 bg-white transition-colors hover:bg-slate-50 group flex flex-col ${!cell.isCurrentMonth ? 'bg-gray-50/50 opacity-60' : ''}`}>
-                            <div className="flex justify-between items-start mb-2">
-                                <span className={`text-xs font-bold ${isToday ? 'bg-[#0B132B] text-white w-6 h-6 flex items-center justify-center rounded-sm shadow-sm' : cell.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}`}>
+                        <div 
+                            key={index} 
+                            className={`relative p-3 bg-white flex flex-col group transition-colors ${!cell.isCurrentMonth ? 'bg-slate-50/60' : 'hover:bg-slate-50/30'}`}
+                        >
+                            {isToday && (
+                                <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#1296E8]"></div>
+                            )}
+
+                            <div className="flex justify-between items-start mb-3 px-1 pt-1">
+                                <span 
+                                    className={`text-sm font-bold w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+                                        isToday 
+                                        ? 'bg-[#1296E8] text-white shadow-md' 
+                                        : cell.isCurrentMonth 
+                                            ? 'text-[#07152F]' 
+                                            : 'text-gray-300'
+                                    }`}
+                                >
                                     {cell.dayNumber}
                                 </span>
+                                
+                                {dayTasks.length > 0 && (
+                                    <span className="text-[10px] font-bold text-gray-400 tracking-wider bg-gray-50 px-2 py-1 rounded-md">
+                                        {dayTasks.length} ACT
+                                    </span>
+                                )}
                             </div>
 
-                            <div className="flex flex-col gap-2 flex-1 overflow-y-auto no-scrollbar">
+                            <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
                                 {dayTasks.map((task, idx) => {
                                     let dailyHours = null;
                                     if (task.maxHours && task.startDate) {
@@ -77,35 +108,54 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers }) => 
                                         dailyHours = (parseFloat(task.maxHours) / totalDays).toFixed(1); 
                                     }
 
-                                    // Aplicamos el tema del usuario
                                     const theme = getUserTheme(task.assignee);
+                                    
+                                    // Pasamos solo el status a la función corregida
+                                    const statusDotColor = getStatusColor(task.status);
 
                                     return (
                                         <div 
                                             key={`${task.id}-${idx}`} 
                                             onClick={() => onTicketClick && onTicketClick(task)}
-                                            className={`p-1.5 border-l-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.05)] border-y border-r border-y-transparent border-r-transparent hover:border-r-gray-200 hover:border-y-gray-200 cursor-pointer transition-all flex flex-col gap-1 ${theme.light} ${theme.border}`}
+                                            className={`relative p-3 rounded-lg border border-gray-100 bg-white hover:border-[#1296E8]/40 hover:shadow-md hover:-translate-y-[2px] cursor-pointer transition-all duration-200 flex flex-col gap-2 group/task`}
                                         >
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-[8px] font-black tracking-widest text-[#0B132B] opacity-70">
-                                                    {task.id}
-                                                </span>
-                                                <div className="flex items-center gap-1.5">
+                                            {/* Indicador de prioridad Crítica */}
+                                            {task.priority === 'CRÍTICA' && (
+                                                <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-red-500 rounded-l-lg"></div>
+                                            )}
+
+                                            <div className="flex justify-between items-center gap-2">
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <div className={`w-2 h-2 rounded-full shrink-0 ${statusDotColor}`}></div>
+                                                    <span className="text-[10px] font-bold tracking-widest text-gray-500 truncate">
+                                                        {task.id || 'TICKET'}
+                                                    </span>
+                                                </div>
+
+                                                <div className="flex items-center gap-2 shrink-0">
                                                     {dailyHours && (
-                                                        <span className="bg-white/80 border border-gray-300 text-gray-700 rounded-sm px-1 text-[7px] font-black tracking-wider shadow-sm">
-                                                            {dailyHours}H
+                                                        <span className="text-[10px] font-bold text-gray-400">
+                                                            {dailyHours}h
                                                         </span>
                                                     )}
-                                                    {/* Badge de avatar con el color principal del usuario */}
-                                                    <span className={`w-4 h-4 rounded-full text-white flex items-center justify-center text-[7px] font-bold shadow-sm ${theme.main}`}>
+                                                    <span className={`w-5 h-5 rounded-full text-white flex items-center justify-center text-[8px] font-bold shadow-sm ${theme.main}`}>
                                                         {task.assignee}
                                                     </span>
                                                 </div>
                                             </div>
-                                            
-                                            <p className="text-[9.5px] font-semibold text-[#0B132B] leading-snug line-clamp-2 mt-0.5">
+
+                                            <p className="text-xs font-semibold text-[#07152F] leading-snug line-clamp-2">
                                                 {task.title}
                                             </p>
+
+                                            {(task.progressPct !== undefined || task.status === 'EN PROGRESO') && (
+                                                <div className="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden opacity-0 group-hover/task:opacity-100 transition-opacity">
+                                                    <div 
+                                                        className={`h-full rounded-full ${statusDotColor}`} 
+                                                        style={{ width: `${task.progressPct || 50}%` }}
+                                                    ></div>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}

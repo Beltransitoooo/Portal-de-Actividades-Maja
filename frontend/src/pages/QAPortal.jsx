@@ -37,7 +37,6 @@ export const QAPortal = () => {
         const loadRealData = async () => {
             setIsLoading(true);
             try {
-                // ... Todo el bloque lógico que ya tenías para calcular los datos
                 const resUsers = await fetchWithAuth('/usuarios');
                 const resTasks = await fetchWithAuth('/actividades');
                 
@@ -97,7 +96,7 @@ export const QAPortal = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-[1500px] mx-auto flex flex-col gap-6">
+            <div className="max-w-[1500px] mx-auto flex flex-col gap-6 animate-fade-in">
                 <PortalHeader 
                     selectedSprint={selectedSprint} 
                     setSelectedSprint={setSelectedSprint} 
@@ -110,9 +109,18 @@ export const QAPortal = () => {
                     </div>
                 ) : (
                     <>
+                        {/* PANEL PRINCIPAL: Ocupa todo el ancho */}
                         <CapacityTable capacityData={capacityData} />
-                        <DeviationTable trackingData={trackingData} />
-                        <EffortBalance balanceData={balanceData} />
+                        
+                        {/* SEGUNDA FILA: Grid asimétrico (7 columnas vs 5 columnas) */}
+                        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 mt-2">
+                            <div className="xl:col-span-7 h-full">
+                                <DeviationTable trackingData={trackingData} />
+                            </div>
+                            <div className="xl:col-span-5 h-full">
+                                <EffortBalance balanceData={balanceData} />
+                            </div>
+                        </div>
                     </>
                 )}
             </div>
