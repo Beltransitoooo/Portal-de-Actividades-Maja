@@ -3,7 +3,7 @@ import { PanelToast } from './TicketPanel/PanelToast';
 import { TicketMetaInfo } from './TicketPanel/TicketMetaInfo';
 import { TimeTracker } from './TicketPanel/TimeTracker';
 
-export const QATicketPanel = ({ ticket, onClose }) => {
+export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
     const [horasTrabajadas, setHorasTrabajadas] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState(null);
@@ -23,10 +23,10 @@ export const QATicketPanel = ({ ticket, onClose }) => {
                 
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-slate-50">
                     <div className="flex items-center gap-3">
-                        <span className="text-xs font-black bg-[#0B132B] text-white px-2 py-1 rounded-sm tracking-widest">
+                        <span className="text-xs font-black bg-[#07152F] text-white px-2.5 py-1 rounded-md tracking-widest">
                             {ticket.id}
                         </span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-sm border ${
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
                             ticket.priority === 'CRÍTICA' ? 'text-red-600 bg-red-50 border-red-200' : 
                             ticket.priority === 'ALTA' ? 'text-orange-600 bg-orange-50 border-orange-200' : 
                             'text-green-600 bg-green-50 border-green-200'
@@ -34,7 +34,7 @@ export const QATicketPanel = ({ ticket, onClose }) => {
                             {ticket.priority || 'NORMAL'}
                         </span>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors">
+                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors p-1">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
@@ -43,21 +43,23 @@ export const QATicketPanel = ({ ticket, onClose }) => {
 
                 <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
                     <div>
-                        <h2 className="text-xl font-black text-[#0B132B] uppercase tracking-tight mb-2">{ticket.title}</h2>
+                        <h2 className="text-xl font-black text-[#07152F] uppercase tracking-tight mb-2">{ticket.title}</h2>
                         <p className="text-sm text-gray-500">{ticket.description || 'Sin descripción detallada.'}</p>
                     </div>
 
                     <TicketMetaInfo assignee={ticket.assignee} type={ticket.type} />
 
                     <TimeTracker 
-                        ticketId={ticket.db_id || ticket.id} // Aquí usamos el ID real de tu BD si existe
+                        ticketId={ticket.db_id}
                         maxHours={ticket.maxHours}
                         horasTrabajadas={horasTrabajadas}
                         setHorasTrabajadas={setHorasTrabajadas}
+                        completadaInicial={ticket.completada}
                         isSaving={isSaving}
                         setIsSaving={setIsSaving}
                         onSuccess={(msg) => {
                             setToastMessage(msg);
+                            if (onTicketUpdated) onTicketUpdated(); // Refresca los datos en vivo
                             setTimeout(() => setToastMessage(null), 3500);
                         }}
                     />

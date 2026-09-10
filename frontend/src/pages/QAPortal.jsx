@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { fetchWithAuth } from '../services/authService';
 
-// Importamos nuestros nuevos micro-componentes
 import { PortalHeader } from '../components/QA/Portal/PortalHeader';
 import { CapacityTable } from '../components/QA/Portal/CapacityTable';
 import { DeviationTable } from '../components/QA/Portal/DeviationTable';
@@ -37,56 +36,103 @@ export const QAPortal = () => {
         const loadRealData = async () => {
             setIsLoading(true);
             try {
-                const resUsers = await fetchWithAuth('/usuarios');
-                const resTasks = await fetchWithAuth('/actividades');
+                const resUsers = await fetchWithAuth('/usuarios/');
+                const resTasks = await fetchWithAuth('/actividades/');
                 
                 const usersData = resUsers.ok ? await resUsers.json() : [];
                 const tasksData = resTasks.ok ? await resTasks.json() : [];
 
                 const colorPalettes = [
-                    { main: 'bg-[#00A3FF]', statusColor: 'text-green-600 bg-green-50 border-green-200' },
-                    { main: 'bg-emerald-500', statusColor: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
-                    { main: 'bg-purple-500', statusColor: 'text-red-600 bg-red-50 border-red-200' },
-                    { main: 'bg-amber-500', statusColor: 'text-green-600 bg-green-50 border-green-200' }
+                    'bg-[#1296E8]',
+                    'bg-emerald-500',
+                    'bg-purple-500',
+                    'bg-amber-500'
                 ];
 
+                // Procesar la capacidad mapeando por el id numérico del usuario
                 const processedCapacity = usersData.map((user, index) => {
                     const initials = getInitials(user.name_users || user.usuario);
-                    const userTasks = tasksData.filter(t => t.assignee === initials || t.assignee === user.usuario);
-                    const assignedHours = userTasks.reduce((total, task) => total + parseFloat(task.maxHours || 0), 0);
+                    const userTasks = tasksData.filter(t => t.asignado_a_id === user.id);
+                    const assignedHours = userTasks.reduce((total, task) => total + parseFloat(task.estimacion_max_hrs || 0), 0);
                     
                     let status = 'Óptimo';
                     let statusColor = 'text-green-600 bg-green-50 border-green-200';
-                    if (assignedHours > 32 && assignedHours <= 40) { status = 'Al Límite'; statusColor = 'text-yellow-600 bg-yellow-50 border-yellow-200'; } 
-                    else if (assignedHours > 40) { status = 'Sobrecargado'; statusColor = 'text-red-600 bg-red-50 border-red-200'; }
+                    if (assignedHours > 32 && assignedHours <= 40) { 
+                        status = 'Al Límite'; 
+                        statusColor = 'text-yellow-600 bg-yellow-50 border-yellow-200'; 
+                    } else if (assignedHours > 40) { 
+                        status = 'Sobrecargado'; 
+                        statusColor = 'text-red-600 bg-red-50 border-red-200'; 
+                    }
 
-                    return { id: initials, name: user.name_users || user.usuario, role: user.es_admin ? 'Administrador' : 'Tester / Dev', tasks: userTasks.length, logged: assignedHours, max: 40, status, color: colorPalettes[index % colorPalettes.length].main, statusColor };
+                    return { 
+                        raw_id: user.id,
+                        id: initials, 
+                        name: user.name_users || user.usuario, 
+                        role: user.es_admin ? 'Administrador' : 'Tester / Dev', 
+                        tasks: userTasks.length, 
+                        logged: assignedHours, 
+                        max: 40, 
+                        status, 
+                        color: colorPalettes[index % colorPalettes.length], 
+                        statusColor 
+                    };
                 });
 
-                const processedTracking = tasksData.slice(0, 5).map(task => {
-                    const assignedUser = processedCapacity.find(u => u.id === task.assignee || u.name === task.assignee) || { name: task.assignee || 'Sin Asignar', id: task.assignee || 'NA' };
-                    const est = parseFloat(task.maxHours || 8); const logged = parseFloat(task.minHours || est); const diffValue = logged - est;
-                    let status = 'success'; let diffText = 'A tiempo';
+                
+                const processedTracking = tasksData.map(task => {
+                    const assignedUser = processedCapacity.find(u => u.raw_id === task.asignado_a_id) || { name: 'Sin Asignar', id: 'NA' };
+                    const est = parseFloat(task.estimacion_max_hrs || 8); 
+                    const logged = parseFloat(task.estimacion_min_hrs || 0); 
+                    const diffValue = logged - est;
                     
-                    if (diffValue > 0) { status = 'danger'; diffText = `+${diffValue} hrs (Retraso)`; } 
-                    else if (diffValue < 0) { status = 'success'; diffText = `${diffValue} hrs (A tiempo)`; }
-                    if (task.priority === 'CRÍTICA') { status = 'blocked'; diffText = 'Bloqueado'; }
+                    let status = 'success'; 
+                    let diffText = 'A tiempo';
+                    
+                    if (task.completada) {
+                        diffText = `${diffValue > 0 ? '+' : ''}${diffValue} hrs (Cerrada)`;
+                    } else if (diffValue > 0) { 
+                        status = 'danger'; 
+                        diffText = `+${diffValue} hrs (Retraso)`; 
+                    } else if (diffValue < 0) { 
+                        status = 'success'; 
+                        diffText = `${diffValue} hrs (A tiempo)`; 
+                    }
+                    
+                    if ((task.prioridad || '').toUpperCase() === 'CRÍTICA' && !task.completada) { 
+                        status = 'blocked'; 
+                        diffText = 'Bloqueado'; 
+                    }
 
-                    return { ticket: task.id || `QA-PENDIENTE`, tester: assignedUser.id, name: assignedUser.name, activity: task.title || 'Actividad sin título', est, logged, diff: diffText, status };
+                    return { 
+                        ticket: `QA-${task.id}`, 
+                        tester: assignedUser.id, 
+                        name: assignedUser.name, 
+                        activity: task.titulo || 'Actividad sin título', 
+                        est, 
+                        logged, 
+                        diff: diffText, 
+                        status 
+                    };
                 });
 
+                // Balance de esfuerzo por tipo de actividad
                 const totalTasks = tasksData.length || 1;
+                const tareasCount = tasksData.filter(t => t.tipo_actividad === 'Tarea').length;
+                const pruebasCount = tasksData.filter(t => t.tipo_actividad === 'Pruebas').length;
+                const bugsCount = tasksData.filter(t => t.tipo_actividad === 'Bug').length;
+
                 setBalanceData({
-                    funcionales: Math.round((tasksData.filter(t => t.type === 'TAREA').length / totalTasks) * 100) || 33,
-                    automatizacion: Math.round((tasksData.filter(t => t.type === 'PRUEBAS').length / totalTasks) * 100) || 33,
-                    performance: Math.round((tasksData.filter(t => t.type === 'BUG').length / totalTasks) * 100) || 34,
+                    funcionales: Math.round((tareasCount / totalTasks) * 100) || 33,
+                    automatizacion: Math.round((pruebasCount / totalTasks) * 100) || 33,
+                    performance: Math.round((bugsCount / totalTasks) * 100) || 34,
                 });
 
                 setCapacityData(processedCapacity);
                 setTrackingData(processedTracking);
 
             } catch (error) {
-                console.error("Error:", error);
+                console.error("Error al cargar la información del portal:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -104,15 +150,16 @@ export const QAPortal = () => {
                 />
 
                 {isLoading ? (
-                    <div className="w-full h-64 flex items-center justify-center bg-white border border-gray-200 mt-6 rounded-sm shadow-sm">
-                        <p className="text-sm font-bold text-gray-400 tracking-widest uppercase animate-pulse">Sincronizando...</p>
+                    <div className="w-full h-64 flex items-center justify-center bg-white border border-gray-100 mt-6 rounded-xl shadow-sm">
+                        <div className="flex flex-col items-center">
+                            <div className="w-8 h-8 border-[3px] border-gray-100 border-t-[#1296E8] rounded-full animate-spin mb-3"></div>
+                            <p className="text-xs font-bold text-gray-400 tracking-widest uppercase animate-pulse">Sincronizando portal...</p>
+                        </div>
                     </div>
                 ) : (
                     <>
-                        {/* PANEL PRINCIPAL: Ocupa todo el ancho */}
                         <CapacityTable capacityData={capacityData} />
                         
-                        {/* SEGUNDA FILA: Grid asimétrico (7 columnas vs 5 columnas) */}
                         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8 mt-2">
                             <div className="xl:col-span-7 h-full">
                                 <DeviationTable trackingData={trackingData} />
