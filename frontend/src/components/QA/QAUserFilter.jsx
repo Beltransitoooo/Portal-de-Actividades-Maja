@@ -1,27 +1,26 @@
 export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
-    // Calculamos totales dinámicos sumando la info de los usuarios (si existe)
     const totalGlobalTasks = teamUsers.reduce((sum, user) => sum + (user.tasksCount || 0), 0);
-    // Un promedio simple de progreso global para la vista "ALL"
     const avgGlobalProgress = teamUsers.length > 0 
         ? Math.round(teamUsers.reduce((sum, user) => sum + (user.progressPct || 0), 0) / teamUsers.length) 
         : 0;
 
     return (
-        <aside className="w-full lg:w-72 shrink-0 lg:mt-0 animate-fade-in">
-            <div className="bg-white border border-gray-200 shadow-sm rounded-xl p-5 sticky top-6">
+        <aside className="w-full flex flex-col h-full min-h-0 animate-fade-in">
+            <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex flex-col h-full min-h-0">
                 
-                <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center justify-between mb-5 shrink-0">
                     <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                         Equipo & Progreso
                     </h3>
                     <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </div>
                 
-                <div className="flex flex-col gap-2">
-                    {/* BOTÓN VISTA GLOBAL (ALL) */}
+                {/* Zona de Scroll contenida */}
+                <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1 min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+                    
                     <button
                         onClick={() => onSelectUser(null)}
-                        className={`relative p-3 rounded-lg transition-all text-left w-full group overflow-hidden ${
+                        className={`relative p-3 rounded-lg transition-all text-left w-full group overflow-hidden shrink-0 ${
                             selectedUser === null 
                             ? 'bg-[#1296E8]/5 border border-[#1296E8]/20 shadow-sm' 
                             : 'border border-transparent hover:bg-slate-50'
@@ -40,7 +39,6 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
                             </div>
                         </div>
 
-                        {/* Progreso Global */}
                         <div className="w-full flex flex-col gap-1.5 pl-11">
                             <div className="flex items-center justify-between text-[10px] font-semibold">
                                 <span className="text-gray-500">{totalGlobalTasks} actividades</span>
@@ -52,11 +50,9 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
                         </div>
                     </button>
 
-                    <hr className="my-2 border-gray-100" />
+                    <hr className="my-2 border-gray-100 shrink-0" />
 
-                    {/* LISTA DE USUARIOS (Con Progressive Disclosure de carga de trabajo) */}
                     {teamUsers.map(user => {
-                        // Respetamos la regla: NO falsificamos datos. Si no vienen, son 0.
                         const tasksCount = user.tasksCount !== undefined ? user.tasksCount : 0;
                         const progressPct = user.progressPct !== undefined ? user.progressPct : 0;
                         const isCompleted = progressPct === 100;
@@ -65,13 +61,12 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
                             <button
                                 key={user.id}
                                 onClick={() => onSelectUser(user.id)}
-                                className={`relative p-3 rounded-lg transition-all text-left w-full group ${
+                                className={`relative p-3 rounded-lg transition-all text-left w-full group shrink-0 ${
                                     selectedUser === user.id 
                                     ? `bg-slate-50 border ${user.theme?.border || 'border-gray-200'} shadow-sm` 
                                     : 'border border-transparent hover:bg-slate-50'
                                 }`}
                             >
-                                {/* Indicador lateral activo */}
                                 {selectedUser === user.id && (
                                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg ${user.theme?.main || 'bg-slate-800'}`}></div>
                                 )}
@@ -90,7 +85,6 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
                                     </div>
                                 </div>
 
-                                {/* Barra de Progreso Individual (Integrada sutilmente) */}
                                 <div className="w-full flex flex-col gap-1.5 pl-11">
                                     <div className="flex items-center justify-between text-[10px] font-semibold">
                                         <span className="text-gray-500">{tasksCount} act.</span>

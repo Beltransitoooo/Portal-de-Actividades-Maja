@@ -22,7 +22,6 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
         setIsSubmitting(true);
         setErrorMessage(null);
 
-        // Mapeo exacto con el esquema ActividadCreate de FastAPI
         const payload = {
             titulo: title,
             descripcion: description || null,
@@ -51,10 +50,8 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
 
             const createdTask = await response.json();
             
-            // Notificamos al padre para refrescar la vista
             if (onSubmit) onSubmit(createdTask);
 
-            // Limpieza de estados
             setTitle(''); 
             setDescription(''); 
             setStartDate(''); 
@@ -83,21 +80,20 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
                 <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-slate-50">
                     <div>
                         <p className="text-[10px] text-[#1296E8] font-bold tracking-widest uppercase mb-1">QA & Testing</p>
-                        <h2 className="text-xl font-black text-[#07152F] uppercase tracking-tight">Crear Incidencia</h2>
+                        {/* CAMBIO REALIZADO AQUÍ */}
+                        <h2 className="text-xl font-black text-[#07152F] uppercase tracking-tight">Crear nueva tarea</h2>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors p-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
 
-                {/* Mensaje de Error API */}
                 {errorMessage && (
                     <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-3 mx-6 mt-4 text-xs rounded font-medium">
                         {errorMessage}
                     </div>
                 )}
 
-                {/* Formulario */}
                 <div className="p-6 overflow-y-auto">
                     <form id="new-ticket-form" onSubmit={handleSubmit} className="space-y-6">
                         
@@ -119,7 +115,6 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
                             ></textarea>
                         </div>
 
-                        {/* Clasificación */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 border border-gray-100 bg-gray-50/50 rounded-lg">
                             <div>
                                 <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Tipo de Actividad</label>
@@ -140,7 +135,6 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
                             </div>
                         </div>
 
-                        {/* Asignaciones y Fechas */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-4">
                                 <div>
@@ -217,7 +211,7 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
                         disabled={isSubmitting}
                         className="bg-[#07152F] text-white px-8 py-3 text-[10px] font-bold tracking-widest uppercase shadow-md hover:bg-[#1296E8] transition-colors rounded-lg disabled:opacity-50"
                     >
-                        {isSubmitting ? 'Guardando...' : 'Crear Ticket'}
+                        {isSubmitting ? 'Guardando...' : 'Crear Tarea'}
                     </button>
                 </div>
             </div>

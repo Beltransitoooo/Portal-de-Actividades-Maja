@@ -55,14 +55,11 @@ export const QADashboard = () => {
                 
                 const formattedTasks = tasksData.map(t => {
                     const assignedUser = formattedUsers.find(u => u.raw_id === t.asignado_a_id);
-                    
-                    // Cálculo inteligente de avance
                     const max = parseFloat(t.estimacion_max_hrs || 0);
                     const logged = parseFloat(t.estimacion_min_hrs || 0);
                     const calculatedProgress = max > 0 ? Math.min(Math.round((logged / max) * 100), 100) : 0;
                     const finalProgress = t.completada ? 100 : calculatedProgress;
 
-                    // Estado dinámico
                     let status = 'PENDIENTE';
                     if (t.completada) status = 'COMPLETADA';
                     else if (logged > 0) status = 'EN PROGRESO';
@@ -86,7 +83,6 @@ export const QADashboard = () => {
                     };
                 });
 
-                // Calculamos el total de tareas y el progreso promedio por usuario para el Sidebar
                 const usersWithStats = formattedUsers.map(user => {
                     const userTasks = formattedTasks.filter(t => t.assignee_raw_id === user.raw_id);
                     const tasksCount = userTasks.length;
@@ -111,42 +107,59 @@ export const QADashboard = () => {
         loadRealData();
     }, []);
 
-    const handleTicketCreated = () => {
-        // Recargar datos directamente del servidor tras crear un ticket
-        loadRealData();
+    const handleStatusChange = async (task, newStatus) => {
+        const isCompleted = newStatus === 'COMPLETADA';
+        const updatedProgress = isCompleted ? 100 : task.progressPct; 
+        
+        const updatedTasks = tasks.map(t => 
+            t.db_id === task.db_id ? { ...t, status: newStatus, completada: isCompleted, progressPct: updatedProgress } : t
+        );
+        setTasks(updatedTasks);
+
+        try {
+            await fetchWithAuth(`/actividades/${task.db_id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ completada: isCompleted })
+            });
+        } catch (error) {
+            console.error("Error al actualizar estado:", error);
+            loadRealData(); 
+        }
     };
 
+    const handleTicketCreated = () => loadRealData();
     const filteredTasks = selectedUser ? tasks.filter(task => task.assignee === selectedUser) : tasks;
-
     const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
     return (
         <DashboardLayout>
-            <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 animate-fade-in">
+            <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 animate-fade-in h-[calc(100vh-90px)] min-h-[880px]">
                 
-                <QAUserFilter 
-                    teamUsers={teamUsers} 
-                    selectedUser={selectedUser} 
-                    onSelectUser={setSelectedUser} 
-                />
+                {/* Sidebar */}
+                <div className="w-full xl:w-72 shrink-0 h-full min-h-0 flex flex-col">
+                    <QAUserFilter teamUsers={teamUsers} selectedUser={selectedUser} onSelectUser={setSelectedUser} />
+                </div>
 
-                <div className="flex-1 min-w-0 flex flex-col">
-                    <QAHeader 
-                        onNewTicketClick={() => setIsModalOpen(true)}
-                        currentDate={currentDate}
-                        onPrevMonth={handlePrevMonth}
-                        onNextMonth={handleNextMonth}
-                    />
+                {/* Contenedor Derecho */}
+                <div className="flex-1 min-w-0 flex flex-col min-h-0 h-full">
                     
-                    <QAKpiPanel filteredTasks={filteredTasks} />
+                    <div className="shrink-0">
+                        <QAHeader 
+                            onNewTicketClick={() => setIsModalOpen(true)}
+                            currentDate={currentDate} onPrevMonth={handlePrevMonth} onNextMonth={handleNextMonth}
+                        />
+                    </div>
+                    
+                    <div className="shrink-0">
+                        <QAKpiPanel filteredTasks={filteredTasks} />
+                    </div>
                     
                     {isLoading ? (
-                        <div className="w-full h-[500px] flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2">
+                        <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2">
                             <div className="w-10 h-10 border-[3px] border-gray-100 border-t-[#1296E8] rounded-full animate-spin mb-4"></div>
-                            <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase animate-pulse">
-                                Sincronizando con base de datos...
-                            </p>
+                            <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase animate-pulse">Sincronizando con base de datos...</p>
                         </div>
                     ) : (
                         <QACalendar 
@@ -154,23 +167,14 @@ export const QADashboard = () => {
                             currentDate={currentDate} 
                             teamUsers={teamUsers}
                             onTicketClick={(ticket) => setSelectedTicket(ticket)} 
+                            onStatusChange={handleStatusChange} 
                         />
                     )}
                 </div>
             </div>
 
-            <QANewTicketModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                onSubmit={handleTicketCreated} 
-                teamUsers={teamUsers}
-            />
-            
-            <QATicketPanel 
-                ticket={selectedTicket} 
-                onClose={() => setSelectedTicket(null)} 
-                onTicketUpdated={loadRealData}
-            />
+            <QANewTicketModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleTicketCreated} teamUsers={teamUsers} />
+            <QATicketPanel ticket={selectedTicket} onClose={() => setSelectedTicket(null)} onTicketUpdated={loadRealData} />
         </DashboardLayout>
     );
 };
