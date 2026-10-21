@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
     ports:
-      - "5433:5433"
+      - "5433:5432"
 #    volumes:
 #      - pgdata:/var/lib/postgresql/data    # Guarda los datos permanentemente, usar en un futuro
 
