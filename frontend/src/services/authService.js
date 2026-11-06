@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000'; // Ajusta la URL si tu backend corre en otro puerto
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'; // Se define con VITE_API_URL al construir la imagen
 
 // Exportación nombrada para loginApi
 export const loginApi = async (usuario, contrasena) => {

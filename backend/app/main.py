@@ -3,13 +3,14 @@ from app.routes.auth import router as auth_router
 from app.routes.actividades import router as actividades_router
 from app.routes.usuarios import router as usuarios_router
 from app.database import get_db
+from app.config import settings
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], 
+    allow_origins=[o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
