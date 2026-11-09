@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from './Modal';
+import { getInitials } from '../../utils/initials';
 
 export const UserDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -9,7 +10,7 @@ export const UserDropdown = () => {
     const navigate = useNavigate();
 
     const username = localStorage.getItem('username') || 'Usuario';
-    const initials = username.substring(0, 2).toUpperCase();
+    const initials = getInitials(username);
     // Solo informativo para la interfaz; los permisos reales los valida el backend
     const roleLabel = localStorage.getItem('es_admin') === 'true' ? 'Administrador' : 'Colaborador';
 

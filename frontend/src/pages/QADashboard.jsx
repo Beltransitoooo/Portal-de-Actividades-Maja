@@ -7,6 +7,79 @@ import { QACalendar } from '../components/QA/QACalendar';
 import { QANewTicketModal } from '../components/QA/QANewTicketModal';
 import { QATicketPanel } from '../components/QA/QATicketPanel';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
+import { getInitials } from '../utils/initials';
+
+const COLOR_PALETTES = [
+    { main: 'bg-[#1296E8]', light: 'bg-blue-50', border: 'border-[#1296E8]' },
+    { main: 'bg-emerald-500', light: 'bg-emerald-50', border: 'border-emerald-500' },
+    { main: 'bg-purple-500', light: 'bg-purple-50', border: 'border-purple-500' },
+    { main: 'bg-amber-500', light: 'bg-amber-50', border: 'border-amber-500' }
+];
+
+// Obtiene equipo y actividades del API y los transforma para la vista (sin tocar estado de React)
+const fetchDashboardData = async () => {
+    const resUsers = await fetchWithAuth('/usuarios/');
+    if (!resUsers.ok) {
+        throw new Error(await readErrorMessage(resUsers, 'No se pudo cargar la información del equipo.'));
+    }
+    const usersData = await resUsers.json();
+    const formattedUsers = usersData.map((user, index) => ({
+        raw_id: user.id,
+        id: getInitials(user.name_users || user.usuario),
+        name: user.name_users || user.usuario,
+        role: user.es_admin ? 'Administrador' : 'QA Tester',
+        theme: COLOR_PALETTES[index % COLOR_PALETTES.length],
+        email: user.usuario
+    }));
+
+    const resTasks = await fetchWithAuth('/actividades/');
+    if (!resTasks.ok) {
+        throw new Error(await readErrorMessage(resTasks, 'No se pudieron cargar las actividades.'));
+    }
+    const tasksData = await resTasks.json();
+
+    const formattedTasks = tasksData.map(t => {
+        const assignedUser = formattedUsers.find(u => u.raw_id === t.asignado_a_id);
+        const max = parseFloat(t.estimacion_max_hrs || 0);
+        const logged = parseFloat(t.estimacion_min_hrs || 0);
+        const calculatedProgress = max > 0 ? Math.min(Math.round((logged / max) * 100), 100) : 0;
+        const finalProgress = t.completada ? 100 : calculatedProgress;
+
+        let status = 'PENDIENTE';
+        if (t.completada) status = 'COMPLETADA';
+        else if (logged > 0) status = 'EN PROGRESO';
+
+        return {
+            db_id: t.id,
+            id: `QA-${t.id}`,
+            title: t.titulo,
+            description: t.descripcion,
+            status: status,
+            priority: (t.prioridad || 'MEDIA').toUpperCase(),
+            startDate: t.fecha_inicio,
+            dueDate: t.fecha_vencimiento || t.fecha_inicio,
+            minHours: logged,
+            maxHours: max,
+            progressPct: finalProgress,
+            assignee: assignedUser ? assignedUser.id : 'NA',
+            assignee_raw_id: t.asignado_a_id,
+            type: t.tipo_actividad,
+            completada: t.completada
+        };
+    });
+
+    const usersWithStats = formattedUsers.map(user => {
+        const userTasks = formattedTasks.filter(t => t.assignee_raw_id === user.raw_id);
+        const tasksCount = userTasks.length;
+        const avgProgress = tasksCount > 0 
+            ? Math.round(userTasks.reduce((sum, task) => sum + task.progressPct, 0) / tasksCount)
+            : 0;
+        
+        return { ...user, tasksCount, progressPct: avgProgress };
+    });
+
+    return { teamUsers: usersWithStats, tasks: formattedTasks };
+};
 
 export const QADashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,96 +94,30 @@ export const QADashboard = () => {
     const [statusFilter, setStatusFilter] = useState('TODAS');
     const [actionError, setActionError] = useState(null);
 
-    const colorPalettes = [
-        { main: 'bg-[#1296E8]', light: 'bg-blue-50', border: 'border-[#1296E8]' },
-        { main: 'bg-emerald-500', light: 'bg-emerald-50', border: 'border-emerald-500' },
-        { main: 'bg-purple-500', light: 'bg-purple-50', border: 'border-purple-500' },
-        { main: 'bg-amber-500', light: 'bg-amber-50', border: 'border-amber-500' }
-    ];
-
-    const getInitials = (name) => {
-        if (!name) return 'US';
-        const words = name.trim().split(' ');
-        if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
-        return name.substring(0, 2).toUpperCase();
-    };
-
-    const loadRealData = async () => {
-        setIsLoading(true);
-        setLoadError(null);
-        try {
-            const resUsers = await fetchWithAuth('/usuarios/');
-            if (!resUsers.ok) {
-                throw new Error(await readErrorMessage(resUsers, 'No se pudo cargar la información del equipo.'));
-            }
-            const usersData = await resUsers.json();
-            const formattedUsers = usersData.map((user, index) => ({
-                raw_id: user.id,
-                id: getInitials(user.name_users || user.usuario),
-                name: user.name_users || user.usuario,
-                role: user.es_admin ? 'Administrador' : 'QA Tester',
-                theme: colorPalettes[index % colorPalettes.length],
-                email: user.usuario
-            }));
-
-            const resTasks = await fetchWithAuth('/actividades/');
-            if (!resTasks.ok) {
-                throw new Error(await readErrorMessage(resTasks, 'No se pudieron cargar las actividades.'));
-            }
-            const tasksData = await resTasks.json();
-
-            const formattedTasks = tasksData.map(t => {
-                const assignedUser = formattedUsers.find(u => u.raw_id === t.asignado_a_id);
-                const max = parseFloat(t.estimacion_max_hrs || 0);
-                const logged = parseFloat(t.estimacion_min_hrs || 0);
-                const calculatedProgress = max > 0 ? Math.min(Math.round((logged / max) * 100), 100) : 0;
-                const finalProgress = t.completada ? 100 : calculatedProgress;
-
-                let status = 'PENDIENTE';
-                if (t.completada) status = 'COMPLETADA';
-                else if (logged > 0) status = 'EN PROGRESO';
-
-                return {
-                    db_id: t.id,
-                    id: `QA-${t.id}`,
-                    title: t.titulo,
-                    description: t.descripcion,
-                    status: status,
-                    priority: (t.prioridad || 'MEDIA').toUpperCase(),
-                    startDate: t.fecha_inicio,
-                    dueDate: t.fecha_vencimiento || t.fecha_inicio,
-                    minHours: logged,
-                    maxHours: max,
-                    progressPct: finalProgress,
-                    assignee: assignedUser ? assignedUser.id : 'NA',
-                    assignee_raw_id: t.asignado_a_id,
-                    type: t.tipo_actividad,
-                    completada: t.completada
-                };
-            });
-
-            const usersWithStats = formattedUsers.map(user => {
-                const userTasks = formattedTasks.filter(t => t.assignee_raw_id === user.raw_id);
-                const tasksCount = userTasks.length;
-                const avgProgress = tasksCount > 0 
-                    ? Math.round(userTasks.reduce((sum, task) => sum + task.progressPct, 0) / tasksCount)
-                    : 0;
-                
-                return { ...user, tasksCount, progressPct: avgProgress };
-            });
-
-            setTeamUsers(usersWithStats);
-            setTasks(formattedTasks);
-        } catch (error) {
-            setLoadError(toUserMessage(error, 'No se pudo sincronizar con la base de datos.'));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // Cambiar reloadKey vuelve a cargar los datos (reintento, alta o edición de actividades)
+    const [reloadKey, setReloadKey] = useState(0);
+    const reload = () => setReloadKey(k => k + 1);
 
     useEffect(() => {
+        let active = true;
+        const loadRealData = async () => {
+            setIsLoading(true);
+            setLoadError(null);
+            try {
+                const data = await fetchDashboardData();
+                if (!active) return;
+                setTeamUsers(data.teamUsers);
+                setTasks(data.tasks);
+            } catch (error) {
+                if (active) setLoadError(toUserMessage(error, 'No se pudo sincronizar con la base de datos.'));
+            } finally {
+                if (active) setIsLoading(false);
+            }
+        };
         loadRealData();
-    }, []);
+        // Evita actualizar estado si la vista se desmonta o se lanza otra carga
+        return () => { active = false; };
+    }, [reloadKey]);
 
     const handleStatusChange = async (task, newStatus) => {
         const isCompleted = newStatus === 'COMPLETADA';
@@ -139,7 +146,7 @@ export const QADashboard = () => {
         }
     };
 
-    const handleTicketCreated = () => loadRealData();
+    const handleTicketCreated = () => reload();
     const filteredTasks = tasks.filter(task => {
         if (selectedUser && task.assignee !== selectedUser) return false;
         if (statusFilter === 'ACTIVAS') return !task.completada;
@@ -191,7 +198,7 @@ export const QADashboard = () => {
                         <div role="alert" className="w-full flex-1 min-h-0 flex flex-col items-center justify-center text-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2 p-6">
                             <p className="text-sm font-bold text-[#07152F]">No se pudo cargar la información</p>
                             <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">{loadError}</p>
-                            <button type="button" onClick={loadRealData} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#1296E8] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
+                            <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#1296E8] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
                                 Reintentar
                             </button>
                         </div>
@@ -208,7 +215,7 @@ export const QADashboard = () => {
             </div>
 
             <QANewTicketModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleTicketCreated} teamUsers={teamUsers} />
-            <QATicketPanel ticket={selectedTicket} onClose={() => setSelectedTicket(null)} onTicketUpdated={loadRealData} />
+            <QATicketPanel key={selectedTicket?.db_id ?? 'sin-ticket'} ticket={selectedTicket} onClose={() => setSelectedTicket(null)} onTicketUpdated={reload} />
         </DashboardLayout>
     );
 };

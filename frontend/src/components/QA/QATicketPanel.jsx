@@ -1,22 +1,16 @@
-import { useState, useEffect, useId } from 'react';
+import { useState, useId } from 'react';
 import { PanelToast } from './TicketPanel/PanelToast';
 import { TicketMetaInfo } from './TicketPanel/TicketMetaInfo';
 import { TimeTracker } from './TicketPanel/TimeTracker';
 import { useDialog } from '../../hooks/useDialog';
 
+// Se monta con key={ticket.db_id}: al abrir otro ticket, el estado inicia desde cero sin efectos
 export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
-    const [horasTrabajadas, setHorasTrabajadas] = useState('');
+    const [horasTrabajadas, setHorasTrabajadas] = useState(ticket?.minHours || '');
     const [isSaving, setIsSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState(null);
     const dialogRef = useDialog(Boolean(ticket), onClose);
     const titleId = useId();
-
-    useEffect(() => {
-        if (ticket) {
-            setHorasTrabajadas(ticket.minHours || '');
-            setToastMessage(null);
-        }
-    }, [ticket]);
 
     if (!ticket) return null;
 

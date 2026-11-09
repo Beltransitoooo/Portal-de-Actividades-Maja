@@ -1,14 +1,11 @@
-import { useState, useEffect, useId } from 'react';
+import { useState, useId } from 'react';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../../../services/authService';
 
 export const TimeTracker = ({ ticketId, maxHours, horasTrabajadas, setHorasTrabajadas, onSuccess, isSaving, setIsSaving, completadaInicial }) => {
     const [isCompleted, setIsCompleted] = useState(completadaInicial || false);
     const [saveError, setSaveError] = useState(null);
     const hoursInputId = useId();
-
-    useEffect(() => {
-        setIsCompleted(completadaInicial || false);
-    }, [completadaInicial]);
+    // El estado inicial basta: el panel padre se vuelve a montar al cambiar de ticket
 
     const handleRegistrar = async () => {
         setIsSaving(true);

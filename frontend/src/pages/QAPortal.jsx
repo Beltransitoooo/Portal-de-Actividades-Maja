@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
 import { getQuarterWeeks, overlapsPeriod, toLocalDateStr, formatDateMx } from '../utils/dates';
+import { getInitials } from '../utils/initials';
 
 import { PortalHeader } from '../components/QA/Portal/PortalHeader';
 import { CapacityTable } from '../components/QA/Portal/CapacityTable';
@@ -14,13 +15,6 @@ const COLOR_PALETTES = [
     'bg-purple-500',
     'bg-amber-500'
 ];
-
-const getInitials = (name) => {
-    if (!name) return 'US';
-    const words = name.trim().split(' ');
-    if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
-    return name.substring(0, 2).toUpperCase();
-};
 
 export const QAPortal = () => {
     const [isLoading, setIsLoading] = useState(true);
