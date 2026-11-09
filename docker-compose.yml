@@ -2,13 +2,13 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: portal_actividades
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: ${POSTGRES_DB:-portal_actividades}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en el .env de la raíz}
     ports:
       - "5433:5432"
-#    volumes:
-#      - pgdata:/var/lib/postgresql/data    # Guarda los datos permanentemente, usar en un futuro
+    volumes:
+      - pgdata:/var/lib/postgresql/data    # Guarda los datos permanentemente, usar en un futuro
 
   backend:
     build: ./backend
@@ -20,7 +20,10 @@ services:
       - db
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
     ports:
       - "80:80"
     depends_on:
@@ -28,5 +31,3 @@ services:
 
 volumes:
   pgdata:
-
-# docker compose up --build  # para levantar el proyecto
