@@ -8,7 +8,7 @@ export const Header = () => {
             <div className="flex items-center gap-3">
                 <img 
                     src={logoMaja} 
-                    alt="Logo" 
+                    alt="" 
                     className="h-6 w-auto object-contain"
                 />
                 <span className="text-white font-black text-xl tracking-widest flex items-center gap-2">

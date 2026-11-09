@@ -3,7 +3,15 @@ import { Link } from 'react-router-dom';
 // ==========================================
 // 1. HEADER (Elegante, minimalista y compacto)
 // ==========================================
-export const QAHeader = ({ onNewTicketClick, currentDate, onPrevMonth, onNextMonth }) => {
+// Opciones del filtro de estado del Gestor de Actividades
+const STATUS_FILTER_OPTIONS = [
+    { value: 'TODAS', label: 'Todas' },
+    { value: 'ACTIVAS', label: 'Activas' },
+    { value: 'COMPLETADAS', label: 'Completadas' },
+];
+
+export const QAHeader = ({ onNewTicketClick, currentDate, onPrevMonth, onNextMonth, statusFilter = 'TODAS', onStatusFilterChange }) => {
+    const currentFilterLabel = STATUS_FILTER_OPTIONS.find(o => o.value === statusFilter)?.label || 'Todas';
     const monthNames = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
     const currentMonthName = monthNames[currentDate.getMonth()];
     const currentYear = currentDate.getFullYear();
@@ -38,26 +46,39 @@ export const QAHeader = ({ onNewTicketClick, currentDate, onPrevMonth, onNextMon
                 
                 {/* Selector de Mes */}
                 <div className="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm h-10 overflow-hidden">
-                    <button onClick={onPrevMonth} className="px-3 text-gray-400 hover:text-[#1296E8] hover:bg-slate-50 h-full transition-colors flex items-center justify-center">
+                    <button type="button" onClick={onPrevMonth} aria-label="Mes anterior" className="px-3 text-gray-400 hover:text-[#1296E8] hover:bg-slate-50 h-full transition-colors flex items-center justify-center">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                     </button>
-                    <span className="text-[10px] font-black text-[#07152F] uppercase tracking-widest min-w-[130px] text-center">
+                    <span aria-live="polite" className="text-[10px] font-black text-[#07152F] uppercase tracking-widest min-w-[130px] text-center">
                         {currentMonthName} {currentYear}
                     </span>
-                    <button onClick={onNextMonth} className="px-3 text-gray-400 hover:text-[#1296E8] hover:bg-slate-50 h-full transition-colors flex items-center justify-center">
+                    <button type="button" onClick={onNextMonth} aria-label="Mes siguiente" className="px-3 text-gray-400 hover:text-[#1296E8] hover:bg-slate-50 h-full transition-colors flex items-center justify-center">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                     </button>
                 </div>
 
                 {/* Filtro Principal */}
-                <div className="h-10 bg-white border border-gray-200 hover:border-gray-300 rounded-lg shadow-sm flex items-center px-4 cursor-pointer transition-colors">
-                    <span className="text-[10px] font-bold text-[#07152F] uppercase tracking-widest">Todas (Activas)</span>
-                    <svg className="w-3 h-3 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
+                <div className="focus-ring-within relative h-10 bg-white border border-gray-200 hover:border-gray-300 rounded-lg shadow-sm flex items-center px-4 cursor-pointer transition-colors">
+                    <span className="text-[10px] font-bold text-[#07152F] uppercase tracking-widest" aria-hidden="true">{currentFilterLabel}</span>
+                    <svg className="w-3 h-3 ml-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
+
+                    {/* Select nativo transparente encima del botón visual (mismo patrón que el selector de período) */}
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => onStatusFilterChange && onStatusFilterChange(e.target.value)}
+                        aria-label="Filtrar actividades por estado"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
+                    >
+                        {STATUS_FILTER_OPTIONS.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* Botón de Acción Principal */}
-                <button 
-                    onClick={onNewTicketClick} 
+                <button
+                    type="button"
+                    onClick={onNewTicketClick}
                     className="h-10 px-5 bg-[#07152F] hover:bg-[#1296E8] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" /></svg>

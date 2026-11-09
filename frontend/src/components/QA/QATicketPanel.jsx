@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { PanelToast } from './TicketPanel/PanelToast';
 import { TicketMetaInfo } from './TicketPanel/TicketMetaInfo';
 import { TimeTracker } from './TicketPanel/TimeTracker';
+import { useDialog } from '../../hooks/useDialog';
 
 export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
     const [horasTrabajadas, setHorasTrabajadas] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [toastMessage, setToastMessage] = useState(null);
+    const dialogRef = useDialog(Boolean(ticket), onClose);
+    const titleId = useId();
 
     useEffect(() => {
         if (ticket) {
@@ -19,7 +22,14 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-gray-900/40 backdrop-blur-sm transition-opacity">
-            <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-slide-left relative">
+            <div
+                ref={dialogRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                tabIndex={-1}
+                className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-slide-left relative outline-none"
+            >
                 
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-slate-50">
                     <div className="flex items-center gap-3">
@@ -34,8 +44,8 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
                             {ticket.priority || 'NORMAL'}
                         </span>
                     </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-red-500 transition-colors p-1">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    <button type="button" onClick={onClose} aria-label="Cerrar detalle de la actividad" className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
 
@@ -43,7 +53,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
 
                 <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
                     <div>
-                        <h2 className="text-xl font-black text-[#07152F] uppercase tracking-tight mb-2">{ticket.title}</h2>
+                        <h2 id={titleId} className="text-xl font-black text-[#07152F] uppercase tracking-tight mb-2">{ticket.title}</h2>
                         <p className="text-sm text-gray-500">{ticket.description || 'Sin descripción detallada.'}</p>
                     </div>
 

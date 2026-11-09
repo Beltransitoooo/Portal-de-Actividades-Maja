@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
-import { fetchWithAuth } from '../../../services/authService';
+import { useState, useEffect, useId } from 'react';
+import { fetchWithAuth, readErrorMessage, toUserMessage } from '../../../services/authService';
 
 export const TimeTracker = ({ ticketId, maxHours, horasTrabajadas, setHorasTrabajadas, onSuccess, isSaving, setIsSaving, completadaInicial }) => {
     const [isCompleted, setIsCompleted] = useState(completadaInicial || false);
+    const [saveError, setSaveError] = useState(null);
+    const hoursInputId = useId();
 
     useEffect(() => {
         setIsCompleted(completadaInicial || false);
@@ -10,6 +12,7 @@ export const TimeTracker = ({ ticketId, maxHours, horasTrabajadas, setHorasTraba
 
     const handleRegistrar = async () => {
         setIsSaving(true);
+        setSaveError(null);
         try {
             const payload = { completada: isCompleted };
             if (horasTrabajadas !== undefined && horasTrabajadas !== '') {
@@ -23,14 +26,12 @@ export const TimeTracker = ({ ticketId, maxHours, horasTrabajadas, setHorasTraba
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Error al guardar la información');
+                throw new Error(await readErrorMessage(response, 'Error al guardar la información'));
             }
 
             if (onSuccess) onSuccess(`¡Actividad actualizada correctamente!`);
         } catch (error) {
-            console.error("Error al registrar:", error);
-            alert(`No se pudo actualizar: ${error.message}`);
+            setSaveError(`No se pudo actualizar: ${toUserMessage(error, 'Error al guardar la información')}`);
         } finally {
             setIsSaving(false);
         }
@@ -45,14 +46,15 @@ export const TimeTracker = ({ ticketId, maxHours, horasTrabajadas, setHorasTraba
             
             <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Horas Estimadas</label>
+                    <p className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Horas Estimadas</p>
                     <div className="h-10 bg-gray-100 border border-gray-200 rounded-lg flex items-center px-3">
                         <span className="text-sm font-bold text-gray-600">{maxHours || 0} hrs</span>
                     </div>
                 </div>
                 <div>
-                    <label className="block text-[10px] font-bold text-[#1296E8] uppercase tracking-widest mb-1">Horas Utilizadas</label>
-                    <input 
+                    <label htmlFor={hoursInputId} className="block text-[10px] font-bold text-[#1296E8] uppercase tracking-widest mb-1">Horas Utilizadas</label>
+                    <input
+                        id={hoursInputId}
                         type="number" min="0" step="0.5" 
                         value={horasTrabajadas} 
                         onChange={(e) => setHorasTrabajadas(e.target.value)} 
@@ -76,8 +78,15 @@ export const TimeTracker = ({ ticketId, maxHours, horasTrabajadas, setHorasTraba
                 </label>
             </div>
 
-            <button 
-                onClick={handleRegistrar} 
+            {saveError && (
+                <div role="alert" className="bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 mb-4 rounded-md font-medium">
+                    {saveError}
+                </div>
+            )}
+
+            <button
+                type="button"
+                onClick={handleRegistrar}
                 disabled={isSaving} 
                 className="w-full h-10 bg-[#07152F] hover:bg-[#1296E8] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
             >

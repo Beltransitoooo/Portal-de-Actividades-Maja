@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints }) => {
+export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints, periodRange }) => {
     return (
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-2">
             
@@ -29,7 +29,7 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
                     Período de trabajo
                 </label>
                 
-                <div className="relative group">
+                <div className="focus-ring-within relative group rounded-lg">
                     {/* 1. Botón Visual (Lo que ve el usuario) */}
                     <div className="flex items-center gap-3 bg-white border border-gray-200 group-hover:border-[#00A3FF]/30 group-hover:shadow-md shadow-sm rounded-lg px-4 py-2.5 text-xs font-bold text-[#0B132B] transition-all duration-200">
                         
@@ -51,6 +51,7 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
                     <select 
                         value={selectedSprint}
                         onChange={(e) => setSelectedSprint(e.target.value)}
+                        aria-label="Período de trabajo"
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
                     >
                         {optionsSprints.map((sprint, index) => (
@@ -60,6 +61,12 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
                         ))}
                     </select>
                 </div>
+
+                {periodRange && (
+                    <span className="text-[10px] font-semibold text-gray-400 tracking-wider px-1">
+                        {periodRange}
+                    </span>
+                )}
             </div>
             
         </div>

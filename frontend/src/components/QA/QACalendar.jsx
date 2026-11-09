@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { Modal } from '../Shared/Modal';
+import { toLocalDateStr, formatDateMx } from '../../utils/dates';
 
 // --- CONFIGURACIÓN VISUAL DE ESTADOS ---
 const STATUS_CONFIG = {
@@ -8,6 +10,10 @@ const STATUS_CONFIG = {
     'COMPLETADA':  { color: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-emerald-500', border: 'border-emerald-200', hover: 'hover:bg-emerald-100' },
     'BLOQUEADA':   { color: 'text-red-600', bg: 'bg-red-50', dot: 'bg-red-500', border: 'border-red-200', hover: 'hover:bg-red-100' }
 };
+
+// Estados que el backend aún no puede guardar (la actividad solo tiene el campo "completada").
+// Se muestran deshabilitados hasta que exista soporte en el servidor.
+const UNSUPPORTED_STATUSES = ['EN REVISIÓN', 'BLOQUEADA'];
 
 // --- COLORES PARA VISTA COMPACTA ---
 const COMPACT_COLORS = [
@@ -28,8 +34,15 @@ const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
         };
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') setIsOpen(false);
+        };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleEscape);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscape);
+        };
     }, []);
 
     const handleSelect = (status, e) => {
@@ -40,14 +53,18 @@ const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button 
+            <button
+                type="button"
                 onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[7.5px] font-black tracking-widest uppercase transition-all duration-200 ${config.bg} ${config.border} ${config.color} ${config.hover}`}
+                aria-haspopup="menu"
+                aria-expanded={isOpen}
+                aria-label={`Estado: ${currentStatus}. Cambiar estado`}
+                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[7.5px] font-black tracking-widest uppercase whitespace-nowrap transition-all duration-200 ${config.bg} ${config.border} ${config.color} ${config.hover}`}
                 title="Cambiar Estado"
             >
-                <span className={`w-1 h-1 rounded-full ${config.dot}`}></span>
+                <span className={`w-1 h-1 rounded-full ${config.dot}`} aria-hidden="true"></span>
                 {currentStatus}
-                <svg className={`w-2 h-2 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className={`w-2 h-2 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
@@ -57,14 +74,19 @@ const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
                     <div className="p-1 flex flex-col gap-0.5">
                         {Object.keys(STATUS_CONFIG).map((status) => {
                             const opt = STATUS_CONFIG[status];
+                            const isUnsupported = UNSUPPORTED_STATUSES.includes(status);
                             return (
                                 <button
                                     key={status}
+                                    type="button"
+                                    disabled={isUnsupported}
                                     onClick={(e) => handleSelect(status, e)}
-                                    className={`flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md text-[8.5px] font-black tracking-widest uppercase transition-colors hover:bg-slate-50 ${currentStatus === status ? opt.bg + ' ' + opt.color : 'text-slate-600'}`}
+                                    title={isUnsupported ? 'Próximamente: este estado aún no se puede guardar' : undefined}
+                                    className={`flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md text-[8.5px] font-black tracking-widest uppercase transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent ${currentStatus === status ? opt.bg + ' ' + opt.color : 'text-slate-600'}`}
                                 >
                                     <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`}></span>
                                     {status}
+                                    {isUnsupported && <span className="ml-auto text-[7px] font-bold text-slate-400 normal-case tracking-normal">Próx.</span>}
                                 </button>
                             );
                         })}
@@ -77,6 +99,9 @@ const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
 
 // --- COMPONENTE PRINCIPAL: CALENDARIO ---
 export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onStatusChange }) => {
+    // Día cuyo listado completo se muestra al pulsar "+N actividades"
+    const [dayDetail, setDayDetail] = useState(null);
+
     const weekDays = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -95,15 +120,16 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
             dateObj: cellDate,
             dayNumber: cellDate.getDate(),
             isCurrentMonth: cellDate.getMonth() === month,
-            dateStr: cellDate.toISOString().split('T')[0]
+            dateStr: toLocalDateStr(cellDate)
         });
     }
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = toLocalDateStr(new Date());
 
     const getEquivalentWorkingDays = (start, end) => {
-        const startDate = new Date(start);
-        const endDate = new Date(end);
+        // 'T00:00:00' fuerza hora local; new Date('AAAA-MM-DD') se interpreta en UTC y corre el día
+        const startDate = new Date(`${start}T00:00:00`);
+        const endDate = new Date(`${end}T00:00:00`);
         if (startDate > endDate) return 1;
 
         let totalDays = 0;
@@ -124,6 +150,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
     };
 
     return (
+        <>
         <div className="w-full bg-white border border-slate-200 rounded-2xl flex flex-col shadow-sm mt-2 animate-fade-in flex-1 min-h-[650px]">
             
             {/* Header Fijo */}
@@ -154,9 +181,11 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                     let visibleTasks = dayTasks;
                     let hiddenCount = 0;
                     
+                    // Si no caben todas, se muestran 2 + el enlace "+N" para que el enlace
+                    // siempre quede dentro de la celda (con 3 + enlace se salía en pantallas bajas)
                     if (isMultipleTasks && dayTasks.length > MAX_COMPACT_VISIBLE) {
-                        visibleTasks = dayTasks.slice(0, MAX_COMPACT_VISIBLE);
-                        hiddenCount = dayTasks.length - MAX_COMPACT_VISIBLE;
+                        visibleTasks = dayTasks.slice(0, MAX_COMPACT_VISIBLE - 1);
+                        hiddenCount = dayTasks.length - (MAX_COMPACT_VISIBLE - 1);
                     }
 
                     let cellBg = 'bg-white hover:bg-slate-50/50';
@@ -193,9 +222,14 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                 </div>
                                 
                                 {dayTasks.length > 0 && !isSunday && (
-                                    <span className="text-[8px] font-black text-slate-400 tracking-wider bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded shadow-sm">
+                                    <button
+                                        type="button"
+                                        onClick={() => setDayDetail({ dateStr: cell.dateStr, tasks: dayTasks })}
+                                        aria-label={`Ver las ${dayTasks.length} actividades del ${formatDateMx(cell.dateStr)}`}
+                                        className="text-[8px] font-black text-slate-400 tracking-wider bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded shadow-sm hover:text-[#1296E8] hover:border-[#1296E8]/30 transition-colors"
+                                    >
                                         {dayTasks.length} ACT
-                                    </span>
+                                    </button>
                                 )}
                             </div>
 
@@ -226,19 +260,20 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                                     {isCritical && <div className="absolute left-0 top-0 bottom-0 w-[2.5px] bg-red-500 rounded-l-md"></div>}
                                                     
                                                     {/* 1. TÍTULO */}
+                                                    {/* El título es un botón para abrir la ficha con teclado; el clic en la tarjeta sigue funcionando */}
                                                     <div className="pl-1.5 shrink-0 mb-0.5">
-                                                        <span className="text-[10px] font-bold text-[#07152F] line-clamp-1 leading-tight" title={task.title}>
+                                                        <button type="button" className="block w-full text-left text-[10px] font-bold text-[#07152F] line-clamp-1 leading-tight" title={task.title} aria-label={`Abrir ${task.id}: ${task.title}`}>
                                                             {task.title}
-                                                        </span>
+                                                        </button>
                                                     </div>
 
                                                     {/* 2. ESTADO E ID (Con mb-auto empuja el contenido de abajo) */}
-                                                    <div className="flex justify-between items-center pl-1.5 shrink-0 z-10 mb-auto">
-                                                        <CustomStatusBadge 
-                                                            currentStatus={task.status} 
+                                                    <div className="flex justify-between items-center gap-1 pl-1.5 shrink-0 z-10 mb-auto">
+                                                        <CustomStatusBadge
+                                                            currentStatus={task.status}
                                                             onChangeStatus={(newStatus) => onStatusChange && onStatusChange(task, newStatus)}
                                                         />
-                                                        <span className="text-[7.5px] font-black tracking-widest text-slate-400 uppercase">
+                                                        <span className="text-[7.5px] font-black tracking-widest text-slate-400 uppercase whitespace-nowrap truncate">
                                                             {task.id}
                                                         </span>
                                                     </div>
@@ -268,25 +303,29 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                     {isMultipleTasks && (
                                         <div className="flex flex-col gap-1 w-full shrink-0">
                                             {visibleTasks.map((task, idx) => (
-                                                <div 
-                                                    key={`${task.id}-${idx}`} 
+                                                <button
+                                                    type="button"
+                                                    key={`${task.id}-${idx}`}
                                                     onClick={() => onTicketClick && onTicketClick(task)}
-                                                    className="flex items-center gap-1.5 px-1.5 py-1 bg-white border border-slate-100 rounded hover:border-[#1296E8]/30 hover:shadow-sm cursor-pointer transition-all shrink-0"
+                                                    aria-label={`Abrir ${task.id}: ${task.title} (${task.status})`}
+                                                    className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 bg-white border border-slate-100 rounded hover:border-[#1296E8]/30 hover:shadow-sm cursor-pointer transition-all shrink-0"
                                                 >
-                                                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${COMPACT_COLORS[idx % COMPACT_COLORS.length]}`}></div>
+                                                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${COMPACT_COLORS[idx % COMPACT_COLORS.length]}`} aria-hidden="true"></div>
                                                     <span className="text-[9.5px] font-bold text-[#07152F] truncate leading-none mt-0.5">
                                                         {task.title}
                                                     </span>
-                                                </div>
+                                                </button>
                                             ))}
-                                            
+
                                             {hiddenCount > 0 && (
-                                                <div 
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setDayDetail({ dateStr: cell.dateStr, tasks: dayTasks })}
                                                     className="text-[8px] font-black text-slate-400 hover:text-[#1296E8] text-center pt-0.5 cursor-pointer transition-colors"
                                                     title="Ver más actividades"
                                                 >
                                                     +{hiddenCount} actividad{hiddenCount > 1 ? 'es' : ''}
-                                                </div>
+                                                </button>
                                             )}
                                         </div>
                                     )}
@@ -298,5 +337,44 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                 })}
             </div>
         </div>
+
+        {/* Listado completo de actividades del día ("+N actividades") */}
+        <Modal
+            isOpen={dayDetail !== null}
+            onClose={() => setDayDetail(null)}
+            eyebrow="QA & Testing"
+            title={dayDetail ? `Actividades del ${formatDateMx(dayDetail.dateStr)}` : ''}
+        >
+            {dayDetail && (
+                <ul className="flex flex-col gap-2">
+                    {dayDetail.tasks.map((task) => {
+                        const config = STATUS_CONFIG[task.status] || STATUS_CONFIG['PENDIENTE'];
+                        const theme = getUserTheme(task.assignee);
+                        return (
+                            <li key={task.db_id}>
+                                <button
+                                    type="button"
+                                    onClick={() => { setDayDetail(null); if (onTicketClick) onTicketClick(task); }}
+                                    className="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg text-left hover:border-[#1296E8]/40 hover:shadow-md transition-all"
+                                >
+                                    <div className={`w-7 h-7 rounded-full text-white flex items-center justify-center text-[9px] font-black shrink-0 ${theme.main}`}>
+                                        {task.assignee}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-bold text-[#07152F] truncate">{task.title}</p>
+                                        <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase mt-0.5">{task.id}</p>
+                                    </div>
+                                    <span className={`flex items-center gap-1 px-2 py-1 rounded border text-[9px] font-black tracking-widest uppercase shrink-0 ${config.bg} ${config.border} ${config.color}`}>
+                                        <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`}></span>
+                                        {task.status}
+                                    </span>
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+        </Modal>
+        </>
     );
 };

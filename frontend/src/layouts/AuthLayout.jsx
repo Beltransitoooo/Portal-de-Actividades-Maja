@@ -12,7 +12,7 @@ export const AuthLayout = ({ children }) => {
                 {/* Logo MAJA Proporcionado */}
                 <div className="relative z-10 p-12 lg:p-16">
                     <div className="flex items-center gap-5">
-                        <img src={logoMaja} alt="Logo MAJA" className="w-12 h-12 object-contain" />
+                        <img src={logoMaja} alt="" className="w-12 h-12 object-contain" />
                         <div className="flex flex-col mt-1">
                             <h1 className="font-black text-5xl tracking-widest italic leading-none">MAJA</h1>
                             <span className="font-light text-[10px] tracking-[0.55em] text-[#00A3FF] mt-1.5 pl-0.5">SPORTSWEAR</span>

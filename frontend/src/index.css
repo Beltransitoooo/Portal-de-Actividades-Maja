@@ -7,6 +7,43 @@
   --color-maja-accent: #0284c7;
   --color-maja-text: #334155;
   --color-maja-border: #e2e8f0;
+
+  /* Animaciones usadas en el proyecto (antes no estaban definidas y no tenían efecto) */
+  --animate-fade-in: fade-in 0.3s ease-out both;
+  --animate-slide-left: slide-left 0.3s ease-out both;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slide-left {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+}
+
+/* Foco visible solo al navegar con teclado (no aparece con clic).
+   Va fuera de las capas de Tailwind para prevalecer sobre "focus:outline-none".
+   Se excluyen campos de texto y selects: ya tienen su propio borde de foco y el navegador
+   los marca como :focus-visible también con clic. */
+:focus-visible:not(input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], textarea, select) {
+  outline: 2px solid #00A3FF;
+  outline-offset: 2px;
+}
+
+/* Selects transparentes superpuestos (filtros): el anillo se muestra en el contenedor visible */
+.focus-ring-within:has(select:focus-visible) {
+  outline: 2px solid #00A3FF;
+  outline-offset: 2px;
+}
+
+/* Respeta la preferencia del sistema de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-left {
+    animation: none;
+  }
 }
 
 body {
