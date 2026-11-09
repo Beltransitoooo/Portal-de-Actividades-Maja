@@ -2,14 +2,14 @@ export const EffortBalance = ({ balanceData = null }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 lg:p-8 flex flex-col h-full">
             <h3 className="text-sm font-black text-[#0B132B] uppercase tracking-wider flex items-center gap-2 mb-8">
-                <svg className="w-4 h-4 text-[#00A3FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
+                <svg className="w-4 h-4 text-[#0072b2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
                 Balance de esfuerzo por tipo
             </h3>
 
             {!balanceData ? (
                 /* ESTADO VACÍO (Empty State) */
                 <div className="flex-1 flex flex-col items-center justify-center py-16 text-center border border-gray-100 rounded-xl bg-slate-50/50">
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-100 mb-4 shadow-sm text-gray-300">
+                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-100 mb-4 shadow-sm text-gray-500">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
                     </div>
                     <p className="text-sm font-bold text-[#0B132B]">Sin actividades para calcular</p>
@@ -28,7 +28,7 @@ export const EffortBalance = ({ balanceData = null }) => {
                         {balanceData.funcionales > 10 && <span className="text-[10px] font-bold text-white">{balanceData.funcionales}%</span>}
                     </div>
                     <div
-                        className="bg-[#00A3FF] hover:opacity-90 transition-all duration-1000 flex items-center justify-center overflow-hidden"
+                        className="bg-[#0072b2] hover:opacity-90 transition-all duration-1000 flex items-center justify-center overflow-hidden"
                         style={{ width: `${balanceData.automatizacion}%` }}
                     >
                         {balanceData.automatizacion > 10 && <span className="text-[10px] font-bold text-white">{balanceData.automatizacion}%</span>}
@@ -48,7 +48,7 @@ export const EffortBalance = ({ balanceData = null }) => {
                         <span className="text-xs font-bold text-[#0B132B]">Funcionales</span>
                     </div>
                     <div className="bg-slate-50 p-3 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">
-                        <div className="w-2 h-2 rounded-full bg-[#00A3FF] mb-2"></div>
+                        <div className="w-2 h-2 rounded-full bg-[#0072b2] mb-2"></div>
                         <span className="text-xs font-bold text-[#0B132B]">Pruebas</span>
                     </div>
                     <div className="bg-slate-50 p-3 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center">

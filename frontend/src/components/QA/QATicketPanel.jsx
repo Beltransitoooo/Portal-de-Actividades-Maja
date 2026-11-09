@@ -31,14 +31,14 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
                             {ticket.id}
                         </span>
                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
-                            ticket.priority === 'CRÍTICA' ? 'text-red-600 bg-red-50 border-red-200' : 
-                            ticket.priority === 'ALTA' ? 'text-orange-600 bg-orange-50 border-orange-200' : 
-                            'text-green-600 bg-green-50 border-green-200'
+                            ticket.priority === 'CRÍTICA' ? 'text-red-700 bg-red-50 border-red-200' : 
+                            ticket.priority === 'ALTA' ? 'text-orange-700 bg-orange-50 border-orange-200' : 
+                            'text-green-700 bg-green-50 border-green-200'
                         }`}>
                             {ticket.priority || 'NORMAL'}
                         </span>
                     </div>
-                    <button type="button" onClick={onClose} aria-label="Cerrar detalle de la actividad" className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                    <button type="button" onClick={onClose} aria-label="Cerrar detalle de la actividad" className="text-gray-500 hover:text-red-700 transition-colors p-1">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 </div>

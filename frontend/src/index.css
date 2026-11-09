@@ -28,13 +28,13 @@
    Se excluyen campos de texto y selects: ya tienen su propio borde de foco y el navegador
    los marca como :focus-visible también con clic. */
 :focus-visible:not(input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], textarea, select) {
-  outline: 2px solid #00A3FF;
+  outline: 2px solid #0072b2;
   outline-offset: 2px;
 }
 
 /* Selects transparentes superpuestos (filtros): el anillo se muestra en el contenedor visible */
 .focus-ring-within:has(select:focus-visible) {
-  outline: 2px solid #00A3FF;
+  outline: 2px solid #0072b2;
   outline-offset: 2px;
 }
 

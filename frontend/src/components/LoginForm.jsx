@@ -29,7 +29,7 @@ export const LoginForm = ({ email, setEmail, password, setPassword, onSubmit, on
                         type="button"
                         onClick={() => setShowRecoveryNotice(v => !v)}
                         aria-expanded={showRecoveryNotice}
-                        className="text-[11px] text-[#00A3FF] font-semibold hover:underline"
+                        className="text-[11px] text-[#0072b2] font-semibold hover:underline"
                     >
                         ¿Olvidaste tu contraseña?
                     </button>
@@ -47,7 +47,7 @@ export const LoginForm = ({ email, setEmail, password, setPassword, onSubmit, on
 
             {/* Sección Social */}
             <div className="mt-8">
-                <span className="block text-center text-[10px] text-gray-400 font-bold uppercase tracking-wider">O ingresa con</span>
+                <span className="block text-center text-[10px] text-gray-500 font-bold uppercase tracking-wider">O ingresa con</span>
                 <div className="w-full flex justify-center gap-4 mt-4">
                     {/* BOTÓN DE GOOGLE CON FUNCIONALIDAD AGREGADA */}
                     <button 
@@ -67,7 +67,7 @@ export const LoginForm = ({ email, setEmail, password, setPassword, onSubmit, on
             </div>
 
             <div className="mt-8 text-center">
-                <button type="button" onClick={onToggle} className="text-[11px] text-[#00A3FF] font-bold hover:underline">
+                <button type="button" onClick={onToggle} className="text-[11px] text-[#0072b2] font-bold hover:underline">
                     ¿No tienes cuenta? Regístrate
                 </button>
             </div>

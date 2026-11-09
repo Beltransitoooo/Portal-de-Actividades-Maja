@@ -5,10 +5,10 @@ import { toLocalDateStr, formatDateMx } from '../../utils/dates';
 // --- CONFIGURACIÓN VISUAL DE ESTADOS ---
 const STATUS_CONFIG = {
     'PENDIENTE':   { color: 'text-slate-600', bg: 'bg-slate-100', dot: 'bg-slate-400', border: 'border-slate-200', hover: 'hover:bg-slate-200' },
-    'EN PROGRESO': { color: 'text-[#1296E8]', bg: 'bg-[#1296E8]/10', dot: 'bg-[#1296E8]', border: 'border-[#1296E8]/20', hover: 'hover:bg-[#1296E8]/20' },
-    'EN REVISIÓN': { color: 'text-amber-600', bg: 'bg-amber-50', dot: 'bg-amber-500', border: 'border-amber-200', hover: 'hover:bg-amber-100' },
+    'EN PROGRESO': { color: 'text-[#0b5a8c]', bg: 'bg-[#1296E8]/10', dot: 'bg-[#0e71af]', border: 'border-[#1296E8]/20', hover: 'hover:bg-[#1296E8]/20' },
+    'EN REVISIÓN': { color: 'text-amber-700', bg: 'bg-amber-50', dot: 'bg-amber-500', border: 'border-amber-200', hover: 'hover:bg-amber-100' },
     'COMPLETADA':  { color: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-emerald-500', border: 'border-emerald-200', hover: 'hover:bg-emerald-100' },
-    'BLOQUEADA':   { color: 'text-red-600', bg: 'bg-red-50', dot: 'bg-red-500', border: 'border-red-200', hover: 'hover:bg-red-100' }
+    'BLOQUEADA':   { color: 'text-red-700', bg: 'bg-red-50', dot: 'bg-red-500', border: 'border-red-200', hover: 'hover:bg-red-100' }
 };
 
 // Estados que el backend aún no puede guardar (la actividad solo tiene el campo "completada").
@@ -17,7 +17,7 @@ const UNSUPPORTED_STATUSES = ['EN REVISIÓN', 'BLOQUEADA'];
 
 // --- COLORES PARA VISTA COMPACTA ---
 const COMPACT_COLORS = [
-    'bg-[#1296E8]',   
+    'bg-[#0e71af]',   
     'bg-emerald-500', 
     'bg-purple-500',  
     'bg-amber-500',   
@@ -52,18 +52,18 @@ const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
     };
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative min-w-0 max-w-full" ref={dropdownRef}>
             <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
                 aria-haspopup="menu"
                 aria-expanded={isOpen}
                 aria-label={`Estado: ${currentStatus}. Cambiar estado`}
-                className={`flex items-center gap-1 px-1.5 py-0.5 rounded border text-[7.5px] font-black tracking-widest uppercase whitespace-nowrap transition-all duration-200 ${config.bg} ${config.border} ${config.color} ${config.hover}`}
+                className={`flex items-center gap-1 px-1.5 min-h-6 max-w-full min-w-0 rounded border text-[8px] font-black tracking-widest uppercase whitespace-nowrap transition-all duration-200 ${config.bg} ${config.border} ${config.color} ${config.hover}`}
                 title="Cambiar Estado"
             >
-                <span className={`w-1 h-1 rounded-full ${config.dot}`} aria-hidden="true"></span>
-                {currentStatus}
+                <span className={`w-1 h-1 rounded-full shrink-0 ${config.dot}`} aria-hidden="true"></span>
+                <span className="truncate">{currentStatus}</span>
                 <svg className={`w-2 h-2 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -86,7 +86,7 @@ const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
                                 >
                                     <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`}></span>
                                     {status}
-                                    {isUnsupported && <span className="ml-auto text-[7px] font-bold text-slate-400 normal-case tracking-normal">Próx.</span>}
+                                    {isUnsupported && <span className="ml-auto text-[8px] font-bold text-slate-600 normal-case tracking-normal">Próx.</span>}
                                 </button>
                             );
                         })}
@@ -151,12 +151,12 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
 
     return (
         <>
-        <div className="w-full bg-white border border-slate-200 rounded-2xl flex flex-col shadow-sm mt-2 animate-fade-in flex-1 min-h-[650px]">
+        <div className="w-full bg-white border border-slate-200 rounded-2xl flex flex-col shadow-sm mt-2 animate-fade-in flex-1 min-h-[820px]">
             
             {/* Header Fijo */}
             <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 shrink-0 rounded-t-2xl overflow-hidden">
                 {weekDays.map((day, idx) => (
-                    <div key={day} className={`py-3 text-center text-[10px] font-black tracking-widest uppercase ${idx === 6 ? 'text-slate-300' : idx === 5 ? 'text-amber-600' : 'text-slate-500'}`}>
+                    <div key={day} className={`py-3 text-center text-[10px] font-black tracking-widest uppercase ${idx === 6 ? 'text-slate-500' : idx === 5 ? 'text-amber-700' : 'text-slate-500'}`}>
                         {day}
                     </div>
                 ))}
@@ -176,47 +176,47 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                     });
 
                     const isMultipleTasks = dayTasks.length > 1;
-                    const MAX_COMPACT_VISIBLE = 3; 
+                    const MAX_COMPACT_VISIBLE = 2; // con objetivos de 24px (WCAG 2.5.8) caben 2 filas en celdas bajas 
                     
                     let visibleTasks = dayTasks;
                     let hiddenCount = 0;
                     
-                    // Si no caben todas, se muestran 2 + el enlace "+N" para que el enlace
-                    // siempre quede dentro de la celda (con 3 + enlace se salía en pantallas bajas)
+                    // Si no caben todas, se muestra 1 actividad + el enlace "+N" (ambos de 24px)
+                    // para que todo quede dentro de la celda incluso en pantallas bajas
                     if (isMultipleTasks && dayTasks.length > MAX_COMPACT_VISIBLE) {
                         visibleTasks = dayTasks.slice(0, MAX_COMPACT_VISIBLE - 1);
                         hiddenCount = dayTasks.length - (MAX_COMPACT_VISIBLE - 1);
                     }
 
                     let cellBg = 'bg-white hover:bg-slate-50/50';
-                    if (!cell.isCurrentMonth) cellBg = 'bg-slate-50/50 opacity-70';
-                    if (isSunday) cellBg = 'bg-slate-50 opacity-80';
+                    if (!cell.isCurrentMonth) cellBg = 'bg-slate-50';
+                    if (isSunday) cellBg = 'bg-slate-50';
 
                     return (
                         <div key={index} className={`relative p-1.5 lg:p-2 flex flex-col transition-colors group ${cellBg} min-h-0`}
                              style={isSunday ? { backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.01) 10px, rgba(0,0,0,0.01) 20px)' } : {}}>
                             
-                            {isToday && <div className="absolute top-0 left-0 right-0 h-1 bg-[#1296E8] shrink-0"></div>}
+                            {isToday && <div className="absolute top-0 left-0 right-0 h-1 bg-[#0e71af] shrink-0"></div>}
 
                             {/* Cabecera del Día */}
                             <div className="flex justify-between items-start mb-1.5 shrink-0">
-                                <div className="flex flex-col items-start gap-1">
+                                <div className="flex items-center gap-1 min-w-0">
                                     <span className={`text-[11px] font-black w-5 h-5 flex items-center justify-center rounded-full transition-colors ${
-                                        isToday ? 'bg-[#1296E8] text-white shadow-md' : 
-                                        cell.isCurrentMonth ? (isSunday ? 'text-slate-400' : 'text-[#07152F]') : 'text-slate-300'
+                                        isToday ? 'bg-[#0e71af] text-white shadow-md' : 
+                                        cell.isCurrentMonth ? (isSunday ? 'text-slate-500' : 'text-[#07152F]') : 'text-slate-500'
                                     }`}>
                                         {cell.dayNumber}
                                     </span>
                                     
                                     {isSaturday && cell.isCurrentMonth && (
-                                        <div className="flex items-center bg-amber-50 border border-amber-200/50 text-amber-600 px-1 py-0.5 rounded">
-                                            <span className="text-[6.5px] font-black uppercase tracking-widest hidden lg:block">9:00-13:00</span>
+                                        <div className="flex items-center bg-amber-50 border border-amber-200/50 text-amber-700 px-1 py-0.5 rounded">
+                                            <span className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden lg:block">9–13 h</span>
                                         </div>
                                     )}
                                     
                                     {isSunday && cell.isCurrentMonth && (
-                                        <div className="bg-slate-100 border border-slate-200/60 text-slate-400 px-1 py-0.5 rounded">
-                                            <span className="text-[6.5px] font-black uppercase tracking-widest hidden lg:block">Descanso</span>
+                                        <div className="bg-slate-100 border border-slate-200/60 text-slate-600 px-1 py-0.5 rounded">
+                                            <span className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden lg:block">Descanso</span>
                                         </div>
                                     )}
                                 </div>
@@ -226,7 +226,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                         type="button"
                                         onClick={() => setDayDetail({ dateStr: cell.dateStr, tasks: dayTasks })}
                                         aria-label={`Ver las ${dayTasks.length} actividades del ${formatDateMx(cell.dateStr)}`}
-                                        className="text-[8px] font-black text-slate-400 tracking-wider bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded shadow-sm hover:text-[#1296E8] hover:border-[#1296E8]/30 transition-colors"
+                                        className="min-h-6 shrink-0 whitespace-nowrap text-[8px] font-black text-slate-500 tracking-wider bg-slate-50 border border-slate-100 px-1.5 rounded shadow-sm hover:text-[#0e71af] hover:border-[#1296E8]/30 transition-colors"
                                     >
                                         {dayTasks.length} ACT
                                     </button>
@@ -258,33 +258,32 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                                     className="relative bg-white border border-slate-200 rounded-md p-1 cursor-pointer group/task transition-all duration-200 hover:shadow-md hover:border-[#1296E8]/40 flex flex-col flex-1 min-h-0 overflow-hidden"
                                                 >
                                                     {isCritical && <div className="absolute left-0 top-0 bottom-0 w-[2.5px] bg-red-500 rounded-l-md"></div>}
-                                                    
-                                                    {/* 1. TÍTULO */}
-                                                    {/* El título es un botón para abrir la ficha con teclado; el clic en la tarjeta sigue funcionando */}
-                                                    <div className="pl-1.5 shrink-0 mb-0.5">
-                                                        <button type="button" className="block w-full text-left text-[10px] font-bold text-[#07152F] line-clamp-1 leading-tight" title={task.title} aria-label={`Abrir ${task.id}: ${task.title}`}>
-                                                            {task.title}
+
+                                                    {/* 1. TÍTULO: botón de 24px (WCAG 2.5.8) para abrir la ficha; el clic en el resto de la tarjeta también la abre */}
+                                                    <div className="pl-1.5 shrink-0">
+                                                        <button type="button" className="w-full min-h-6 flex items-center text-left text-[10px] font-bold text-[#07152F] leading-tight" title={task.title} aria-label={`Abrir ${task.id}: ${task.title}`}>
+                                                            <span className="line-clamp-1">{task.title}</span>
                                                         </button>
                                                     </div>
 
                                                     {/* 2. ESTADO E ID (Con mb-auto empuja el contenido de abajo) */}
-                                                    <div className="flex justify-between items-center gap-1 pl-1.5 shrink-0 z-10 mb-auto">
+                                                    <div className="relative flex justify-between items-center gap-1 pl-1.5 shrink-0 z-10 mb-auto">
                                                         <CustomStatusBadge
                                                             currentStatus={task.status}
                                                             onChangeStatus={(newStatus) => onStatusChange && onStatusChange(task, newStatus)}
                                                         />
-                                                        <span className="text-[7.5px] font-black tracking-widest text-slate-400 uppercase whitespace-nowrap truncate">
+                                                        <span className="hidden 2xl:block text-[8px] font-black tracking-widest text-slate-500 uppercase whitespace-nowrap truncate">
                                                             {task.id}
                                                         </span>
                                                     </div>
 
                                                     {/* 3. INFO SECUNDARIA (Totalmente a salvo del corte) */}
-                                                    <div className="flex items-center justify-between pl-1.5 shrink-0 border-t border-slate-50 pt-0.5 mt-0.5">
-                                                        <div className="flex items-center gap-1 text-slate-400">
+                                                    <div className="flex items-center justify-between pl-1.5 shrink-0 border-t border-slate-50 pt-0.5">
+                                                        <div className="flex items-center gap-1 text-slate-500">
                                                             <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                             <span className="text-[8px] font-bold">{dailyHours ? `${dailyHours}h` : '--'}</span>
                                                         </div>
-                                                        <div className={`w-3.5 h-3.5 rounded-full text-white flex items-center justify-center text-[5.5px] font-black shadow-sm shrink-0 ${theme.main}`} title={task.assignee}>
+                                                        <div className={`w-4 h-4 rounded-full text-white flex items-center justify-center text-[8px] font-black shadow-sm shrink-0 ${theme.main}`} title={task.assignee}>
                                                             {task.assignee}
                                                         </div>
                                                     </div>
@@ -308,7 +307,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                                     key={`${task.id}-${idx}`}
                                                     onClick={() => onTicketClick && onTicketClick(task)}
                                                     aria-label={`Abrir ${task.id}: ${task.title} (${task.status})`}
-                                                    className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 bg-white border border-slate-100 rounded hover:border-[#1296E8]/30 hover:shadow-sm cursor-pointer transition-all shrink-0"
+                                                    className="w-full min-h-6 text-left flex items-center gap-1.5 px-1.5 py-1 bg-white border border-slate-100 rounded hover:border-[#1296E8]/30 hover:shadow-sm cursor-pointer transition-all shrink-0"
                                                 >
                                                     <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${COMPACT_COLORS[idx % COMPACT_COLORS.length]}`} aria-hidden="true"></div>
                                                     <span className="text-[9.5px] font-bold text-[#07152F] truncate leading-none mt-0.5">
@@ -321,7 +320,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                                 <button
                                                     type="button"
                                                     onClick={() => setDayDetail({ dateStr: cell.dateStr, tasks: dayTasks })}
-                                                    className="text-[8px] font-black text-slate-400 hover:text-[#1296E8] text-center pt-0.5 cursor-pointer transition-colors"
+                                                    className="w-full min-h-6 flex items-center justify-center text-[8px] font-black text-slate-500 hover:text-[#0e71af] cursor-pointer transition-colors"
                                                     title="Ver más actividades"
                                                 >
                                                     +{hiddenCount} actividad{hiddenCount > 1 ? 'es' : ''}
@@ -362,7 +361,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-xs font-bold text-[#07152F] truncate">{task.title}</p>
-                                        <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase mt-0.5">{task.id}</p>
+                                        <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase mt-0.5">{task.id}</p>
                                     </div>
                                     <span className={`flex items-center gap-1 px-2 py-1 rounded border text-[9px] font-black tracking-widest uppercase shrink-0 ${config.bg} ${config.border} ${config.color}`}>
                                         <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`}></span>

@@ -9,10 +9,10 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
             <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex flex-col h-full min-h-0">
                 
                 <div className="flex items-center justify-between mb-5 shrink-0">
-                    <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                         Equipo & Progreso
                     </h3>
-                    <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </div>
                 
                 {/* Zona de Scroll contenida */}
@@ -27,25 +27,25 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
                         }`}
                     >
                         {selectedUser === null && (
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1296E8] rounded-l-lg"></div>
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#0e71af] rounded-l-lg"></div>
                         )}
                         <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-colors ${selectedUser === null ? 'bg-[#1296E8] text-white shadow-md' : 'bg-slate-100 text-gray-500 group-hover:bg-slate-200'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-colors ${selectedUser === null ? 'bg-[#0e71af] text-white shadow-md' : 'bg-slate-100 text-gray-600 group-hover:bg-slate-200'}`}>
                                 ALL
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className={`text-xs font-bold truncate ${selectedUser === null ? 'text-[#07152F]' : 'text-gray-600'}`}>Vista Global</p>
-                                <p className="text-[9px] text-gray-400 uppercase tracking-widest truncate">Todos los tickets</p>
+                                <p className="text-[9px] text-gray-500 uppercase tracking-widest truncate">Todos los tickets</p>
                             </div>
                         </div>
 
                         <div className="w-full flex flex-col gap-1.5 pl-11">
                             <div className="flex items-center justify-between text-[10px] font-semibold">
                                 <span className="text-gray-500">{totalGlobalTasks} actividades</span>
-                                <span className="text-[#1296E8]">{avgGlobalProgress}%</span>
+                                <span className="text-[#0e71af]">{avgGlobalProgress}%</span>
                             </div>
                             <div className="h-1 w-full bg-slate-200/50 rounded-full overflow-hidden">
-                                <div className="h-full bg-[#1296E8] rounded-full transition-all duration-700" style={{ width: `${avgGlobalProgress}%` }}></div>
+                                <div className="h-full bg-[#0e71af] rounded-full transition-all duration-700" style={{ width: `${avgGlobalProgress}%` }}></div>
                             </div>
                         </div>
                     </button>
@@ -72,14 +72,14 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
                                 )}
                                 
                                 <div className="flex items-center gap-3 mb-2">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-sm transition-opacity ${user.theme?.main || 'bg-slate-800'} ${selectedUser !== user.id && selectedUser !== null ? 'opacity-50 group-hover:opacity-100' : ''}`}>
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-sm transition-opacity ${user.theme?.main || 'bg-slate-800'} ${selectedUser !== user.id && selectedUser !== null ? 'grayscale group-hover:grayscale-0' : ''}`}>
                                         {user.id}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className={`text-xs font-bold truncate transition-colors ${selectedUser === user.id ? 'text-[#07152F]' : 'text-gray-600 group-hover:text-[#07152F]'}`}>
                                             {user.name}
                                         </p>
-                                        <p className="text-[9px] text-gray-400 uppercase tracking-widest truncate">
+                                        <p className="text-[9px] text-gray-500 uppercase tracking-widest truncate">
                                             {user.role}
                                         </p>
                                     </div>
@@ -88,7 +88,7 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
                                 <div className="w-full flex flex-col gap-1.5 pl-11">
                                     <div className="flex items-center justify-between text-[10px] font-semibold">
                                         <span className="text-gray-500">{tasksCount} act.</span>
-                                        <span className={isCompleted && tasksCount > 0 ? 'text-emerald-500' : 'text-gray-400'}>
+                                        <span className={isCompleted && tasksCount > 0 ? 'text-emerald-700' : 'text-gray-500'}>
                                             {progressPct}%
                                         </span>
                                     </div>

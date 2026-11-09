@@ -58,7 +58,7 @@ export const CapacityTable = ({ capacityData = [] }) => {
                                     <div className="flex justify-between items-end mb-1.5">
                                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Esfuerzo Asignado</span>
                                         <span className="text-xs font-semibold text-white">
-                                            {tester.logged} <span className="text-slate-500 font-normal">/ {tester.max}h</span>
+                                            {tester.logged} <span className="text-slate-400 font-normal">/ {tester.max}h</span>
                                         </span>
                                     </div>
                                     <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50 relative">

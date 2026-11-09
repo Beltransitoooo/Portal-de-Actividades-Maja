@@ -6,12 +6,12 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
             
             {/* --- TITULO Y BREADCRUMB --- */}
             <div>
-                <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 tracking-wide uppercase">
+                <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 mb-2 tracking-wide uppercase">
                     <span>Módulos</span>
-                    <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span className="text-[#00A3FF]">QA & Testing</span>
+                    <span className="text-[#0072b2]">QA & Testing</span>
                 </div>
                 
                 <h1 className="text-3xl lg:text-4xl font-black text-[#0B132B] tracking-tight">
@@ -25,7 +25,7 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
 
             {/* --- SELECTOR PREMIUM (Con funcionalidad nativa oculta) --- */}
             <div className="flex flex-col gap-1.5 shrink-0">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">
                     Período de trabajo
                 </label>
                 
@@ -42,7 +42,7 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
                         {/* Texto dinámico según el state */}
                         {selectedSprint ? selectedSprint.toUpperCase() : 'SELECCIONA...'}
                         
-                        <svg className="w-4 h-4 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-gray-500 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
@@ -63,7 +63,7 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
                 </div>
 
                 {periodRange && (
-                    <span className="text-[10px] font-semibold text-gray-400 tracking-wider px-1">
+                    <span className="text-[10px] font-semibold text-gray-500 tracking-wider px-1">
                         {periodRange}
                     </span>
                 )}

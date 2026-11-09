@@ -10,10 +10,10 @@ import { DeviationTable } from '../components/QA/Portal/DeviationTable';
 import { EffortBalance } from '../components/QA/Portal/EffortBalance';
 
 const COLOR_PALETTES = [
-    'bg-[#1296E8]',
-    'bg-emerald-500',
-    'bg-purple-500',
-    'bg-amber-500'
+    'bg-[#0e71af]',
+    'bg-emerald-700',
+    'bg-purple-700',
+    'bg-amber-700'
 ];
 
 export const QAPortal = () => {
@@ -73,13 +73,13 @@ export const QAPortal = () => {
             const assignedHours = userTasks.reduce((total, task) => total + parseFloat(task.estimacion_max_hrs || 0), 0);
 
             let status = 'Óptimo';
-            let statusColor = 'text-green-600 bg-green-50 border-green-200';
+            let statusColor = 'text-green-700 bg-green-50 border-green-200';
             if (assignedHours > 32 && assignedHours <= 40) {
                 status = 'Al Límite';
-                statusColor = 'text-yellow-600 bg-yellow-50 border-yellow-200';
+                statusColor = 'text-yellow-800 bg-yellow-50 border-yellow-200';
             } else if (assignedHours > 40) {
                 status = 'Sobrecargado';
-                statusColor = 'text-red-600 bg-red-50 border-red-200';
+                statusColor = 'text-red-700 bg-red-50 border-red-200';
             }
 
             return {
@@ -161,8 +161,8 @@ export const QAPortal = () => {
                 {isLoading ? (
                     <div className="w-full h-64 flex items-center justify-center bg-white border border-gray-100 mt-6 rounded-xl shadow-sm">
                         <div className="flex flex-col items-center">
-                            <div className="w-8 h-8 border-[3px] border-gray-100 border-t-[#1296E8] rounded-full animate-spin mb-3"></div>
-                            <p className="text-xs font-bold text-gray-400 tracking-widest uppercase animate-pulse">Sincronizando portal...</p>
+                            <div className="w-8 h-8 border-[3px] border-gray-100 border-t-[#0e71af] rounded-full animate-spin mb-3"></div>
+                            <p className="text-xs font-bold text-gray-500 tracking-widest uppercase animate-pulse">Sincronizando portal...</p>
                         </div>
                     </div>
                 ) : loadError ? (

@@ -51,7 +51,7 @@ export const UserDropdown = () => {
                 aria-label={`Menú de usuario: ${username}`}
                 aria-haspopup="menu"
                 aria-expanded={isOpen}
-                className="flex items-center justify-center w-10 h-10 bg-[#00A3FF]/20 text-[#00A3FF] hover:bg-[#00A3FF] hover:text-white transition-colors rounded-full font-bold shadow-sm"
+                className="flex items-center justify-center w-10 h-10 bg-[#00A3FF]/20 text-[#00A3FF] hover:bg-[#0072b2] hover:text-white transition-colors rounded-full font-bold shadow-sm"
             >
                 {initials}
             </button>
@@ -62,7 +62,7 @@ export const UserDropdown = () => {
                     
                     {/* Cabecera */}
                     <div className="px-4 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-700 to-blue-600">
-                        <p className="text-xs font-medium text-blue-200 uppercase tracking-wider">
+                        <p className="text-xs font-medium text-blue-50 uppercase tracking-wider">
                             Sesión iniciada como
                         </p>
                         <div className="flex items-center mt-1">
@@ -98,7 +98,7 @@ export const UserDropdown = () => {
                                 </svg>
                             </div>
                             <span className="font-medium text-gray-700">Configuración</span>
-                            <span className="ml-auto text-[9px] font-bold uppercase tracking-wider text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">Próximamente</span>
+                            <span className="ml-auto text-[9px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">Próximamente</span>
                         </button>
 
                         <button 
@@ -108,11 +108,11 @@ export const UserDropdown = () => {
                         >
                             <div className="absolute left-0 top-0 h-full w-1 bg-red-500 rounded-r opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:scale-y-100 scale-y-80"></div>
                             <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mr-3 shrink-0 group-hover:bg-red-200 transition-colors duration-200">
-                                <svg fill="currentColor" viewBox="0 0 20 20" className="h-5 w-5 text-red-500 group-hover:text-red-600" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <svg fill="currentColor" viewBox="0 0 20 20" className="h-5 w-5 text-red-700 group-hover:text-red-700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                                     <path clipRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" fillRule="evenodd"></path>
                                 </svg>
                             </div>
-                            <span className="font-medium text-gray-700 group-hover:text-red-600">Cerrar sesión</span>
+                            <span className="font-medium text-gray-700 group-hover:text-red-700">Cerrar sesión</span>
                         </button>
                     </div>
                 </div>
@@ -121,12 +121,12 @@ export const UserDropdown = () => {
             {/* Perfil: datos disponibles en la sesión actual */}
             <Modal isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} eyebrow="Mi cuenta" title="Perfil">
                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-[#00A3FF] text-white flex items-center justify-center text-lg font-black shadow-md shrink-0">
+                    <div className="w-14 h-14 rounded-full bg-[#0072b2] text-white flex items-center justify-center text-lg font-black shadow-md shrink-0">
                         {initials}
                     </div>
                     <div className="min-w-0">
                         <p className="text-base font-black text-[#07152F] truncate">{username}</p>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{roleLabel}</p>
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{roleLabel}</p>
                     </div>
                 </div>
             </Modal>

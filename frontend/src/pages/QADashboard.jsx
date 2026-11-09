@@ -10,10 +10,10 @@ import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/auth
 import { getInitials } from '../utils/initials';
 
 const COLOR_PALETTES = [
-    { main: 'bg-[#1296E8]', light: 'bg-blue-50', border: 'border-[#1296E8]' },
-    { main: 'bg-emerald-500', light: 'bg-emerald-50', border: 'border-emerald-500' },
-    { main: 'bg-purple-500', light: 'bg-purple-50', border: 'border-purple-500' },
-    { main: 'bg-amber-500', light: 'bg-amber-50', border: 'border-amber-500' }
+    { main: 'bg-[#0e71af]', light: 'bg-blue-50', border: 'border-[#0e71af]' },
+    { main: 'bg-emerald-700', light: 'bg-emerald-50', border: 'border-emerald-500' },
+    { main: 'bg-purple-700', light: 'bg-purple-50', border: 'border-purple-500' },
+    { main: 'bg-amber-700', light: 'bg-amber-50', border: 'border-amber-500' }
 ];
 
 // Obtiene equipo y actividades del API y los transforma para la vista (sin tocar estado de React)
@@ -158,15 +158,15 @@ export const QADashboard = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 animate-fade-in h-[calc(100vh-90px)] min-h-[880px]">
+            <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 animate-fade-in xl:h-[calc(100vh-90px)] xl:min-h-[1080px]">
                 
                 {/* Sidebar */}
-                <div className="w-full xl:w-72 shrink-0 h-full min-h-0 flex flex-col">
+                <div className="w-full xl:w-72 shrink-0 xl:h-full min-h-0 flex flex-col">
                     <QAUserFilter teamUsers={teamUsers} selectedUser={selectedUser} onSelectUser={setSelectedUser} />
                 </div>
 
                 {/* Contenedor Derecho */}
-                <div className="flex-1 min-w-0 flex flex-col min-h-0 h-full">
+                <div className="flex-1 min-w-0 flex flex-col min-h-0 xl:h-full">
                     
                     <div className="shrink-0">
                         <QAHeader 
@@ -191,14 +191,14 @@ export const QADashboard = () => {
 
                     {isLoading ? (
                         <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2">
-                            <div className="w-10 h-10 border-[3px] border-gray-100 border-t-[#1296E8] rounded-full animate-spin mb-4"></div>
-                            <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase animate-pulse">Sincronizando con base de datos...</p>
+                            <div className="w-10 h-10 border-[3px] border-gray-100 border-t-[#0e71af] rounded-full animate-spin mb-4"></div>
+                            <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase animate-pulse">Sincronizando con base de datos...</p>
                         </div>
                     ) : loadError ? (
                         <div role="alert" className="w-full flex-1 min-h-0 flex flex-col items-center justify-center text-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2 p-6">
                             <p className="text-sm font-bold text-[#07152F]">No se pudo cargar la información</p>
                             <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">{loadError}</p>
-                            <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#1296E8] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
+                            <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
                                 Reintentar
                             </button>
                         </div>

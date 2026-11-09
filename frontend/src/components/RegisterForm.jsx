@@ -20,7 +20,7 @@ export const RegisterForm = ({ nameUsers, setNameUsers, email, setEmail, passwor
         </form>
 
         <div className="mt-8 text-center">
-            <button type="button" onClick={onToggle} className="text-[11px] text-[#00A3FF] font-bold hover:underline">
+            <button type="button" onClick={onToggle} className="text-[11px] text-[#0072b2] font-bold hover:underline">
                 ¿Ya tienes cuenta? Inicia sesión
             </button>
         </div>
