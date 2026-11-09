@@ -14,9 +14,9 @@ export const LoginForm = ({ email, setEmail, password, setPassword, onSubmit, on
     return (
         <div className="w-full max-w-[400px] bg-gradient-to-b from-white to-slate-50 rounded-[40px] p-8 lg:p-10 border-[5px] border-white shadow-[0_30px_30px_-20px_rgba(11,19,43,0.15)] mx-auto">
             
-            <h3 className="text-center font-black text-3xl text-[#0B132B] tracking-tight mb-6 uppercase">
+            <h1 className="text-center font-black text-3xl text-[#0B132B] tracking-tight mb-6 uppercase">
                 Acceso
-            </h3>
+            </h1>
 
             {error && <div role="alert" className="bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 mb-4 rounded-md">{error}</div>}
 

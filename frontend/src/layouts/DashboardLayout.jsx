@@ -7,7 +7,7 @@ export const DashboardLayout = ({ children }) => {
             {/* Header global; el usuario y sus iniciales los resuelve UserDropdown */}
             <Header />
 
-            <div className="flex flex-1 min-h-[calc(100vh-64px)]">
+            <div className="flex flex-col lg:flex-row flex-1 lg:min-h-[calc(100vh-64px)]">
                 {/* Sidebar global limpio (sin la tarjeta repetida de usuario abajo) */}
                 <Sidebar />
 

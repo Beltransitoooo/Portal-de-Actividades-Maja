@@ -2,13 +2,13 @@ import { NavLink } from 'react-router-dom';
 
 export const Sidebar = () => {
     return (
-        <aside className="w-64 bg-white border-r border-gray-200 flex flex-col justify-between shrink-0 min-h-[calc(100vh-64px)]">
+        <aside aria-label="Barra lateral" className="w-full lg:w-64 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col justify-between shrink-0 lg:min-h-[calc(100vh-64px)]">
             <div className="p-4 lg:p-6">
                 <p className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-4 px-2">
                     Navegación
                 </p>
 
-                <nav className="space-y-1">
+                <nav aria-label="Navegación principal" className="flex flex-wrap gap-1 lg:block lg:space-y-1">
                     {/* PANEL DE RENDIMIENTO */}
                     <NavLink
                         to="/qa"

@@ -1,10 +1,10 @@
 export const EffortBalance = ({ balanceData = null }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 lg:p-8 flex flex-col h-full">
-            <h3 className="text-sm font-black text-[#0B132B] uppercase tracking-wider flex items-center gap-2 mb-8">
+            <h2 className="text-sm font-black text-[#0B132B] uppercase tracking-wider flex items-center gap-2 mb-8">
                 <svg className="w-4 h-4 text-[#0072b2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
                 Balance de esfuerzo por tipo
-            </h3>
+            </h2>
 
             {!balanceData ? (
                 /* ESTADO VACÍO (Empty State) */

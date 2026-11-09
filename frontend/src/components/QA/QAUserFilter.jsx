@@ -5,13 +5,13 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
         : 0;
 
     return (
-        <aside className="w-full flex flex-col h-full min-h-0 animate-fade-in">
+        <aside aria-label="Filtro por integrante del equipo" className="w-full flex flex-col h-full min-h-0 animate-fade-in">
             <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex flex-col h-full min-h-0">
                 
                 <div className="flex items-center justify-between mb-5 shrink-0">
-                    <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                         Equipo & Progreso
-                    </h3>
+                    </h2>
                     <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </div>
                 

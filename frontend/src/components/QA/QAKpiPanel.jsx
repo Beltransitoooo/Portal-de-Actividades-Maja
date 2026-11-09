@@ -17,7 +17,7 @@ export const QAKpiPanel = ({ filteredTasks = [] }) => {
             <div className="flex items-center gap-6 xl:w-1/4 xl:border-r border-slate-100 xl:pr-8 shrink-0">
                 <div className="w-full">
                     <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Actividades</h3>
+                        <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Actividades</h2>
                         {total > 0 && (
                             <span className="text-[10px] font-black text-[#0e71af] bg-[#1296E8]/10 px-2 py-1 rounded-md tracking-wider">
                                 {progressPct}% AVANCE
@@ -60,9 +60,10 @@ export const QAKpiPanel = ({ filteredTasks = [] }) => {
 // Subcomponente para mantener limpio el panel
 const MetricCard = ({ label, count, color, isAlert }) => (
     <div className={`flex flex-col p-3 rounded-xl border ${isAlert ? 'border-red-200 bg-red-50/50' : 'border-slate-100 bg-slate-50'} ${count === 0 ? 'grayscale' : ''} transition-all`}>
-        <div className="flex items-center gap-2 mb-1.5">
-            <div className={`w-2 h-2 rounded-full ${color} ${isAlert ? 'shadow-[0_0_8px_rgba(239,68,68,0.6)]' : ''}`}></div>
-            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{label}</span>
+        {/* La etiqueta se ajusta en dos líneas si no cabe (antes se truncaba: "COMPL…") */}
+        <div className="flex items-start gap-2 mb-1.5">
+            <div className={`w-2 h-2 mt-[3px] rounded-full shrink-0 ${color} ${isAlert ? 'shadow-[0_0_8px_rgba(239,68,68,0.6)]' : ''}`} aria-hidden="true"></div>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider leading-tight break-words min-w-0">{label}</span>
         </div>
         <span className={`text-lg font-black leading-none ${isAlert ? 'text-red-700' : 'text-[#07152F]'}`}>{count}</span>
     </div>

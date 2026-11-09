@@ -151,10 +151,10 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
 
     return (
         <>
-        <div className="w-full bg-white border border-slate-200 rounded-2xl flex flex-col shadow-sm mt-2 animate-fade-in flex-1 min-h-[820px]">
+        <div className="w-full bg-white border border-slate-200 rounded-2xl flex flex-col shadow-sm mt-2 animate-fade-in flex-1 min-h-[820px] overflow-x-auto">
             
             {/* Header Fijo */}
-            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50/80 shrink-0 rounded-t-2xl overflow-hidden">
+            <div className="grid grid-cols-7 min-w-[640px] border-b border-slate-200 bg-slate-50/80 shrink-0 rounded-t-2xl overflow-hidden">
                 {weekDays.map((day, idx) => (
                     <div key={day} className={`py-3 text-center text-[10px] font-black tracking-widest uppercase ${idx === 6 ? 'text-slate-500' : idx === 5 ? 'text-amber-700' : 'text-slate-500'}`}>
                         {day}
@@ -163,7 +163,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
             </div>
 
             {/* Cuadrícula Restringida */}
-            <div className="grid grid-cols-7 grid-rows-6 bg-slate-200 gap-px flex-1 min-h-0 rounded-b-2xl overflow-hidden">
+            <div className="grid grid-cols-7 grid-rows-6 min-w-[640px] bg-slate-200 gap-px flex-1 min-h-0 rounded-b-2xl overflow-hidden">
                 {calendarCells.map((cell, index) => {
                     const isToday = cell.dateStr === todayStr;
                     const isSaturday = cell.dateObj.getDay() === 6;
@@ -320,7 +320,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                                 <button
                                                     type="button"
                                                     onClick={() => setDayDetail({ dateStr: cell.dateStr, tasks: dayTasks })}
-                                                    className="w-full min-h-6 flex items-center justify-center text-[8px] font-black text-slate-500 hover:text-[#0e71af] cursor-pointer transition-colors"
+                                                    className="w-full min-h-6 flex items-center justify-center text-[8px] font-black text-slate-600 hover:text-[#0e71af] cursor-pointer transition-colors"
                                                     title="Ver más actividades"
                                                 >
                                                     +{hiddenCount} actividad{hiddenCount > 1 ? 'es' : ''}
