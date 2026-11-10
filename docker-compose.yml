@@ -8,7 +8,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data    # Guarda los datos permanentemente, usar en un futuro
+      - pgdata:/var/lib/postgresql/data     # Guarda datos de la DB
 
   backend:
     build: ./backend
