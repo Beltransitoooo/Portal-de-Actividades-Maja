@@ -1,2 +1,5 @@
 # Variables locales (IP, puertos)
 .env
+
+# Vercel
+.vercel
