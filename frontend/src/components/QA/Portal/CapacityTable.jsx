@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { BarChart3 } from 'lucide-react';
+import { WEEKLY_CAPACITY } from '../../../utils/capacity';
 
 export const CapacityTable = ({ capacityData = [] }) => {
     return (
@@ -26,7 +27,7 @@ export const CapacityTable = ({ capacityData = [] }) => {
                         Capacidad y distribución de carga
                     </h2>
                     <span className="text-[11px] font-bold text-slate-300 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 tracking-wider">
-                        BASE: 40H SEMANALES
+                        BASE: {WEEKLY_CAPACITY}H SEMANALES
                     </span>
                 </div>
 

@@ -1,4 +1,5 @@
 import { fetchWithAuth, readErrorMessage } from './authService';
+import { listLeaders, listHours, getMe } from './qaApi';
 import { getInitials } from '../utils/initials';
 
 // Colores de identidad por integrante (orden fijo por índice de usuario).
@@ -29,46 +30,56 @@ export const STATUS_CONFIG = {
     'BLOQUEADA':   { color: 'text-red-700', bg: 'bg-red-50', dot: 'bg-red-500', border: 'border-red-200', hover: 'hover:bg-red-100' }
 };
 
-// Horas utilizadas: campo nuevo; si el servidor aún no tiene la migración se usa el campo anterior
-export const loggedHoursOf = (t) => parseFloat(t.horas_utilizadas ?? t.estimacion_min_hrs ?? 0) || 0;
-
-// Obtiene equipo y actividades del API y los transforma para las vistas de QA
-// (Gestor de actividades y Cronograma). No toca estado de React.
+// Obtiene equipo, actividades, líderes técnicos y horas por día, y los transforma para las vistas de QA
+// (Gestor de actividades, Cronograma y Mi día). No toca estado de React.
 export const fetchDashboardData = async () => {
-    const resUsers = await fetchWithAuth('/usuarios/');
+    const [resUsers, resTasks, leaders, hoursRaw, me] = await Promise.all([
+        fetchWithAuth('/usuarios/'),
+        fetchWithAuth('/actividades/'),
+        listLeaders(),
+        listHours(),
+        getMe(),
+    ]);
+
     if (!resUsers.ok) {
         throw new Error(await readErrorMessage(resUsers, 'No se pudo cargar la información del equipo.'));
     }
+    if (!resTasks.ok) {
+        throw new Error(await readErrorMessage(resTasks, 'No se pudieron cargar las actividades.'));
+    }
     const usersData = await resUsers.json();
+    const tasksData = await resTasks.json();
+
     const formattedUsers = usersData.map((user, index) => ({
         raw_id: user.id,
         id: getInitials(user.name_users || user.usuario),
         name: user.name_users || user.usuario,
         role: user.es_admin ? 'Administrador' : 'QA Tester',
+        isAdmin: Boolean(user.es_admin),
         theme: COLOR_PALETTES[index % COLOR_PALETTES.length],
         email: user.usuario
     }));
 
-    const resTasks = await fetchWithAuth('/actividades/');
-    if (!resTasks.ok) {
-        throw new Error(await readErrorMessage(resTasks, 'No se pudieron cargar las actividades.'));
+    // Horas reales agrupadas por actividad y por día
+    const entriesByTask = new Map();
+    for (const entry of hoursRaw) {
+        if (!entriesByTask.has(entry.actividad_id)) entriesByTask.set(entry.actividad_id, []);
+        entriesByTask.get(entry.actividad_id).push(entry);
     }
-    const tasksData = await resTasks.json();
 
     const formattedTasks = tasksData.map(t => {
         const assignedUser = formattedUsers.find(u => u.raw_id === t.asignado_a_id);
-        // estimacion_max_hrs guarda la estimación única; horas_utilizadas, las horas reales
+        const leader = leaders.find(l => l.id === t.lider_catalogo_id);
+        // estimacion_max_hrs guarda la estimación única; horas_utilizadas es la suma de las horas por día
         const estimated = parseFloat(t.estimacion_max_hrs || 0);
-        const logged = loggedHoursOf(t);
+        const logged = parseFloat(t.horas_utilizadas || 0);
         const calculatedProgress = estimated > 0 ? Math.min(Math.round((logged / estimated) * 100), 100) : 0;
-        const finalProgress = t.completada ? 100 : calculatedProgress;
+        const finalProgress = t.estado === 'COMPLETADA' ? 100 : calculatedProgress;
 
-        // Estado real del API; si el servidor no lo envía, se infiere como antes
-        let status = STATUS_LABELS[t.estado];
-        if (!status) {
-            status = 'PENDIENTE';
-            if (t.completada) status = 'COMPLETADA';
-            else if (logged > 0) status = 'EN PROGRESO';
+        const hoursEntries = entriesByTask.get(t.id) || [];
+        const hoursByDate = {};
+        for (const entry of hoursEntries) {
+            hoursByDate[entry.fecha] = (hoursByDate[entry.fecha] || 0) + entry.horas;
         }
 
         return {
@@ -76,17 +87,23 @@ export const fetchDashboardData = async () => {
             id: `QA-${t.id}`,
             title: t.titulo,
             description: t.descripcion,
-            status: status,
+            status: STATUS_LABELS[t.estado] || 'PENDIENTE',
             priority: (t.prioridad || 'MEDIA').toUpperCase(),
             startDate: t.fecha_inicio,
             dueDate: t.fecha_vencimiento || t.fecha_inicio,
-            minHours: logged,
+            loggedHours: logged,
             maxHours: estimated,
             progressPct: finalProgress,
             assignee: assignedUser ? assignedUser.id : 'NA',
             assignee_raw_id: t.asignado_a_id,
+            assigneeName: assignedUser ? assignedUser.name : 'Sin asignar',
+            leaderId: t.lider_catalogo_id,
+            leaderName: leader ? leader.nombre : null,
+            blockReason: t.motivo_bloqueo,
+            hoursEntries,
+            hoursByDate,
             type: t.tipo_actividad,
-            completada: t.completada
+            completada: t.estado === 'COMPLETADA'
         };
     });
 
@@ -100,5 +117,5 @@ export const fetchDashboardData = async () => {
         return { ...user, tasksCount, progressPct: avgProgress };
     });
 
-    return { teamUsers: usersWithStats, tasks: formattedTasks };
+    return { teamUsers: usersWithStats, tasks: formattedTasks, leaders, me };
 };

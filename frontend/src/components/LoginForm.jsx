@@ -35,7 +35,7 @@ export const LoginForm = ({ email, setEmail, password, setPassword, onSubmit, on
                     </button>
                     {showRecoveryNotice && (
                         <p role="status" className="mt-2 text-[11px] text-gray-500 leading-relaxed">
-                            Próximamente: la recuperación de contraseña aún no está disponible en el portal.
+                            Pide a un administrador del portal que te genere un enlace de restablecimiento. Es de un solo uso y con vigencia limitada.
                         </p>
                     )}
                 </div>

@@ -10,7 +10,7 @@
 
   /* Animaciones usadas en el proyecto (antes no estaban definidas y no tenían efecto) */
   --animate-fade-in: fade-in 0.3s ease-out both;
-  --animate-slide-left: slide-left 0.3s ease-out both;
+  --animate-slide-left: slide-left 0.3s ease-out backwards;
 
   @keyframes fade-in {
     from { opacity: 0; }
@@ -166,3 +166,17 @@ body {
 .dark .bg-slate-100\/70 { background-color: var(--d-surface-2); }
 .dark .bg-green-50 { background-color: rgb(52 211 153 / 0.12); }
 .dark .border-green-700 { border-color: #22c55e; }
+
+/* =====================================================================
+   IMPRESIÓN / PDF
+   Oculta la navegación y los controles; el contenido ocupa toda la hoja.
+   ===================================================================== */
+@media print {
+  @page { size: landscape; margin: 10mm; }
+  body { background: #ffffff !important; }
+  header, .no-print { display: none !important; }
+  main { padding: 0 !important; overflow: visible !important; }
+  .print-fit { overflow: visible !important; zoom: 0.78; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+

@@ -4,6 +4,9 @@ import { Dashboard } from './pages/Dashboard';
 import { QAPortal } from './pages/QAPortal'; 
 import { QADashboard } from './pages/QADashboard';
 import { QASchedule } from './pages/QASchedule';
+import { QAMyDay } from './pages/QAMyDay';
+import { QATeam } from './pages/QATeam';
+import { ResetPassword } from './pages/ResetPassword';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -13,6 +16,9 @@ function App() {
         {/* Ruta pública */}
         <Route path="/" element={<Login />} />
         
+        {/* Restablecer contraseña con el enlace que comparte un administrador (público) */}
+        <Route path="/restablecer" element={<ResetPassword />} />
+
         {/* Selección de Módulo post-login */}
         <Route 
           path="/dashboard" 
@@ -29,6 +35,26 @@ function App() {
           element={
             <ProtectedRoute>
               <QAPortal />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Mi día: actividades de hoy y avisos */}
+        <Route 
+          path="/qa/mi-dia" 
+          element={
+            <ProtectedRoute>
+              <QAMyDay />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Equipo (administradores): enlaces de restablecimiento y líderes técnicos */}
+        <Route 
+          path="/qa/equipo" 
+          element={
+            <ProtectedRoute>
+              <QATeam />
             </ProtectedRoute>
           } 
         />

@@ -3,7 +3,10 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
 import { getQuarterWeeks, overlapsPeriod, toLocalDateStr, formatDateMx } from '../utils/dates';
 import { getInitials } from '../utils/initials';
-import { COLOR_PALETTES, loggedHoursOf } from '../services/qaData';
+import { COLOR_PALETTES } from '../services/qaData';
+import { WEEKLY_CAPACITY, NEAR_LIMIT_RATIO } from '../utils/capacity';
+import { toCsv, downloadCsv } from '../utils/csv';
+import { printPage } from '../utils/print';
 
 import { PortalHeader } from '../components/QA/Portal/PortalHeader';
 import { CapacityTable } from '../components/QA/Portal/CapacityTable';
@@ -70,10 +73,10 @@ export const QAPortal = () => {
 
             let status = 'Óptimo';
             let statusColor = 'text-green-700 bg-green-50 border-green-200';
-            if (assignedHours > 32 && assignedHours <= 40) {
+            if (assignedHours > WEEKLY_CAPACITY * NEAR_LIMIT_RATIO && assignedHours <= WEEKLY_CAPACITY) {
                 status = 'Al Límite';
                 statusColor = 'text-yellow-800 bg-yellow-50 border-yellow-200';
-            } else if (assignedHours > 40) {
+            } else if (assignedHours > WEEKLY_CAPACITY) {
                 status = 'Sobrecargado';
                 statusColor = 'text-red-700 bg-red-50 border-red-200';
             }
@@ -85,7 +88,7 @@ export const QAPortal = () => {
                 role: user.es_admin ? 'Administrador' : 'Tester / Dev',
                 tasks: userTasks.length,
                 logged: assignedHours,
-                max: 40,
+                max: WEEKLY_CAPACITY,
                 status,
                 color: COLOR_PALETTES[index % COLOR_PALETTES.length].main,
                 statusColor
@@ -95,7 +98,7 @@ export const QAPortal = () => {
         const processedTracking = periodTasks.map(task => {
             const assignedUser = processedCapacity.find(u => u.raw_id === task.asignado_a_id) || { name: 'Sin Asignar', id: 'NA' };
             const est = parseFloat(task.estimacion_max_hrs || 8);
-            const logged = loggedHoursOf(task);
+            const logged = parseFloat(task.horas_utilizadas || 0);
             const diffValue = logged - est;
 
             let status = 'success';
@@ -145,10 +148,24 @@ export const QAPortal = () => {
         return { capacityData: processedCapacity, trackingData: processedTracking, balanceData: processedBalance };
     }, [usersData, tasksData, selectedWeek]);
 
+    const exportCsv = () => {
+        const columns = [
+            { label: 'Código', value: r => r.ticket },
+            { label: 'Actividad', value: r => r.activity },
+            { label: 'Responsable', value: r => r.name },
+            { label: 'Horas estimadas', value: r => r.est },
+            { label: 'Horas utilizadas', value: r => r.logged },
+            { label: 'Resultado', value: r => r.diff },
+        ];
+        downloadCsv(`desviacion-de-tiempos-${selectedWeek.start}.csv`, toCsv(columns, trackingData));
+    };
+
     return (
         <DashboardLayout>
             <div className="max-w-[1500px] mx-auto flex flex-col gap-6 animate-fade-in">
                 <PortalHeader
+                    onExportCsv={exportCsv}
+                    onPrint={printPage}
                     selectedSprint={selectedSprint}
                     setSelectedSprint={setSelectedSprint}
                     optionsSprints={optionsSprints}

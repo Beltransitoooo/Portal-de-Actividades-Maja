@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { X } from 'lucide-react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { QAHeader } from '../components/QA/QAHeader';
 import { QAUserFilter } from '../components/QA/QAUserFilter';
@@ -6,81 +7,57 @@ import { QAKpiPanel } from '../components/QA/QAKpiPanel';
 import { QACalendar } from '../components/QA/QACalendar';
 import { QANewTicketModal } from '../components/QA/QANewTicketModal';
 import { QATicketPanel } from '../components/QA/QATicketPanel';
-import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
-import { fetchDashboardData, STATUS_CODES } from '../services/qaData';
+import { ActivityFilters } from '../components/QA/ActivityFilters';
+import { useQAData } from '../hooks/useQAData';
+import { useActivityFilters } from '../hooks/useActivityFilters';
+import { useStatusChange } from '../hooks/useStatusChange';
+import { updateActivity } from '../services/qaApi';
+import { STATUS_CODES } from '../services/qaData';
+import { toUserMessage } from '../services/authService';
 
 export const QADashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedTicket, setSelectedTicket] = useState(null);
-
-    const [teamUsers, setTeamUsers] = useState([]);
-    const [tasks, setTasks] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [loadError, setLoadError] = useState(null);
+    const [selectedTicketId, setSelectedTicketId] = useState(null);
     const [statusFilter, setStatusFilter] = useState('TODAS');
     const [actionError, setActionError] = useState(null);
 
-    // Cambiar reloadKey vuelve a cargar los datos (reintento, alta o edición de actividades)
-    const [reloadKey, setReloadKey] = useState(0);
-    const reload = () => setReloadKey(k => k + 1);
+    const { teamUsers, tasks, leaders, me, setTasks, isLoading, loadError, reload } = useQAData();
+    const { filters, setFilter, reset, matches, activeCount } = useActivityFilters();
 
-    useEffect(() => {
-        let active = true;
-        const loadRealData = async () => {
-            setIsLoading(true);
-            setLoadError(null);
-            try {
-                const data = await fetchDashboardData();
-                if (!active) return;
-                setTeamUsers(data.teamUsers);
-                setTasks(data.tasks);
-            } catch (error) {
-                if (active) setLoadError(toUserMessage(error, 'No se pudo sincronizar con la base de datos.'));
-            } finally {
-                if (active) setIsLoading(false);
-            }
-        };
-        loadRealData();
-        // Evita actualizar estado si la vista se desmonta o se lanza otra carga
-        return () => { active = false; };
-    }, [reloadKey]);
+    // La actividad abierta siempre se toma de los datos cargados, así el panel refleja cada cambio
+    const selectedTicket = tasks.find(t => t.db_id === selectedTicketId) ?? null;
 
-    const handleStatusChange = async (task, newStatus) => {
+    const applyStatus = async (task, newStatus, reason) => {
         const isCompleted = newStatus === 'COMPLETADA';
-        const updatedProgress = isCompleted ? 100 : task.progressPct; 
-        
         const previousTasks = tasks;
-        const updatedTasks = tasks.map(t =>
-            t.db_id === task.db_id ? { ...t, status: newStatus, completada: isCompleted, progressPct: updatedProgress } : t
-        );
-        setTasks(updatedTasks);
+        setTasks(current => current.map(t =>
+            t.db_id === task.db_id
+                ? { ...t, status: newStatus, completada: isCompleted, progressPct: isCompleted ? 100 : t.progressPct, blockReason: newStatus === 'BLOQUEADA' ? reason : null }
+                : t
+        ));
         setActionError(null);
 
         try {
-            const response = await fetchWithAuth(`/actividades/${task.db_id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                // "estado" es el dato real; "completada" mantiene compatibilidad con servidores sin migrar
-                body: JSON.stringify({ estado: STATUS_CODES[newStatus], completada: isCompleted })
-            });
-            if (!response.ok) {
-                throw new Error(await readErrorMessage(response, 'No se pudo actualizar el estado de la actividad.'));
-            }
+            const body = { estado: STATUS_CODES[newStatus] };
+            if (reason) body.motivo_bloqueo = reason;
+            await updateActivity(task.db_id, body);
+            reload();
         } catch (error) {
             // Se revierte el cambio optimista para no mostrar un estado que no se guardó
             setTasks(previousTasks);
             setActionError(`${task.id}: ${toUserMessage(error, 'No se pudo actualizar el estado de la actividad.')}`);
         }
     };
+    // Pasar a "Bloqueada" pide primero el motivo
+    const [requestStatusChange, blockDialog] = useStatusChange(applyStatus);
 
-    const handleTicketCreated = () => reload();
     const filteredTasks = tasks.filter(task => {
         if (selectedUser && task.assignee !== selectedUser) return false;
-        if (statusFilter === 'ACTIVAS') return !task.completada;
-        if (statusFilter === 'COMPLETADAS') return task.completada;
-        return true;
+        if (statusFilter === 'ACTIVAS' && task.completada) return false;
+        if (statusFilter === 'COMPLETADAS' && !task.completada) return false;
+        return matches(task);
     });
     const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
@@ -88,7 +65,7 @@ export const QADashboard = () => {
     return (
         <DashboardLayout>
             <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-5 animate-fade-in xl:h-[calc(100vh-112px)] xl:min-h-[620px]">
-                
+
                 {/* Sidebar */}
                 <div className="w-full xl:w-72 shrink-0 xl:h-full min-h-0 flex flex-col">
                     <QAUserFilter teamUsers={teamUsers} selectedUser={selectedUser} onSelectUser={setSelectedUser} />
@@ -96,24 +73,28 @@ export const QADashboard = () => {
 
                 {/* Contenedor Derecho */}
                 <div className="flex-1 min-w-0 flex flex-col min-h-0 xl:h-full">
-                    
+
                     <div className="shrink-0">
-                        <QAHeader 
+                        <QAHeader
                             onNewTicketClick={() => setIsModalOpen(true)}
                             currentDate={currentDate} onPrevMonth={handlePrevMonth} onNextMonth={handleNextMonth}
                             statusFilter={statusFilter} onStatusFilterChange={setStatusFilter}
                         />
                     </div>
-                    
+
+                    <div className="shrink-0 mb-3">
+                        <ActivityFilters filters={filters} setFilter={setFilter} reset={reset} activeCount={activeCount} resultCount={filteredTasks.length} />
+                    </div>
+
                     <div className="shrink-0">
                         <QAKpiPanel filteredTasks={filteredTasks} />
                     </div>
-                    
+
                     {actionError && (
                         <div role="alert" className="shrink-0 flex items-start justify-between gap-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 mb-2 rounded-md font-medium">
                             <span>{actionError}</span>
                             <button type="button" onClick={() => setActionError(null)} aria-label="Cerrar mensaje" className="text-red-400 hover:text-red-700 transition-colors">
-                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                <X className="w-3.5 h-3.5" aria-hidden="true" />
                             </button>
                         </div>
                     )}
@@ -132,19 +113,37 @@ export const QADashboard = () => {
                             </button>
                         </div>
                     ) : (
-                        <QACalendar 
-                            tasks={filteredTasks} 
-                            currentDate={currentDate} 
+                        <QACalendar
+                            tasks={filteredTasks}
+                            currentDate={currentDate}
                             teamUsers={teamUsers}
-                            onTicketClick={(ticket) => setSelectedTicket(ticket)} 
-                            onStatusChange={handleStatusChange} 
+                            onTicketClick={(ticket) => setSelectedTicketId(ticket.db_id)}
+                            onStatusChange={requestStatusChange}
                         />
                     )}
                 </div>
             </div>
 
-            <QANewTicketModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleTicketCreated} teamUsers={teamUsers} />
-            <QATicketPanel key={selectedTicket?.db_id ?? 'sin-ticket'} ticket={selectedTicket} onClose={() => setSelectedTicket(null)} onTicketUpdated={reload} />
+            {isModalOpen && (
+                <QANewTicketModal
+                    onClose={() => setIsModalOpen(false)}
+                    onSubmit={reload}
+                    teamUsers={teamUsers}
+                    leaders={leaders}
+                    isAdmin={Boolean(me?.es_admin)}
+                />
+            )}
+            <QATicketPanel
+                key={selectedTicket?.db_id ?? 'sin-ticket'}
+                ticket={selectedTicket}
+                onClose={() => setSelectedTicketId(null)}
+                onTicketUpdated={reload}
+                onDeleted={reload}
+                leaders={leaders}
+                teamUsers={teamUsers}
+                me={me}
+            />
+            {blockDialog}
         </DashboardLayout>
     );
 };

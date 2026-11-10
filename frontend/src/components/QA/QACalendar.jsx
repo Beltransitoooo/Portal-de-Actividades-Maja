@@ -1,105 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
-import { Clock3, ChevronDown, Hourglass } from 'lucide-react';
+import { useState } from 'react';
+import { Clock3, Hourglass, Ban } from 'lucide-react';
 import { Modal } from '../Shared/Modal';
+import { StatusBadge } from '../Shared/StatusBadge';
 import { toLocalDateStr, formatDateMx } from '../../utils/dates';
 import { distributeHours, fmtHours } from '../../utils/schedule';
 import { STATUS_CONFIG } from '../../services/qaData';
-
-// --- COMPONENTE: BADGE INTERACTIVO DE ESTADO ---
-// El menú usa posición fija calculada desde el botón: así ninguna ventana (overflow) lo recorta
-// y, si abajo no hay espacio, se abre hacia arriba.
-const MENU_WIDTH = 132;
-const MENU_HEIGHT = Object.keys(STATUS_CONFIG).length * 28 + 8;
-
-const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
-    const [menuPos, setMenuPos] = useState(null); // null = cerrado
-    const dropdownRef = useRef(null);
-    const config = STATUS_CONFIG[currentStatus] || STATUS_CONFIG['PENDIENTE'];
-    const isOpen = menuPos !== null;
-
-    const toggleMenu = (e) => {
-        e.stopPropagation();
-        if (isOpen) { setMenuPos(null); return; }
-        const rect = e.currentTarget.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        const openUp = spaceBelow < MENU_HEIGHT + 8 && rect.top > spaceBelow;
-        const left = Math.min(Math.max(8, rect.left), window.innerWidth - MENU_WIDTH - 8);
-        setMenuPos({ left, top: openUp ? Math.max(8, rect.top - MENU_HEIGHT - 4) : rect.bottom + 4 });
-    };
-
-    useEffect(() => {
-        if (!isOpen) return undefined;
-        const close = () => setMenuPos(null);
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) close();
-        };
-        // En captura: Escape cierra solo el menú y no la ventana del día que lo contiene
-        const handleEscape = (event) => {
-            if (event.key === 'Escape') { event.stopPropagation(); close(); }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        document.addEventListener('keydown', handleEscape, true);
-        window.addEventListener('resize', close);
-        document.addEventListener('scroll', close, true);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleEscape, true);
-            window.removeEventListener('resize', close);
-            document.removeEventListener('scroll', close, true);
-        };
-    }, [isOpen]);
-
-    const handleSelect = (status, e) => {
-        e.stopPropagation();
-        onChangeStatus(status);
-        setMenuPos(null);
-    };
-
-    return (
-        <div className="min-w-0 max-w-full" ref={dropdownRef}>
-            <button
-                type="button"
-                onClick={toggleMenu}
-                aria-haspopup="menu"
-                aria-expanded={isOpen}
-                aria-label={`Estado: ${currentStatus}. Cambiar estado`}
-                className={`flex items-center gap-1 px-1.5 min-h-6 max-w-full min-w-0 rounded border text-[8px] font-black tracking-widest uppercase whitespace-nowrap transition-all duration-200 ${config.bg} ${config.border} ${config.color} ${config.hover}`}
-                title="Cambiar Estado"
-            >
-                <span className={`w-1 h-1 rounded-full shrink-0 ${config.dot}`} aria-hidden="true"></span>
-                <span className="truncate">{currentStatus}</span>
-                <ChevronDown className={`w-2 h-2 opacity-60 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
-            </button>
-
-            {isOpen && (
-                <div
-                    role="menu"
-                    aria-label="Cambiar estado"
-                    style={{ position: 'fixed', left: menuPos.left, top: menuPos.top, width: MENU_WIDTH }}
-                    className="bg-white border border-slate-200 rounded-lg shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] z-[100] overflow-hidden animate-fade-in"
-                >
-                    <div className="p-1 flex flex-col gap-0.5">
-                        {Object.keys(STATUS_CONFIG).map((status) => {
-                            const opt = STATUS_CONFIG[status];
-                            return (
-                                <button
-                                    key={status}
-                                    type="button"
-                                    role="menuitem"
-                                    onClick={(e) => handleSelect(status, e)}
-                                    className={`flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md text-[8.5px] font-black tracking-widest uppercase transition-colors hover:bg-slate-50 ${currentStatus === status ? opt.bg + ' ' + opt.color : 'text-slate-600'}`}
-                                >
-                                    <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`}></span>
-                                    {status}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
 
 // --- COMPONENTE PRINCIPAL: CALENDARIO ---
 export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onStatusChange }) => {
@@ -300,11 +205,17 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                         <p className="text-xs font-bold text-[#07152F] truncate group-hover/item:text-[#0e71af] transition-colors">{task.title}</p>
                                         <p className="text-[9px] font-black tracking-widest text-slate-500 uppercase mt-0.5">{task.id}</p>
                                     </button>
-                                    <CustomStatusBadge
+                                    <StatusBadge
                                         currentStatus={task.status}
                                         onChangeStatus={(newStatus) => onStatusChange && onStatusChange(task, newStatus)}
                                     />
                                 </div>
+                                {task.status === 'BLOQUEADA' && (
+                                    <p className="flex items-start gap-1.5 mt-2 pl-10 text-[11px] font-semibold text-red-700 break-words">
+                                        <Ban className="w-3 h-3 shrink-0 mt-0.5" aria-hidden="true" />
+                                        {task.blockReason || 'Sin motivo registrado'}
+                                    </p>
+                                )}
                                 <div className="flex items-center gap-3 mt-2 pl-10">
                                     <span className="flex items-center gap-1 text-[9px] font-bold text-slate-500">
                                         <Hourglass className="w-2.5 h-2.5" aria-hidden="true" />

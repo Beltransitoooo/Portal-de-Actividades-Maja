@@ -9,6 +9,10 @@ const FOCUSABLE_SELECTOR = [
     '[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
+// Pila de diálogos abiertos: cuando hay uno encima de otro (p. ej. un aviso sobre el panel),
+// solo el de arriba responde a Escape y Tab.
+const dialogStack = [];
+
 // Comportamiento accesible para diálogos modales:
 // - Enfoca el diálogo al abrir y devuelve el foco al elemento previo al cerrar.
 // - Escape cierra el diálogo.
@@ -17,6 +21,7 @@ const FOCUSABLE_SELECTOR = [
 export const useDialog = (isOpen, onClose) => {
     const dialogRef = useRef(null);
     const onCloseRef = useRef(onClose);
+    const idRef = useRef({});
 
     useEffect(() => {
         onCloseRef.current = onClose;
@@ -25,10 +30,13 @@ export const useDialog = (isOpen, onClose) => {
     useEffect(() => {
         if (!isOpen) return undefined;
 
+        const id = idRef.current;
+        dialogStack.push(id);
         const previouslyFocused = document.activeElement;
         dialogRef.current?.focus();
 
         const handleKeyDown = (event) => {
+            if (dialogStack[dialogStack.length - 1] !== id) return;
             if (event.key === 'Escape') {
                 event.stopPropagation();
                 onCloseRef.current();
@@ -56,6 +64,8 @@ export const useDialog = (isOpen, onClose) => {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => {
+            const index = dialogStack.indexOf(id);
+            if (index !== -1) dialogStack.splice(index, 1);
             document.removeEventListener('keydown', handleKeyDown);
             if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
         };

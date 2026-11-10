@@ -1,12 +1,15 @@
 import { ChevronDown } from 'lucide-react';
 import { PageHeader } from '../../Shared/PageHeader';
+import { ExportBar } from '../../Shared/ExportBar';
 
-export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints, periodRange }) => {
+export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints, periodRange, onExportCsv, onPrint }) => {
     return (
         <PageHeader
             title="Panel de rendimiento"
             subtitle="Visualiza el progreso, la carga de trabajo y el estado de las actividades del equipo."
         >
+            <ExportBar onCsv={onExportCsv} onPrint={onPrint} />
+
             <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">
                     Período de trabajo

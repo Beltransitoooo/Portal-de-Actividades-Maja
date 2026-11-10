@@ -49,3 +49,17 @@ export const overlapsPeriod = (startDate, endDate, period) => {
     const end = endDate || startDate;
     return startDate <= period.end && end >= period.start;
 };
+
+// Fecha y hora local (DD/MM/AAAA HH:mm) a partir de un datetime del servidor.
+// El servidor guarda UTC sin zona ("2026-11-10T18:48:07"), por eso se interpreta como UTC.
+export const formatDateTimeMx = (value) => {
+    if (!value) return '';
+    const hasZone = /(Z|[+-]\d{2}:?\d{2})$/.test(value);
+    const date = new Date(hasZone ? value : `${value}Z`);
+    if (Number.isNaN(date.getTime())) return '';
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+// Días entre dos fechas 'AAAA-MM-DD' (b - a), sin desfases de zona horaria
+export const daysBetween = (a, b) => Math.round((new Date(`${b}T00:00:00`) - new Date(`${a}T00:00:00`)) / 86400000);
