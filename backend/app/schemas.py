@@ -41,6 +41,12 @@ class UsuarioCreate(UsuarioBase):
         return validar_fortaleza_contrasena(value)
 
 
+class UsuarioUpdate(BaseModel):
+    """Edición de un usuario por el administrador. area_id = null lo deja sin área."""
+    name_users: Optional[str] = Field(default=None, max_length=120)
+    area_id: Optional[int] = None
+
+
 class UsuarioResponse(UsuarioBase):
     id: int
     es_admin: bool
@@ -109,7 +115,15 @@ class AreaBase(BaseModel):
 
 
 class AreaCreate(AreaBase):
-    pass
+    nombre: str = Field(min_length=2, max_length=60)
+
+    @field_validator("nombre")
+    @classmethod
+    def limpiar_nombre(cls, value: str) -> str:
+        value = " ".join(value.split())
+        if len(value) < 2:
+            raise ValueError("El nombre es demasiado corto")
+        return value
 
 
 class AreaResponse(AreaBase):

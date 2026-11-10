@@ -48,8 +48,8 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
         return dateStr >= t.startDate && dateStr <= (t.dueDate || t.startDate);
     });
 
-    const getUserTheme = (assigneeId) => {
-        const user = teamUsers.find(u => u.id === assigneeId);
+    const getUserTheme = (assigneeRawId) => {
+        const user = teamUsers.find(u => u.raw_id === assigneeRawId);
         return user ? user.theme : { main: 'bg-slate-600' };
     };
 
@@ -57,7 +57,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
 
     // Fila compacta de actividad dentro de una celda del día
     const TaskChip = ({ task, dateStr }) => {
-        const theme = getUserTheme(task.assignee);
+        const theme = getUserTheme(task.assignee_raw_id);
         const config = STATUS_CONFIG[task.status] || STATUS_CONFIG['PENDIENTE'];
         const hours = taskHours.get(task.db_id)?.[dateStr] || 0;
         const isCritical = task.priority === 'CRÍTICA';
@@ -187,7 +187,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
             {detailDate && (
                 <ul className="flex flex-col gap-2">
                     {detailTasks.map((task) => {
-                        const theme = getUserTheme(task.assignee);
+                        const theme = getUserTheme(task.assignee_raw_id);
                         const dayHours = taskHours.get(task.db_id)?.[detailDate] || 0;
                         const estimated = parseFloat(task.maxHours) || 0;
                         return (

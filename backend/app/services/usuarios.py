@@ -8,12 +8,16 @@ from app.config import settings
 
 def listar(db: Session, usuario_actual: models.Usuario):
     if usuario_actual.es_admin:
-        return db.query(models.Usuario).all()
+        return db.query(models.Usuario).order_by(models.Usuario.id).all()
 
-    return db.query(models.Usuario).filter(models.Usuario.area_id == usuario_actual.area_id).all()
+    # Sin área asignada solo se ve a sí mismo (antes "sin área" se trataba como un área compartida)
+    if usuario_actual.area_id is None:
+        return [usuario_actual]
+
+    return db.query(models.Usuario).filter(models.Usuario.area_id == usuario_actual.area_id).order_by(models.Usuario.id).all()
 
 
-def actualizar(db: Session, usuario_id: int, usuario_update: schemas.UsuarioBase, usuario_actual: models.Usuario):
+def actualizar(db: Session, usuario_id: int, usuario_update: schemas.UsuarioUpdate, usuario_actual: models.Usuario):
     if not usuario_actual.es_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -27,17 +31,22 @@ def actualizar(db: Session, usuario_id: int, usuario_update: schemas.UsuarioBase
             detail="Usuario no encontrado"
         )
 
-    if usuario_update.area_id is not None:
-        area_db = db.query(models.Area).filter(models.Area.id == usuario_update.area_id).first()
-        if not area_db:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="El área especificada no existe"
-            )
-        db_usuario.area_id = usuario_update.area_id
+    datos = usuario_update.model_dump(exclude_unset=True)
 
-    if usuario_update.name_users is not None:
-        db_usuario.name_users = usuario_update.name_users
+    if "area_id" in datos:
+        if datos["area_id"] is not None:
+            area_db = db.query(models.Area).filter(models.Area.id == datos["area_id"]).first()
+            if not area_db:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="El área especificada no existe"
+                )
+        db_usuario.area_id = datos["area_id"]
+
+    if datos.get("name_users"):
+        nombre = " ".join(datos["name_users"].split())
+        if nombre:
+            db_usuario.name_users = nombre
 
     db.commit()
     db.refresh(db_usuario)

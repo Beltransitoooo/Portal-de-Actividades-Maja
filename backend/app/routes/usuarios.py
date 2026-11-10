@@ -32,7 +32,7 @@ def generar_enlace_restablecimiento(
 @router.put("/{usuario_id}", response_model=schemas.UsuarioResponse)
 def actualizar_usuario(
     usuario_id: int,
-    usuario_update: schemas.UsuarioBase,
+    usuario_update: schemas.UsuarioUpdate,
     db: Session = Depends(get_db),
     usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
 ):

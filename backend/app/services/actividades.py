@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from fastapi import HTTPException, status
 from typing import Optional
 from datetime import date, timedelta
@@ -65,14 +65,38 @@ def _registrar_historial(db: Session, actividad_id: int, usuario: models.Usuario
     ))
 
 
-def _obtener_actividad(db: Session, actividad_id: int, usuario: models.Usuario) -> models.Actividad:
-    """Devuelve la actividad si existe y el usuario puede verla.
+def _puede_ver(actividad: models.Actividad, usuario: models.Usuario) -> bool:
+    """Administradores: todo. Con área: las de su área. Sin área: solo las que creó o tiene asignadas.
 
-    Mismo criterio que el listado: los administradores ven todo y el resto solo su área.
+    "Sin área" no es un área compartida: antes area_id NULL == NULL dejaba a todas las cuentas
+    nuevas ver (y editar) las actividades de las demás cuentas sin área.
+    """
+    if usuario.es_admin:
+        return True
+    if usuario.area_id is not None:
+        return actividad.area_id == usuario.area_id
+    return usuario.id in (actividad.creador_id, actividad.asignado_a_id)
+
+
+def _filtrar_visibles(query, usuario: models.Usuario):
+    """Mismo criterio que _puede_ver, aplicado a una consulta que incluye models.Actividad."""
+    if usuario.es_admin:
+        return query
+    if usuario.area_id is not None:
+        return query.filter(models.Actividad.area_id == usuario.area_id)
+    return query.filter(or_(
+        models.Actividad.creador_id == usuario.id,
+        models.Actividad.asignado_a_id == usuario.id,
+    ))
+
+
+def _obtener_actividad(db: Session, actividad_id: int, usuario: models.Usuario) -> models.Actividad:
+    """Devuelve la actividad si existe y el usuario puede verla (ver _puede_ver).
+
     Si no tiene acceso se responde 404 para no revelar que la actividad existe.
     """
     actividad = db.query(models.Actividad).filter(models.Actividad.id == actividad_id).first()
-    if not actividad or (not usuario.es_admin and actividad.area_id != usuario.area_id):
+    if not actividad or not _puede_ver(actividad, usuario):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Actividad no encontrada")
     return actividad
 
@@ -133,10 +157,7 @@ def listar(
     fecha_inicio: Optional[date] = None,
     fecha_fin: Optional[date] = None
 ):
-    query = db.query(models.Actividad)
-
-    if not usuario_actual.es_admin:
-        query = query.filter(models.Actividad.area_id == usuario_actual.area_id)
+    query = _filtrar_visibles(db.query(models.Actividad), usuario_actual)
 
     if equipo:
         # "equipo" se interpreta como el nombre del área (la actividad no tiene un campo "equipo")
@@ -146,13 +167,25 @@ def listar(
         query = query.filter(models.Actividad.fecha_creacion >= fecha_inicio)
 
     if fecha_fin:
-        query = query.filter(models.Actividad.fecha_creacion <= fecha_fin)
+        # fecha_creacion es fecha-hora: "hasta el día X" incluye todo ese día
+        query = query.filter(models.Actividad.fecha_creacion < fecha_fin + timedelta(days=1))
 
     return query.order_by(models.Actividad.id).all()
 
 
 def crear(db: Session, actividad_in: schemas.ActividadCreate, usuario_actual: models.Usuario):
     datos = actividad_in.model_dump()
+
+    # Igual que al editar: solo el administrador asigna actividades a otras personas
+    if (
+        not usuario_actual.es_admin
+        and datos.get("asignado_a_id") is not None
+        and datos["asignado_a_id"] != usuario_actual.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo el administrador puede asignar tareas a otros usuarios"
+        )
 
     _validar_referencias(db, datos)
 
@@ -231,6 +264,16 @@ def actualizar(db: Session, actividad_id: int, datos_in: schemas.ActividadUpdate
                 detail="Solo el administrador puede reasignar tareas a otros usuarios"
             )
 
+    # Mover una actividad de área: solo el administrador (al crear ya se validaba, al editar no)
+    if "area_id" in datos and datos["area_id"] != actividad.area_id:
+        if not usuario_actual.es_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Solo el administrador puede mover actividades a otra área"
+            )
+        if datos["area_id"] is not None and not db.query(models.Area).filter(models.Area.id == datos["area_id"]).first():
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El área especificada no existe")
+
     # Columnas NOT NULL: un null explícito se ignora en lugar de romper la restricción
     if datos.get("estado") is None:
         datos.pop("estado", None)
@@ -261,11 +304,15 @@ def actualizar(db: Session, actividad_id: int, datos_in: schemas.ActividadUpdate
         datos["motivo_bloqueo"] = None
 
     _validar_referencias(db, datos)
+    # Solo se validan los valores que llegan en esta edición. Las fechas se combinan con las
+    # guardadas; las estimaciones no, porque estimacion_min_hrs guardaba antes las horas usadas
+    # y en datos antiguos puede ser mayor que la máxima: eso bloqueaba cualquier edición.
+    toca_fechas = "fecha_inicio" in datos or "fecha_vencimiento" in datos
     _validar_valores(
-        datos.get("fecha_inicio", actividad.fecha_inicio),
-        datos.get("fecha_vencimiento", actividad.fecha_vencimiento),
-        datos.get("estimacion_min_hrs", actividad.estimacion_min_hrs),
-        datos.get("estimacion_max_hrs", actividad.estimacion_max_hrs),
+        datos.get("fecha_inicio", actividad.fecha_inicio) if toca_fechas else None,
+        datos.get("fecha_vencimiento", actividad.fecha_vencimiento) if toca_fechas else None,
+        datos.get("estimacion_min_hrs"),
+        datos.get("estimacion_max_hrs"),
     )
 
     # Sin campos que cambiar: no hace falta escribir en la base
@@ -343,8 +390,7 @@ def listar_horas(
     query = db.query(models.RegistroHoras).join(
         models.Actividad, models.Actividad.id == models.RegistroHoras.actividad_id
     )
-    if not usuario_actual.es_admin:
-        query = query.filter(models.Actividad.area_id == usuario_actual.area_id)
+    query = _filtrar_visibles(query, usuario_actual)
     if actividad_id:
         query = query.filter(models.RegistroHoras.actividad_id == actividad_id)
     if desde:

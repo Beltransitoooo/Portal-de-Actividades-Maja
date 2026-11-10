@@ -1,8 +1,10 @@
-export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
-    const totalGlobalTasks = teamUsers.reduce((sum, user) => sum + (user.tasksCount || 0), 0);
-    const avgGlobalProgress = teamUsers.length > 0 
-        ? Math.round(teamUsers.reduce((sum, user) => sum + (user.progressPct || 0), 0) / teamUsers.length) 
-        : 0;
+import { completionPct } from '../../services/qaData';
+
+export const QAUserFilter = ({ teamUsers, tasks = [], selectedUser, onSelectUser }) => {
+    // La vista global cuenta todas las actividades (también las sin asignar) y su avance se
+    // calcula por actividad, no promediando personas (alguien sin tareas bajaba el promedio).
+    const totalGlobalTasks = tasks.length;
+    const avgGlobalProgress = completionPct(tasks);
 
     return (
         <aside aria-label="Filtro por integrante del equipo" className="w-full flex flex-col h-full min-h-0 animate-fade-in">
@@ -41,7 +43,7 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
 
                         <div className="w-full flex flex-col gap-1.5 pl-11">
                             <div className="flex items-center justify-between text-[10px] font-semibold">
-                                <span className="text-gray-500">{totalGlobalTasks} actividades</span>
+                                <span className="text-gray-500">{totalGlobalTasks} {totalGlobalTasks === 1 ? 'actividad' : 'actividades'}</span>
                                 <span className="text-[#0e71af]">{avgGlobalProgress}%</span>
                             </div>
                             <div className="h-1 w-full bg-slate-200/50 rounded-full overflow-hidden">
@@ -59,24 +61,24 @@ export const QAUserFilter = ({ teamUsers, selectedUser, onSelectUser }) => {
 
                         return (
                             <button
-                                key={user.id}
-                                onClick={() => onSelectUser(user.id)}
+                                key={user.raw_id}
+                                onClick={() => onSelectUser(user.raw_id)}
                                 className={`relative p-3 rounded-lg transition-all text-left w-full group shrink-0 ${
-                                    selectedUser === user.id 
+                                    selectedUser === user.raw_id 
                                     ? `bg-slate-50 border ${user.theme?.border || 'border-gray-200'} shadow-sm` 
                                     : 'border border-transparent hover:bg-slate-50'
                                 }`}
                             >
-                                {selectedUser === user.id && (
+                                {selectedUser === user.raw_id && (
                                     <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-lg ${user.theme?.main || 'bg-slate-800'}`}></div>
                                 )}
                                 
                                 <div className="flex items-center gap-3 mb-2">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-sm transition-opacity ${user.theme?.main || 'bg-slate-800'} ${selectedUser !== user.id && selectedUser !== null ? 'grayscale group-hover:grayscale-0' : ''}`}>
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-sm transition-opacity ${user.theme?.main || 'bg-slate-800'} ${selectedUser !== user.raw_id && selectedUser !== null ? 'grayscale group-hover:grayscale-0' : ''}`}>
                                         {user.id}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className={`text-xs font-bold truncate transition-colors ${selectedUser === user.id ? 'text-[#07152F]' : 'text-gray-600 group-hover:text-[#07152F]'}`}>
+                                        <p className={`text-xs font-bold truncate transition-colors ${selectedUser === user.raw_id ? 'text-[#07152F]' : 'text-gray-600 group-hover:text-[#07152F]'}`}>
                                             {user.name}
                                         </p>
                                         <p className="text-[9px] text-gray-500 uppercase tracking-widest truncate">

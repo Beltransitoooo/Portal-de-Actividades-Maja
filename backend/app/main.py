@@ -4,6 +4,7 @@ from app.routes.actividades import router as actividades_router
 from app.routes.usuarios import router as usuarios_router
 from app.routes.lideres import router as lideres_router
 from app.routes.horas import router as horas_router
+from app.routes.areas import router as areas_router
 from app.database import get_db
 from app.config import settings
 from sqlalchemy import text
@@ -13,7 +14,12 @@ from fastapi.responses import JSONResponse
 import logging
 
 logger = logging.getLogger("portal")
-app = FastAPI()
+# La documentación interactiva expone todos los endpoints: solo se publica si MOSTRAR_DOCS=true
+app = FastAPI(
+    docs_url="/docs" if settings.MOSTRAR_DOCS else None,
+    redoc_url="/redoc" if settings.MOSTRAR_DOCS else None,
+    openapi_url="/openapi.json" if settings.MOSTRAR_DOCS else None,
+)
 
 
 # Errores no controlados: se registran en el log y se responde JSON. Se declara antes que
@@ -31,6 +37,15 @@ async def capturar_errores(request, call_next):
         )
 
 
+@app.middleware("http")
+async def encabezados_seguridad(request, call_next):
+    respuesta = await call_next(request)
+    respuesta.headers.setdefault("X-Content-Type-Options", "nosniff")
+    respuesta.headers.setdefault("X-Frame-Options", "DENY")
+    respuesta.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    return respuesta
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()],
@@ -44,6 +59,7 @@ app.include_router(actividades_router)
 app.include_router(usuarios_router)
 app.include_router(lideres_router)
 app.include_router(horas_router)
+app.include_router(areas_router)
 
 @app.get("/db-check")
 def test_db_connection(db: Session = Depends(get_db)):

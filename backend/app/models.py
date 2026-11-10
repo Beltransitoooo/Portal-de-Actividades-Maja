@@ -12,6 +12,9 @@ class Usuario(Base):
     contrasena = Column(String, nullable=False)
     es_admin = Column(Boolean, default=False)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    # Protección contra fuerza bruta en el login
+    intentos_fallidos = Column(Integer, nullable=False, default=0, server_default="0")
+    bloqueado_hasta = Column(DateTime, nullable=True)
 
     actividades_creadas = relationship("Actividad", foreign_keys="Actividad.creador_id", back_populates="creador")
     actividades_asignadas = relationship("Actividad", foreign_keys="Actividad.asignado_a_id", back_populates="asignado_a")

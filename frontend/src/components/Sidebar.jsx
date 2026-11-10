@@ -33,11 +33,12 @@ const NavItem = ({ to, end, label, hint, icon: Icon }) => (
                 }`}>
                     <Icon className="w-4 h-4" aria-hidden="true" />
                 </span>
-                <span className="min-w-0 hidden sm:block">
+                {/* En móvil se ve el nombre (antes solo el ícono); la descripción, desde sm */}
+                <span className="min-w-0 block">
                     <span className={`block text-xs font-bold leading-tight ${isActive ? 'text-[#0072b2]' : 'text-gray-600 group-hover:text-[#07152F]'}`}>
                         {label}
                     </span>
-                    <span className={`block text-[9px] font-medium mt-0.5 truncate ${isActive ? 'text-[#0b5a8c]' : 'text-gray-500'}`}>
+                    <span className={`hidden sm:block text-[9px] font-medium mt-0.5 truncate ${isActive ? 'text-[#0b5a8c]' : 'text-gray-500'}`}>
                         {hint}
                     </span>
                 </span>
@@ -53,11 +54,11 @@ export const Sidebar = () => {
     return (
         <aside aria-label="Barra lateral" className="no-print w-full lg:w-64 bg-white border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col justify-between shrink-0 lg:min-h-[calc(100vh-64px)]">
             <div className="p-4 lg:p-6">
-                <p className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-4 px-2">
+                <p className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-3 lg:mb-4 px-2">
                     Navegación
                 </p>
 
-                <nav aria-label="Navegación principal" className="flex flex-wrap gap-1.5 lg:flex-col">
+                <nav aria-label="Navegación principal" className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap lg:flex-col">
                     {NAV_ITEMS.map(item => <NavItem key={item.to} {...item} />)}
                 </nav>
 
@@ -66,7 +67,7 @@ export const Sidebar = () => {
                         <p className="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mt-6 mb-4 px-2 hidden lg:block">
                             Administración
                         </p>
-                        <nav aria-label="Administración" className="flex flex-wrap gap-1.5 lg:flex-col mt-1.5 lg:mt-0">
+                        <nav aria-label="Administración" className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap lg:flex-col mt-1.5 lg:mt-0">
                             {ADMIN_ITEMS.map(item => <NavItem key={item.to} {...item} />)}
                         </nav>
                     </>

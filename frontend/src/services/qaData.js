@@ -30,6 +30,12 @@ export const STATUS_CONFIG = {
     'BLOQUEADA':   { color: 'text-red-700', bg: 'bg-red-50', dot: 'bg-red-500', border: 'border-red-200', hover: 'hover:bg-red-100' }
 };
 
+// Porcentaje de actividades completadas (misma regla en el filtro de equipo y en los KPI)
+export const completionPct = (tasks) => {
+    if (!tasks.length) return 0;
+    return Math.round((tasks.filter(t => t.status === 'COMPLETADA').length / tasks.length) * 100);
+};
+
 // Obtiene equipo, actividades, líderes técnicos y horas por día, y los transforma para las vistas de QA
 // (Gestor de actividades, Cronograma y Mi día). No toca estado de React.
 export const fetchDashboardData = async () => {
@@ -48,6 +54,11 @@ export const fetchDashboardData = async () => {
         throw new Error(await readErrorMessage(resTasks, 'No se pudieron cargar las actividades.'));
     }
     const usersData = await resUsers.json();
+
+    // El encabezado lee el nombre de localStorage; se corrige si quedó el del correo
+    if (me?.name_users && localStorage.getItem('username') !== me.name_users) {
+        localStorage.setItem('username', me.name_users);
+    }
     const tasksData = await resTasks.json();
 
     const formattedUsers = usersData.map((user, index) => ({
@@ -57,7 +68,8 @@ export const fetchDashboardData = async () => {
         role: user.es_admin ? 'Administrador' : 'QA Tester',
         isAdmin: Boolean(user.es_admin),
         theme: COLOR_PALETTES[index % COLOR_PALETTES.length],
-        email: user.usuario
+        email: user.usuario,
+        areaId: user.area_id ?? null
     }));
 
     // Horas reales agrupadas por actividad y por día
@@ -107,14 +119,12 @@ export const fetchDashboardData = async () => {
         };
     });
 
+    // Avance de una persona = actividades completadas / actividades asignadas
+    // (antes se promediaban horas consumidas: alguien con una actividad bloqueada que ya gastó
+    // sus horas aparecía al 100%).
     const usersWithStats = formattedUsers.map(user => {
         const userTasks = formattedTasks.filter(t => t.assignee_raw_id === user.raw_id);
-        const tasksCount = userTasks.length;
-        const avgProgress = tasksCount > 0
-            ? Math.round(userTasks.reduce((sum, task) => sum + task.progressPct, 0) / tasksCount)
-            : 0;
-
-        return { ...user, tasksCount, progressPct: avgProgress };
+        return { ...user, tasksCount: userTasks.length, progressPct: completionPct(userTasks) };
     });
 
     return { teamUsers: usersWithStats, tasks: formattedTasks, leaders, me };

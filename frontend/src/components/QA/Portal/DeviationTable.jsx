@@ -2,6 +2,14 @@ import React from 'react';
 
 import { Clock3, ClipboardList } from 'lucide-react';
 
+// Bloqueadas y con retraso en rojo; sin estimación en gris (antes todo lo que no era "danger" salía verde)
+const DIFF_COLORS = {
+    danger: 'text-red-700',
+    blocked: 'text-red-700',
+    neutral: 'text-gray-500',
+    success: 'text-emerald-700',
+};
+
 export const DeviationTable = ({ trackingData = [] }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 lg:p-8 flex flex-col h-full">
@@ -28,8 +36,8 @@ export const DeviationTable = ({ trackingData = [] }) => {
                                 <span className="text-xs font-semibold text-gray-500">{item.name}</span>
                                 
                                 <div className="text-right flex flex-col items-end">
-                                    <span className="text-xs font-bold text-gray-700">{item.est}h</span>
-                                    <span className={`text-[10px] font-bold ${item.status === 'danger' ? 'text-red-700' : 'text-emerald-700'}`}>
+                                    <span className="text-xs font-bold text-gray-700">{item.est === null ? '—' : `${item.est}h`}</span>
+                                    <span className={`text-[10px] font-bold ${DIFF_COLORS[item.status] || 'text-emerald-700'}`}>
                                         {item.diff}
                                     </span>
                                 </div>

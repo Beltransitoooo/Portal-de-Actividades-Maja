@@ -3,10 +3,11 @@ import { Clock3, Trash2, Plus } from 'lucide-react';
 import { addHours, deleteHours } from '../../../services/qaApi';
 import { toUserMessage } from '../../../services/authService';
 import { toLocalDateStr, formatDateMx } from '../../../utils/dates';
-import { fmtHours } from '../../../utils/schedule';
+import { fmtHours, parseLocalDate } from '../../../utils/schedule';
+import { dayCapacity } from '../../../utils/capacity';
 
 // Registro de horas por día de una actividad. La suma de los registros es la hora utilizada.
-export const HoursLog = ({ ticket, me, onChanged }) => {
+export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
     const todayStr = toLocalDateStr(new Date());
     const [date, setDate] = useState(todayStr);
     const [hours, setHours] = useState('');
@@ -19,6 +20,27 @@ export const HoursLog = ({ ticket, me, onChanged }) => {
     const logged = ticket.loggedHours;
     const diff = Math.round((logged - estimated) * 10) / 10;
     const over = estimated > 0 && logged > estimated;
+    // Avisos que no bloquean: fecha fuera del rango de la actividad o día por encima de la jornada
+    const warnings = [];
+    if (date && ticket.startDate && date < ticket.startDate) {
+        warnings.push(`Ese día es anterior al inicio de la actividad (${formatDateMx(ticket.startDate)}).`);
+    } else if (date && ticket.dueDate && date > ticket.dueDate) {
+        warnings.push(`Ese día es posterior al vencimiento de la actividad (${formatDateMx(ticket.dueDate)}).`);
+    }
+    const value = parseFloat(hours) || 0;
+    if (me && date && value > 0) {
+        const myDayTotal = (allTasks.length ? allTasks : [ticket])
+            .flatMap(t => t.hoursEntries || [])
+            .filter(e => e.usuario_id === me.id && e.fecha === date)
+            .reduce((sum, e) => sum + e.horas, 0);
+        const capacity = dayCapacity(parseLocalDate(date));
+        if (capacity === 0) {
+            warnings.push('Ese día es de descanso (domingo).');
+        } else if (myDayTotal + value > capacity) {
+            warnings.push(`Con esto sumarías ${fmtHours(myDayTotal + value)} h ese día; la jornada es de ${fmtHours(capacity)} h.`);
+        }
+    }
+
     const entries = [...ticket.hoursEntries].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
 
     const submit = async (event) => {
@@ -94,6 +116,12 @@ export const HoursLog = ({ ticket, me, onChanged }) => {
                     <label htmlFor={ids.note} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Nota (opcional)</label>
                     <input id={ids.note} type="text" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="¿Qué hiciste?" className={`${inputClass} font-medium`} />
                 </div>
+                {warnings.length > 0 && (
+                    <div role="status" className="bg-amber-50 border-l-4 border-amber-400 text-amber-800 text-xs p-3 rounded font-medium flex flex-col gap-1">
+                        {warnings.map(w => <p key={w}>{w}</p>)}
+                        <p className="text-[11px] font-normal">Puedes registrarlas de todos modos si es correcto.</p>
+                    </div>
+                )}
                 {error && <div role="alert" className="bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 rounded font-medium">{error}</div>}
                 <button type="submit" disabled={saving} className="h-10 bg-[#07152F] hover:bg-[#0e71af] disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
                     <Plus className="w-3.5 h-3.5" aria-hidden="true" />

@@ -39,6 +39,11 @@ export const deleteComment = (activityId, commentId) => call(`/actividades/${act
 // ---- Historial ----
 export const listHistory = (activityId) => call(`/actividades/${activityId}/historial`, { fallback: 'No se pudo cargar el historial.' });
 
+// ---- Áreas y área de cada usuario ----
+export const listAreas = () => call('/areas/', { fallback: 'No se pudieron cargar las áreas.' });
+export const createArea = (nombre) => call('/areas/', { method: 'POST', body: { nombre }, fallback: 'No se pudo crear el área.' });
+export const setUserArea = (userId, areaId) => call(`/usuarios/${userId}`, { method: 'PUT', body: { area_id: areaId }, fallback: 'No se pudo cambiar el área.' });
+
 // ---- Restablecimiento de contraseña ----
 export const createResetLink = (userId) => call(`/usuarios/${userId}/restablecimiento`, { method: 'POST', fallback: 'No se pudo generar el enlace.' });
 export const resetPassword = (token, contrasena) => call('/auth/restablecer', { method: 'POST', body: { token, contrasena }, fallback: 'No se pudo restablecer la contraseña.' });

@@ -18,7 +18,23 @@ def hash_contrasena(contrasena: str) -> str:
     return pwd_context.hash(contrasena_bytes.decode('utf-8', errors='ignore'))
 
 def verificar_contrasena(contrasena_plana: str, contrasena_hasheada: str) -> bool:
-    return pwd_context.verify(contrasena_plana, contrasena_hasheada)
+    # Las cuentas creadas con Google no tienen contraseña (hash vacío): passlib lanzaría
+    # UnknownHashError y el login respondería 500. Se tratan como credenciales incorrectas.
+    if not contrasena_hasheada:
+        return False
+    try:
+        return pwd_context.verify(contrasena_plana, contrasena_hasheada)
+    except ValueError:
+        return False
+
+
+# Hash de referencia para igualar el tiempo de respuesta cuando el correo no existe
+# (evita saber si una cuenta existe midiendo cuánto tarda el login).
+_HASH_FICTICIO = pwd_context.hash("contrasena-ficticia-para-igualar-tiempos")
+
+
+def simular_verificacion() -> None:
+    pwd_context.verify("x", _HASH_FICTICIO)
 
 def crear_token_acceso(datos: dict, expires_delta: Optional[timedelta] = None):
     a_codificar = datos.copy()

@@ -8,7 +8,8 @@ export const QAKpiPanel = ({ filteredTasks = [] }) => {
     const pending = total - (inProgress + inReview + completed + blocked);
 
     const getPct = (val) => total > 0 ? (val / total) * 100 : 0;
-    const progressPct = total > 0 ? Math.round(((completed + (inProgress * 0.5)) / total) * 100) : 0;
+    // Mismo criterio que el filtro de equipo: porcentaje de actividades completadas
+    const progressPct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     return (
         <div className="bg-white border border-slate-200 rounded-2xl p-4 lg:p-5 mb-4 shadow-sm animate-fade-in flex flex-col xl:flex-row xl:items-center gap-5">

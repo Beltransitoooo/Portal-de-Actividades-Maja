@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, CalendarOff } from 'lucide-react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { QAHeader } from '../components/QA/QAHeader';
 import { QAUserFilter } from '../components/QA/QAUserFilter';
@@ -54,11 +54,14 @@ export const QADashboard = () => {
     const [requestStatusChange, blockDialog] = useStatusChange(applyStatus);
 
     const filteredTasks = tasks.filter(task => {
-        if (selectedUser && task.assignee !== selectedUser) return false;
+        if (selectedUser && task.assignee_raw_id !== selectedUser) return false;
         if (statusFilter === 'ACTIVAS' && task.completada) return false;
         if (statusFilter === 'COMPLETADAS' && !task.completada) return false;
         return matches(task);
     });
+    // Sin fecha de inicio no caben en el calendario: se listan aparte para poder abrirlas
+    const undatedTasks = filteredTasks.filter(task => !task.startDate);
+
     const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
@@ -66,9 +69,9 @@ export const QADashboard = () => {
         <DashboardLayout>
             <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-5 animate-fade-in xl:h-[calc(100vh-112px)] xl:min-h-[620px]">
 
-                {/* Sidebar */}
-                <div className="w-full xl:w-72 shrink-0 xl:h-full min-h-0 flex flex-col">
-                    <QAUserFilter teamUsers={teamUsers} selectedUser={selectedUser} onSelectUser={setSelectedUser} />
+                {/* Sidebar (en móvil va al final para que el título y el calendario se vean primero) */}
+                <div className="order-last xl:order-none w-full xl:w-72 shrink-0 xl:h-full min-h-0 flex flex-col">
+                    <QAUserFilter teamUsers={teamUsers} tasks={tasks} selectedUser={selectedUser} onSelectUser={setSelectedUser} />
                 </div>
 
                 {/* Contenedor Derecho */}
@@ -89,6 +92,30 @@ export const QADashboard = () => {
                     <div className="shrink-0">
                         <QAKpiPanel filteredTasks={filteredTasks} />
                     </div>
+
+                    {!isLoading && !loadError && undatedTasks.length > 0 && (
+                        <section aria-labelledby="sin-fechas-titulo" className="shrink-0 bg-amber-50/60 border border-amber-200 rounded-xl px-4 py-3 mb-3">
+                            <h2 id="sin-fechas-titulo" className="text-[10px] font-black text-amber-800 uppercase tracking-widest flex items-center gap-2 mb-2">
+                                <CalendarOff className="w-3.5 h-3.5" aria-hidden="true" />
+                                Sin fechas ({undatedTasks.length}) · no aparecen en el calendario
+                            </h2>
+                            <ul className="flex flex-wrap gap-2">
+                                {undatedTasks.map(task => (
+                                    <li key={task.db_id}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedTicketId(task.db_id)}
+                                            className="max-w-[260px] h-8 px-3 bg-white border border-amber-200 hover:border-amber-400 rounded-lg text-[11px] font-semibold text-[#07152F] flex items-center gap-2 transition-colors"
+                                        >
+                                            <span className="text-[9px] font-black text-gray-500 shrink-0">{task.id}</span>
+                                            <span className="truncate">{task.title}</span>
+                                            <span className="sr-only">, {task.status}. Abrir para asignarle fechas</span>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    )}
 
                     {actionError && (
                         <div role="alert" className="shrink-0 flex items-start justify-between gap-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 mb-2 rounded-md font-medium">
@@ -131,9 +158,11 @@ export const QADashboard = () => {
                     teamUsers={teamUsers}
                     leaders={leaders}
                     isAdmin={Boolean(me?.es_admin)}
+                    meId={me?.id ?? null}
                 />
             )}
             <QATicketPanel
+                allTasks={tasks}
                 key={selectedTicket?.db_id ?? 'sin-ticket'}
                 ticket={selectedTicket}
                 onClose={() => setSelectedTicketId(null)}

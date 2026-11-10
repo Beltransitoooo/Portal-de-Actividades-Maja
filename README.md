@@ -110,3 +110,15 @@ docker compose exec db sh -c 'dropdb -U "$POSTGRES_USER" restore_test'   # bórr
 `restore_db.sh` nunca escribe en producción ni sobre `portal_actividades`. Restaurar la BD real es un proceso manual: consúltalo con el administrador de la BD.
 
 ---
+
+## ⚙️ Variables de entorno del backend (seguridad)
+
+| Variable | Valor por defecto | Descripción |
+| --- | --- | --- |
+| `DOMINIOS_REGISTRO` | `majasportswear.com` | Dominios de correo permitidos en el registro (separados por coma). |
+| `INTENTOS_LOGIN_MAX` | `5` | Intentos fallidos antes de bloquear temporalmente la cuenta. |
+| `MINUTOS_BLOQUEO_LOGIN` | `15` | Minutos de bloqueo tras superar los intentos. Un enlace de restablecimiento lo levanta. |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `480` | Vigencia de la sesión (8 h). |
+| `MOSTRAR_DOCS` | `false` | Publica `/docs`, `/redoc` y `/openapi.json`. Úsalo solo en local (`MOSTRAR_DOCS=true`). |
+
+> La migración `d9e3f4a5b6c7` agrega las columnas del bloqueo de login y limpia estimaciones antiguas inválidas. Debe aplicarse (`alembic upgrade head`) antes de desplegar el backend.

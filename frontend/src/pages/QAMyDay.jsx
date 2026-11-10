@@ -147,7 +147,15 @@ export const QAMyDay = () => {
                                 detail={activeScope === 'mine' ? (isRestDay ? 'Hoy es día de descanso' : `de ${fmtHours(capacityToday)} h disponibles`) : undefined}
                                 alert={activeScope === 'mine' && capacityToday > 0 && plannedToday > capacityToday + 0.05}
                             />
-                            <Summary icon={Clock3} label="Registradas hoy" value={`${fmtHours(loggedToday)}h`} detail={plannedToday > 0 ? `${Math.round(Math.min(loggedToday / plannedToday, 9.99) * 100)}% de lo planeado` : undefined} />
+                            <Summary
+                                icon={Clock3}
+                                label="Registradas hoy"
+                                value={`${fmtHours(loggedToday)}h`}
+                                alert={loggedToday > capacityToday}
+                                detail={loggedToday > capacityToday
+                                    ? `Supera la jornada de ${fmtHours(capacityToday)} h`
+                                    : plannedToday > 0 ? `${Math.round(Math.min(loggedToday / plannedToday, 9.99) * 100)}% de lo planeado` : undefined}
+                            />
                             <Summary icon={alerts.length > 0 ? TriangleAlert : CheckCircle2} label="Avisos" value={alerts.length} detail={alerts.length === 0 ? 'Todo en orden' : undefined} alert={alerts.length > 0} />
                         </div>
 
@@ -172,7 +180,7 @@ export const QAMyDay = () => {
                                 ) : (
                                     <ul className="flex flex-col gap-3">
                                         {todayTasks.map(({ task, planned }) => {
-                                            const theme = teamUsers.find(u => u.id === task.assignee)?.theme ?? { main: 'bg-slate-600' };
+                                            const theme = teamUsers.find(u => u.raw_id === task.assignee_raw_id)?.theme ?? { main: 'bg-slate-600' };
                                             const loggedHere = task.hoursByDate[todayStr] || 0;
                                             const usage = task.maxHours > 0 ? Math.min((task.loggedHours / task.maxHours) * 100, 100) : 0;
                                             const over = task.maxHours > 0 && task.loggedHours > task.maxHours;
@@ -258,6 +266,7 @@ export const QAMyDay = () => {
             </div>
 
             <QATicketPanel
+                allTasks={tasks}
                 key={panel ? `${panel.id}-${panel.seq}` : 'sin-ticket'}
                 ticket={selected}
                 initialTab={panel?.tab}

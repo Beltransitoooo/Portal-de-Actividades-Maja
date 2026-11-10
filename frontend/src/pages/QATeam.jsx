@@ -1,10 +1,10 @@
-import { useState, useId } from 'react';
-import { KeyRound, Copy, Check, UserPlus, ShieldCheck, ShieldAlert, Users, RotateCcw, Power } from 'lucide-react';
+import { useState, useId, useEffect } from 'react';
+import { KeyRound, Copy, Check, UserPlus, ShieldCheck, ShieldAlert, Users, RotateCcw, Power, Layers } from 'lucide-react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { PageHeader } from '../components/Shared/PageHeader';
 import { Modal } from '../components/Shared/Modal';
 import { useQAData } from '../hooks/useQAData';
-import { createResetLink, createLeader, updateLeader } from '../services/qaApi';
+import { createResetLink, createLeader, updateLeader, listAreas, createArea, setUserArea } from '../services/qaApi';
 import { toUserMessage } from '../services/authService';
 import { formatDateTimeMx } from '../utils/dates';
 
@@ -63,6 +63,49 @@ export const QATeam = () => {
     const [leaderError, setLeaderError] = useState(null);
     const [savingLeader, setSavingLeader] = useState(false);
     const leaderFieldId = useId();
+    const areaFieldId = useId();
+    const [areas, setAreas] = useState([]);
+    const [areasKey, setAreasKey] = useState(0);
+    const [newArea, setNewArea] = useState('');
+    const [areaError, setAreaError] = useState(null);
+    const [savingArea, setSavingArea] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+        listAreas()
+            .then(data => { if (active) setAreas(data); })
+            .catch(error => { if (active) setAreaError(toUserMessage(error, 'No se pudieron cargar las áreas.')); });
+        return () => { active = false; };
+    }, [areasKey]);
+
+    const changeUserArea = async (person, value) => {
+        setBusyUserId(person.raw_id);
+        setTeamError(null);
+        try {
+            await setUserArea(person.raw_id, value === '' ? null : Number(value));
+            reload();
+        } catch (error) {
+            setTeamError(toUserMessage(error, 'No se pudo cambiar el área.'));
+        } finally {
+            setBusyUserId(null);
+        }
+    };
+
+    const addArea = async (event) => {
+        event.preventDefault();
+        if (newArea.trim().length < 2) { setAreaError('Escribe el nombre del área.'); return; }
+        setSavingArea(true);
+        setAreaError(null);
+        try {
+            await createArea(newArea.trim());
+            setNewArea('');
+            setAreasKey(k => k + 1);
+        } catch (error) {
+            setAreaError(toUserMessage(error, 'No se pudo crear el área.'));
+        } finally {
+            setSavingArea(false);
+        }
+    };
 
     const generateLink = async (person) => {
         setBusyUserId(person.raw_id);
@@ -143,7 +186,7 @@ export const QATeam = () => {
                                 <Users className="w-4 h-4 text-[#0072b2]" aria-hidden="true" />
                                 Integrantes
                             </h2>
-                            <p className="text-xs text-gray-500 mb-4">¿Alguien olvidó su contraseña? Genera un enlace de un solo uso y compártelo con esa persona.</p>
+                            <p className="text-xs text-gray-500 mb-4">Asigna el área de cada persona: sin área solo ve las actividades que creó o que tiene asignadas. ¿Alguien olvidó su contraseña? Genera un enlace de un solo uso y compártelo con esa persona.</p>
 
                             {teamError && <div role="alert" className="bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 mb-3 rounded font-medium">{teamError}</div>}
 
@@ -155,6 +198,17 @@ export const QATeam = () => {
                                             <p className="text-sm font-bold text-[#07152F] truncate">{person.name}</p>
                                             <p className="text-[11px] text-gray-500 truncate">{person.email}</p>
                                         </div>
+                                        <label className="sr-only" htmlFor={`area-${person.raw_id}`}>Área de {person.name}</label>
+                                        <select
+                                            id={`area-${person.raw_id}`}
+                                            value={person.areaId ?? ''}
+                                            onChange={(e) => changeUserArea(person, e.target.value)}
+                                            disabled={busyUserId === person.raw_id}
+                                            className={`h-9 px-2 bg-white border rounded-lg text-[11px] font-bold cursor-pointer disabled:opacity-60 ${person.areaId == null && !person.isAdmin ? 'border-amber-300 text-amber-800' : 'border-gray-200 text-[#07152F]'}`}
+                                        >
+                                            <option value="">Sin área</option>
+                                            {areas.map(area => <option key={area.id} value={area.id}>{area.nombre}</option>)}
+                                        </select>
                                         <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded border ${person.isAdmin ? 'text-[#0b5a8c] bg-[#1296E8]/10 border-[#1296E8]/20' : 'text-slate-600 bg-slate-100 border-slate-200'}`}>
                                             {person.role}
                                         </span>
@@ -171,6 +225,38 @@ export const QATeam = () => {
                                     </li>
                                 ))}
                             </ul>
+                        </section>
+
+                        {/* Áreas */}
+                        <section aria-labelledby="areas-titulo" className={sectionClass}>
+                            <h2 id="areas-titulo" className="text-sm font-black text-[#07152F] uppercase tracking-wider flex items-center gap-2 mb-1">
+                                <Layers className="w-4 h-4 text-[#0072b2]" aria-hidden="true" />
+                                Áreas
+                            </h2>
+                            <p className="text-xs text-gray-500 mb-4">Cada persona ve las actividades de su área. Crea aquí las áreas y asígnalas en la lista de integrantes.</p>
+
+                            {areaError && <div role="alert" className="bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 mb-3 rounded font-medium">{areaError}</div>}
+
+                            <ul className="flex flex-wrap gap-2 mb-4">
+                                {areas.length === 0 && <li className="text-xs text-gray-500">Todavía no hay áreas.</li>}
+                                {areas.map(area => (
+                                    <li key={area.id} className="h-8 px-3 bg-slate-50 border border-gray-200 rounded-lg text-[11px] font-bold text-[#07152F] flex items-center">
+                                        {area.nombre}
+                                        <span className="ml-2 text-[10px] font-semibold text-gray-500">{teamUsers.filter(u => u.areaId === area.id).length}</span>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <form onSubmit={addArea} noValidate className="flex flex-wrap items-end gap-3">
+                                <div className="flex-1 min-w-[220px]">
+                                    <label htmlFor={areaFieldId} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Nueva área</label>
+                                    <input id={areaFieldId} type="text" maxLength={60} value={newArea} onChange={(e) => setNewArea(e.target.value)} placeholder="Ej: QA" className="w-full h-10 bg-white border border-gray-200 focus:border-[#0e71af] focus:ring-2 focus:ring-[#0e71af]/30 rounded-lg px-3 text-sm text-[#07152F] transition-colors" />
+                                </div>
+                                <button type="submit" disabled={savingArea} className="h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-colors flex items-center gap-2">
+                                    <Layers className="w-3.5 h-3.5" aria-hidden="true" />
+                                    {savingArea ? 'Creando...' : 'Crear área'}
+                                </button>
+                            </form>
                         </section>
 
                         {/* Líderes técnicos */}

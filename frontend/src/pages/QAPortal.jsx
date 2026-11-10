@@ -97,14 +97,21 @@ export const QAPortal = () => {
 
         const processedTracking = periodTasks.map(task => {
             const assignedUser = processedCapacity.find(u => u.raw_id === task.asignado_a_id) || { name: 'Sin Asignar', id: 'NA' };
-            const est = parseFloat(task.estimacion_max_hrs || 8);
+            // Sin estimación no hay contra qué medir la desviación (antes se suponían 8 h)
+            const rawEst = parseFloat(task.estimacion_max_hrs);
+            const est = rawEst > 0 ? rawEst : null;
             const logged = parseFloat(task.horas_utilizadas || 0);
-            const diffValue = logged - est;
+            const diffValue = est === null ? 0 : Math.round((logged - est) * 100) / 100;
 
             let status = 'success';
             let diffText = 'A tiempo';
 
-            if (task.completada) {
+            if (est === null) {
+                status = 'neutral';
+                diffText = logged > 0 ? `${logged} hrs (sin estimación)` : 'Sin estimación';
+            } else if (task.completada) {
+                // Cerrada pasada de lo estimado sigue siendo una desviación
+                status = diffValue > 0 ? 'danger' : 'success';
                 diffText = `${diffValue > 0 ? '+' : ''}${diffValue} hrs (Cerrada)`;
             } else if (diffValue > 0) {
                 status = 'danger';
@@ -153,7 +160,7 @@ export const QAPortal = () => {
             { label: 'Código', value: r => r.ticket },
             { label: 'Actividad', value: r => r.activity },
             { label: 'Responsable', value: r => r.name },
-            { label: 'Horas estimadas', value: r => r.est },
+            { label: 'Horas estimadas', value: r => r.est ?? '' },
             { label: 'Horas utilizadas', value: r => r.logged },
             { label: 'Resultado', value: r => r.diff },
         ];

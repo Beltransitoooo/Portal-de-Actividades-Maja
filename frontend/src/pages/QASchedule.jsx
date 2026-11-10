@@ -91,7 +91,7 @@ export const QASchedule = () => {
     // Actividades cuyo rango (inicio → vencimiento) toca el mes visible, con búsqueda y filtros aplicados
     const monthTasks = useMemo(() => tasks
         .filter(t => t.startDate && t.startDate <= monthEnd && (t.dueDate || t.startDate) >= monthStart)
-        .filter(t => !memberFilter || t.assignee === memberFilter)
+        .filter(t => !memberFilter || String(t.assignee_raw_id) === memberFilter)
         .filter(matches)
         .sort((a, b) => a.startDate.localeCompare(b.startDate) || (a.dueDate || '').localeCompare(b.dueDate || '')),
     [tasks, monthStart, monthEnd, memberFilter, matches]);
@@ -127,13 +127,13 @@ export const QASchedule = () => {
         };
     }, [monthTasks, days, distributions]);
 
-    const getUserTheme = (assigneeId) => {
-        const user = teamUsers.find(u => u.id === assigneeId);
+    const getUserTheme = (assigneeRawId) => {
+        const user = teamUsers.find(u => u.raw_id === assigneeRawId);
         return user ? user.theme : { main: 'bg-slate-600' };
     };
 
     const memberName = memberFilter
-        ? (teamUsers.find(u => u.id === memberFilter)?.name || memberFilter)
+        ? (teamUsers.find(u => String(u.raw_id) === memberFilter)?.name || memberFilter)
         : 'Todo el equipo';
 
     const exportCsv = () => {
@@ -181,7 +181,7 @@ export const QASchedule = () => {
                         >
                             <option value="">Todo el equipo</option>
                             {teamUsers.map(user => (
-                                <option key={user.id} value={user.id}>{user.name}</option>
+                                <option key={user.raw_id} value={String(user.raw_id)}>{user.name}</option>
                             ))}
                         </select>
                     </div>
@@ -291,7 +291,7 @@ export const QASchedule = () => {
 
                                         {/* Filas de actividades */}
                                         {monthTasks.map(task => {
-                                            const theme = getUserTheme(task.assignee);
+                                            const theme = getUserTheme(task.assignee_raw_id);
                                             const endDate = task.dueDate || task.startDate;
                                             const clampedStart = task.startDate < monthStart;
                                             const clampedEnd = endDate > monthEnd;
@@ -470,6 +470,7 @@ export const QASchedule = () => {
             </div>
 
             <QATicketPanel
+                allTasks={tasks}
                 key={selectedTicket?.db_id ?? 'sin-ticket'}
                 ticket={selectedTicket}
                 onClose={() => setSelectedTicketId(null)}

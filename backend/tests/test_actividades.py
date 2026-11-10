@@ -31,7 +31,9 @@ def test_entradas_invalidas_en_crear(client, f, mundo):
     assert client.post("/actividades/", json={"titulo": "X", "estimacion_max_hrs": -3}, headers=h).status_code == 400
     r = client.post("/actividades/", json={"titulo": "X", "fecha_inicio": "2026-11-10", "fecha_vencimiento": "2026-11-09"}, headers=h)
     assert r.status_code == 400
-    assert client.post("/actividades/", json={"titulo": "X", "asignado_a_id": 9999}, headers=h).status_code == 404
+    # Asignar a otra persona solo lo hace el administrador; si el usuario no existe, 404
+    assert client.post("/actividades/", json={"titulo": "X", "asignado_a_id": 9999}, headers=h).status_code == 403
+    assert client.post("/actividades/", json={"titulo": "X", "asignado_a_id": 9999}, headers=f.auth(mundo["admin"])).status_code == 404
 
 
 def test_sin_sesion_401(client):

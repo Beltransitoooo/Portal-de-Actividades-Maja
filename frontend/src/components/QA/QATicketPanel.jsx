@@ -29,7 +29,7 @@ const PRIORITY_STYLES = {
 
 // Se monta con key={ticket.db_id}: al abrir otra actividad, el estado inicia desde cero sin efectos.
 // ticket es siempre la versión más reciente (la página lo deriva de los datos cargados).
-export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, leaders = [], teamUsers = [], me = null, initialTab = 'detalle' }) => {
+export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, leaders = [], teamUsers = [], me = null, initialTab = 'detalle', allTasks = [] }) => {
     const [tab, setTab] = useState(initialTab);
     const [toast, setToast] = useState(null);
     const [actionError, setActionError] = useState(null);
@@ -240,7 +240,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
                     )}
 
                     {tab !== 'detalle' && <h2 id={titleId} className="sr-only">{ticket.title}</h2>}
-                    {tab === 'horas' && <HoursLog ticket={ticket} me={me} onChanged={changed} />}
+                    {tab === 'horas' && <HoursLog ticket={ticket} me={me} onChanged={changed} allTasks={allTasks} />}
                     {tab === 'comentarios' && <Comments ticket={ticket} me={me} />}
                     {tab === 'historial' && <History ticket={ticket} />}
                 </div>
@@ -252,6 +252,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
                     teamUsers={teamUsers}
                     leaders={leaders}
                     isAdmin={Boolean(me?.es_admin)}
+                    meId={me?.id ?? null}
                     onClose={() => setIsEditing(false)}
                     onSubmit={() => { setIsEditing(false); changed('Cambios guardados'); }}
                 />

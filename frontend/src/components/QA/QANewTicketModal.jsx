@@ -8,7 +8,7 @@ const PRIORITIES = ['Crítica', 'Alta', 'Media', 'Baja'];
 
 // Formulario para crear una actividad o, si recibe `ticket`, para editarla.
 // Se monta solo cuando está abierto, así cada apertura empieza con los valores correctos.
-export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers = [], leaders = [], isAdmin = false }) => {
+export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers = [], leaders = [], isAdmin = false, meId = null }) => {
     const isEdit = Boolean(ticket);
 
     const [title, setTitle] = useState(ticket?.title ?? '');
@@ -42,6 +42,10 @@ export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers =
     const leaderOptions = leaders.filter(l => l.activo || String(l.id) === leaderId);
     // Reasignar es una acción de administrador (el servidor también lo exige)
     const canChooseAssignee = !isEdit || isAdmin;
+    // Sin ser administrador solo puede asignarse a sí mismo (se conserva el responsable actual al editar)
+    const assigneeOptions = isAdmin
+        ? teamUsers
+        : teamUsers.filter(u => u.raw_id === meId || u.raw_id === ticket?.assignee_raw_id);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -162,11 +166,12 @@ export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers =
                                     <label htmlFor={ids.assignee} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Persona Asignada</label>
                                     <select id={ids.assignee} value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} disabled={!canChooseAssignee} className={`${fieldClass} bg-slate-50 p-2.5 rounded-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}>
                                         <option value="">Sin Asignar</option>
-                                        {teamUsers.map(user => (
+                                        {assigneeOptions.map(user => (
                                             <option key={user.raw_id} value={user.raw_id}>{user.name}</option>
                                         ))}
                                     </select>
                                     {!canChooseAssignee && <p className="text-[10px] text-gray-500 mt-1">Solo un administrador puede reasignar.</p>}
+                                    {canChooseAssignee && !isAdmin && <p className="text-[10px] text-gray-500 mt-1">Puedes asignártela a ti; a otras personas las asigna un administrador.</p>}
                                 </div>
                                 <div>
                                     <label htmlFor={ids.leader} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Líder Técnico</label>
