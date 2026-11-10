@@ -5,9 +5,9 @@ import re
 
 
 class UsuarioBase(BaseModel):
-    name_users: str | None = None
+    name_users: Optional[str] = None
     usuario: str
-    area_id: int | None = None
+    area_id: Optional[int] = None
 
     @field_validator("usuario")
     @classmethod

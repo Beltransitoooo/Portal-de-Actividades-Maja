@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.maja.portal.backup</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/carlosbustamante/Documents/MajaProyect/Portal-de-Actividades-Maja/scripts/backup_db.sh</string>
+  </array>
+
+  <!-- Una vez al día a las 13:00. Si el equipo estaba dormido a esa hora, macOS lo ejecuta al despertar.
+      Si estaba apagado, NO se ejecuta hasta el día siguiente. -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>13</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+
+  <!-- launchd no hereda tu PATH: se incluye la ruta de docker -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/carlosbustamante/.docker/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/carlosbustamante/Documents/MajaProyect/Portal-de-Actividades-Maja/backups/backup.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/carlosbustamante/Documents/MajaProyect/Portal-de-Actividades-Maja/backups/backup.log</string>
+</dict>
+</plist>
