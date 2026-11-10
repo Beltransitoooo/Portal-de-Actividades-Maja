@@ -62,5 +62,51 @@ backend/
 │   └── security.py
 ├── main.py
 └── requirements.txt
+```
+
+---
+
+
+## 💾 Respaldos de la Base de Datos
+
+Los scripts están en `scripts/` y requieren Docker. Los respaldos se guardan en `backups/` (ignorada por git) y se conservan 14 días.
+
+> ⚠️ Los respaldos contienen datos personales (LFPDPPP). No los subas al repositorio ni los compartas por chat o correo.
+
+**Respaldar**
+
+```bash
+./scripts/backup_db.sh           # BD local (contenedor "db")
+./scripts/backup_db.sh supabase  # BD de producción en Supabase (la que usa la app en Vercel)
+```
+
+Para producción, crea en la raíz un archivo `.env.backup` (ignorado por git) con una sola línea:
+
+```
+SUPABASE_DB_URL='<cadena de conexión de Supabase>'
+```
+
+Cópiala de Supabase (botón **Connect**) o del `DATABASE_URL` del backend en Vercel; es la misma. Protege el archivo con `chmod 600 .env.backup`. Si prefieres no guardarlo en disco, exporta `SUPABASE_DB_URL` solo en la terminal.
+
+**Respaldo automático cada 24 horas**
+
+El servicio `backup` de `docker-compose.yml` respalda Supabase al arrancar y después cada 24 horas, con la misma retención de 14 días. No arranca con `docker compose up`; hay que pedirlo:
+
+```bash
+docker compose --profile backup up -d backup   # activar
+docker compose logs backup                     # ver resultados
+docker compose stop backup                     # detener
+```
+
+Solo respalda mientras Docker está corriendo en el equipo que lo activó.
+
+**Comprobar que un respaldo sirve**
+
+```bash
+./scripts/restore_db.sh backups/<archivo>.dump            # restaura en la BD local "restore_test"
+docker compose exec db sh -c 'dropdb -U "$POSTGRES_USER" restore_test'   # bórrala al terminar
+```
+
+`restore_db.sh` nunca escribe en producción ni sobre `portal_actividades`. Restaurar la BD real es un proceso manual: consúltalo con el administrador de la BD.
 
 ---

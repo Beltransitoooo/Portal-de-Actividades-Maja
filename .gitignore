@@ -1,8 +1,9 @@
 # Variables locales (IP, puertos)
 .env
 
-# Respaldos de BD (contienen datos personales)
+# Respaldos de BD (contienen datos personales) y conexión para respaldos remotos
 backups/
+.env.backup
 
 # Vercel
 .vercel

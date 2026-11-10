@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD en el .env de la raíz}
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"   # solo accesible desde este equipo
     volumes:
       - pgdata:/var/lib/postgresql/data     # Guarda datos de la DB
 
@@ -28,6 +28,23 @@ services:
       - "80:80"
     depends_on:
       - backend
+
+  # Respaldo diario de la BD de Supabase. Solo arranca si se pide su perfil:
+  #   docker compose --profile backup up -d backup
+  # Requiere .env.backup con SUPABASE_DB_URL (ver README).
+  backup:
+    image: postgres:17
+    profiles: ["backup"]
+    env_file:
+      - path: ./.env.backup
+        required: false
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup_loop.sh:/backup_loop.sh:ro
+    environment:
+      TZ: America/Mexico_City   # fechas de archivos y log en hora local
+    entrypoint: ["sh", "/backup_loop.sh"]
+    restart: unless-stopped
 
 volumes:
   pgdata:
