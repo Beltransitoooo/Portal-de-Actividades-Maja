@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, date
-from typing import Optional
+from typing import Optional, Literal
 import re
 
 
@@ -44,6 +44,10 @@ class UsuarioResponse(UsuarioBase):
         from_attributes = True
 
 
+# Estados válidos de una actividad (deben coincidir con models.ESTADOS_ACTIVIDAD)
+EstadoActividad = Literal["PENDIENTE", "EN_PROGRESO", "EN_REVISION", "COMPLETADA", "BLOQUEADA"]
+
+
 class ActividadBase(BaseModel):
     titulo: str
     descripcion: Optional[str] = None
@@ -54,6 +58,8 @@ class ActividadBase(BaseModel):
     fecha_vencimiento: Optional[date] = None
     estimacion_min_hrs: Optional[float] = None
     estimacion_max_hrs: Optional[float] = None
+    horas_utilizadas: float = Field(default=0, ge=0)
+    estado: Optional[EstadoActividad] = None
 
 class ActividadCreate(ActividadBase):
     asignado_a_id: Optional[int] = None
@@ -70,12 +76,15 @@ class ActividadUpdate(BaseModel):
     fecha_vencimiento: Optional[date] = None
     estimacion_min_hrs: Optional[float] = None
     estimacion_max_hrs: Optional[float] = None
+    horas_utilizadas: Optional[float] = Field(default=None, ge=0)
+    estado: Optional[EstadoActividad] = None
     asignado_a_id: Optional[int] = None
     lider_tecnico_id: Optional[int] = None
     area_id: Optional[int] = None
 
 class ActividadResponse(ActividadBase):
     id: int
+    estado: EstadoActividad
     fecha_creacion: datetime
     creador_id: int
     asignado_a_id: Optional[int] = None

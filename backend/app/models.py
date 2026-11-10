@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Date, Float, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Date, Float, Integer, String, Boolean, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.database import Base
@@ -20,8 +20,19 @@ class Usuario(Base):
     area = relationship("Area", back_populates="usuarios")
     
 
+# Estados válidos de una actividad (deben coincidir con el CHECK de la migración y con schemas.EstadoActividad)
+ESTADOS_ACTIVIDAD = ("PENDIENTE", "EN_PROGRESO", "EN_REVISION", "COMPLETADA", "BLOQUEADA")
+
+
 class Actividad(Base):
     __tablename__ = "actividades"
+    __table_args__ = (
+        CheckConstraint("horas_utilizadas >= 0", name="ck_actividades_horas_utilizadas_no_negativas"),
+        CheckConstraint(
+            "estado IN ('PENDIENTE', 'EN_PROGRESO', 'EN_REVISION', 'COMPLETADA', 'BLOQUEADA')",
+            name="ck_actividades_estado_valido",
+        ),
+    )
 
     id = Column(Integer, primary_key=True, index=True) 
     titulo = Column(String, nullable=False) 
@@ -34,6 +45,10 @@ class Actividad(Base):
     fecha_vencimiento = Column(Date, nullable=True) 
     estimacion_min_hrs = Column(Float, nullable=True) 
     estimacion_max_hrs = Column(Float, nullable=True) 
+    # Horas reales registradas en la actividad (antes se guardaban en estimacion_min_hrs)
+    horas_utilizadas = Column(Float, nullable=False, default=0, server_default="0")
+    # Estado de flujo; "completada" se mantiene sincronizado por compatibilidad
+    estado = Column(String(20), nullable=False, default="PENDIENTE", server_default="PENDIENTE")
     
     creador_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False) 
     creador = relationship("Usuario", foreign_keys=[creador_id], back_populates="actividades_creadas") 

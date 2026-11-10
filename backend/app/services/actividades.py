@@ -4,6 +4,16 @@ from typing import Optional
 from datetime import date
 from app import models, schemas
 
+
+def _estado_por_defecto(completada: bool, horas_utilizadas: float) -> str:
+    """Estado inferido cuando el cliente no lo envía (misma regla que la migración)."""
+    if completada:
+        return "COMPLETADA"
+    if (horas_utilizadas or 0) > 0:
+        return "EN_PROGRESO"
+    return "PENDIENTE"
+
+
 def listar(
     db: Session, 
     usuario_actual: models.Usuario, 
@@ -63,6 +73,11 @@ def crear(db: Session, actividad_in: schemas.ActividadCreate, usuario_actual: mo
         if max_hrs < min_hrs:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La estimación máxima no puede ser menor a la mínima")
 
+    # "estado" manda; "completada" se deriva de él para mantener compatibilidad
+    if not datos.get("estado"):
+        datos["estado"] = _estado_por_defecto(datos.get("completada", False), datos.get("horas_utilizadas", 0))
+    datos["completada"] = datos["estado"] == "COMPLETADA"
+
     nueva_actividad = models.Actividad(
         **datos,
         creador_id=usuario_actual.id
@@ -90,6 +105,27 @@ def actualizar(db: Session, actividad_id: int, datos_in: schemas.ActividadUpdate
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Solo el administrador puede reasignar tareas a otros usuarios"
             )
+
+    # Columnas NOT NULL: un null explícito se ignora en lugar de romper la restricción
+    for campo in ("estado", "horas_utilizadas"):
+        if campo in datos_actualizar and datos_actualizar[campo] is None:
+            datos_actualizar.pop(campo)
+
+    # Sincronía estado <-> completada
+    if "estado" in datos_actualizar:
+        datos_actualizar["completada"] = datos_actualizar["estado"] == "COMPLETADA"
+    elif "completada" in datos_actualizar:
+        if datos_actualizar["completada"]:
+            datos_actualizar["estado"] = "COMPLETADA"
+        elif actividad_db.estado == "COMPLETADA":
+            # Se reabre: vuelve a en progreso o pendiente según sus horas
+            horas = datos_actualizar.get("horas_utilizadas", actividad_db.horas_utilizadas)
+            datos_actualizar["estado"] = _estado_por_defecto(False, horas)
+        # Si estaba en revisión o bloqueada, desmarcar "completada" no cambia su estado
+
+    # Sin campos que cambiar: un UPDATE vacío genera SQL inválido (error 500)
+    if not datos_actualizar:
+        return actividad_db
 
     query.update(datos_actualizar)
     db.commit()
