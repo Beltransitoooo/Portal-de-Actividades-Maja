@@ -9,7 +9,27 @@ from app.config import settings
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import logging
+
+logger = logging.getLogger("portal")
 app = FastAPI()
+
+
+# Errores no controlados: se registran en el log y se responde JSON. Se declara antes que
+# CORS para que quede por dentro y la respuesta 500 también lleve los encabezados CORS;
+# sin ellos el navegador la bloquea y el frontend solo ve "No se pudo conectar".
+@app.middleware("http")
+async def capturar_errores(request, call_next):
+    try:
+        return await call_next(request)
+    except Exception:
+        logger.exception("Error no controlado en %s %s", request.method, request.url.path)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Ocurrió un error en el servidor. Inténtalo de nuevo."},
+        )
+
 
 app.add_middleware(
     CORSMiddleware,
