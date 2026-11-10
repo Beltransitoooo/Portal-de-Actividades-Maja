@@ -32,22 +32,11 @@ export const Loader = () => {
                     {/* Se omiten los paths para legibilidad, pero aquí va tu código SVG original */}
                     <path d="M195.136 135.689C188.115 131.215 179.948 128.873 171.624 128.946C163.299 129.019 155.174 131.503 148.232 136.099L148.42 136.382C155.307 131.823 163.368 129.358 171.627 129.286C179.886 129.213 187.988 131.537 194.954 135.975L195.136 135.689Z"></path>
                     <path d="M195.136 208.311C188.115 212.784 179.948 215.127 171.624 215.054C163.299 214.981 155.174 212.496 148.232 207.901L148.42 207.618C155.307 212.177 163.368 214.642 171.627 214.714C179.886 214.786 187.988 212.463 194.954 208.025L195.136 208.311Z"></path>
-                    <path mask="url(#path-5-inside-3_111_3212)" fill="#00A3FF" d="M195.136 135.689L195.474 135.904..."></path>
-                </g>
-                <path stroke="#00A3FF" d="M240.944 172C240.944 187.951..." id="out3"></path>
-            </svg>
-
-            <svg style={{ '--i': 1, '--j': 3 }}>
-                <g id="inner1">
-                    <path fill="#00A3FF" d="M145.949 124.51L148.554..." clipRule="evenodd" fillRule="evenodd"></path>
-                    <path fill="#00A3FF" d="M139.91 220.713C134.922..." clipRule="evenodd" fillRule="evenodd"></path>
                 </g>
             </svg>
-
-            <svg style={{ '--i': 2, '--j': 4 }}>
-                <path fill="#0B132B" d="M180.956 186.056C183.849..." id="center1"></path>
-                <path fill="#00A3FF" d="M172 166.445C175.068 166.445..." id="center"></path>
-            </svg>
+            {/* Se retiraron los trazos #inner3 (máscara), #out3, #inner1, #center1 y #center:
+                su atributo "d" estaba truncado con "..." (SVG inválido) y no se dibujaban.
+                Para recuperarlos hace falta el SVG original completo. */}
         </div>
     );
 };

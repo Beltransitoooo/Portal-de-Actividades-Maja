@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { QAPortal } from './pages/QAPortal'; 
-import { QADashboard } from './pages/QADashboard'; 
+import { QADashboard } from './pages/QADashboard';
+import { QASchedule } from './pages/QASchedule';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -28,6 +29,16 @@ function App() {
           element={
             <ProtectedRoute>
               <QAPortal />
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* Cronograma de QA (línea de tiempo mensual) */}
+        <Route 
+          path="/qa/cronograma" 
+          element={
+            <ProtectedRoute>
+              <QASchedule />
             </ProtectedRoute>
           } 
         />
