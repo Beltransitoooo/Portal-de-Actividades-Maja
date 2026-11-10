@@ -1,10 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>Portal de Actividades | MAJA</title>
+    <!-- Aplica el tema guardado antes de pintar (evita un destello claro en modo oscuro) -->
+    <script>
+      try { if (localStorage.getItem('maja-theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

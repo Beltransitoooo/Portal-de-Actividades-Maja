@@ -6,9 +6,10 @@ export const Header = () => {
         <header className="h-16 bg-[#0B132B] flex items-center justify-between px-6 shadow-md shrink-0 z-40">
             {/* Logo de imagen + Texto de MAJA */}
             <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="w-1 h-7 bg-[#00A3FF] -skew-x-12 rounded-sm"></span>
                 <img 
                     src={logoMaja} 
-                    alt="Logo" 
+                    alt="" 
                     className="h-6 w-auto object-contain"
                 />
                 <span className="text-white font-black text-xl tracking-widest flex items-center gap-2">

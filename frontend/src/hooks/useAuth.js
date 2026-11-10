@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { loginApi, registerApi, loginWithGoogleApi } from '../services/authService';
+import { clearSessionStorage } from '../utils/theme';
+import { loginApi, registerApi, loginWithGoogleApi, toUserMessage } from '../services/authService';
 
 export const useAuth = () => {
     const [loading, setLoading] = useState(false);
@@ -10,12 +11,12 @@ export const useAuth = () => {
         setError(null);
         try {
             const data = await loginApi(usuario, contrasena);
-            
+
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('token_type', data.token_type);
             localStorage.setItem('es_admin', String(data.es_admin));
             if (data.area_id) localStorage.setItem('area_id', String(data.area_id));
-            
+
             let displayName = data.name_users;
             if (!displayName) {
                 displayName = usuario.includes('@') ? usuario.split('@')[0] : usuario;
@@ -26,7 +27,7 @@ export const useAuth = () => {
             setLoading(false);
             return true;
         } catch (err) {
-            setError(err.message);
+            setError(toUserMessage(err, 'Error en el inicio de sesión'));
             setLoading(false);
             return false;
         }
@@ -43,20 +44,19 @@ export const useAuth = () => {
                 contrasena: contrasena
             });
 
-            // Auto-login o guardado de datos tras registro
             localStorage.setItem('username', data.name_users || nameUsers);
             setLoading(false);
             return true;
         } catch (err) {
-            setError(err.message);
+            setError(toUserMessage(err, 'Error al registrar usuario'));
             setLoading(false);
             return false;
         }
     };
 
     const logout = () => {
-        localStorage.clear();
-        window.location.href = '/login';
+        clearSessionStorage();
+        window.location.href = '/';
     };
 
     const loginWithGoogle = async (googleToken) => {
@@ -64,23 +64,23 @@ export const useAuth = () => {
         setError(null);
         try {
             const data = await loginWithGoogleApi(googleToken);
-            
+
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('token_type', data.token_type);
             localStorage.setItem('es_admin', String(data.es_admin));
             if (data.area_id) localStorage.setItem('area_id', String(data.area_id));
-            
+
             const displayName = data.name_users || 'Usuario de Google';
             localStorage.setItem('username', displayName);
 
             setLoading(false);
             return true;
         } catch (err) {
-            setError(err.message);
+            setError(toUserMessage(err, 'Error en el inicio de sesión con Google'));
             setLoading(false);
             return false;
         }
     };
 
-    return { login, register, loginWithGoogle, logout, loading, error };
+    return { login, register, loginWithGoogle, logout, loading, error, setError };
 };

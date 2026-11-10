@@ -7,9 +7,162 @@
   --color-maja-accent: #0284c7;
   --color-maja-text: #334155;
   --color-maja-border: #e2e8f0;
+
+  /* Animaciones usadas en el proyecto (antes no estaban definidas y no tenían efecto) */
+  --animate-fade-in: fade-in 0.3s ease-out both;
+  --animate-slide-left: slide-left 0.3s ease-out both;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slide-left {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+}
+
+/* Foco visible solo al navegar con teclado (no aparece con clic).
+   Va fuera de las capas de Tailwind para prevalecer sobre "focus:outline-none".
+   Se excluyen campos de texto y selects: ya tienen su propio borde de foco y el navegador
+   los marca como :focus-visible también con clic. */
+:focus-visible:not(input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], textarea, select) {
+  outline: 2px solid #0072b2;
+  outline-offset: 2px;
+}
+
+/* Selects transparentes superpuestos (filtros): el anillo se muestra en el contenedor visible */
+.focus-ring-within:has(select:focus-visible) {
+  outline: 2px solid #0072b2;
+  outline-offset: 2px;
+}
+
+/* Respeta la preferencia del sistema de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-left {
+    animation: none;
+  }
 }
 
 body {
   background-color: var(--color-maja-bg);
   color: var(--color-maja-text);
 }
+/* =====================================================================
+   MODO OSCURO
+   Se activa con la clase "dark" en <html> (switch en Perfil).
+   Capa de reasignación de colores: mantiene la estructura y el diseño de
+   cada pantalla sin duplicar clases en los componentes. Va fuera de las
+   capas de Tailwind para prevalecer sobre sus utilidades; por eso también
+   se reasignan los estados hover/focus de las clases que se sobrescriben.
+   Contraste verificado contra WCAG 2.2 AA (4.5:1 texto, 3:1 no-texto).
+   ===================================================================== */
+:root.dark {
+  color-scheme: dark;
+  --d-bg: #0b1120;
+  --d-surface: #111a2c;
+  --d-surface-2: #18233a;
+  --d-surface-3: #22304b;
+  --d-border: #26334d;
+  --d-border-strong: #3a4a66;
+  --d-text: #e5ecf6;
+  --d-text-2: #c3cfdf;
+  --d-muted: #9aa9bf;
+  --d-accent: #5cb8f0;
+  --color-maja-bg: var(--d-bg);
+  --color-maja-text: var(--d-text-2);
+}
+
+/* Superficies */
+.dark .bg-slate-50, .dark .bg-gray-50\/50, .dark .bg-slate-50\/80, .dark .bg-slate-50\/50 { background-color: var(--d-bg); }
+.dark .bg-white, .dark .bg-white\/80, .dark .bg-white\/40 { background-color: var(--d-surface); }
+.dark .bg-slate-100, .dark .bg-gray-100, .dark .bg-slate-200\/50 { background-color: var(--d-surface-2); }
+.dark .bg-slate-200 { background-color: var(--d-surface-3); }
+.dark .bg-slate-300 { background-color: #4a5a75; }
+.dark .bg-\[\#07152F\] { background-color: #1d2a44; }
+.dark .from-white { --tw-gradient-from: var(--d-surface); }
+.dark .to-slate-50 { --tw-gradient-to: var(--d-surface-2); }
+
+/* Bordes */
+.dark .border-gray-100, .dark .border-slate-100, .dark .border-slate-50,
+.dark .border-gray-200, .dark .border-slate-200, .dark .border-slate-200\/60,
+.dark .divide-gray-100 > *, .dark .divide-gray-200 > * { border-color: var(--d-border); }
+.dark .border-gray-300 { border-color: var(--d-border-strong); }
+.dark .border-white { border-color: var(--d-surface); }
+.dark .border-\[\#16274D\] { border-color: var(--d-border-strong); }
+
+/* Texto */
+.dark .text-\[\#07152F\], .dark .text-\[\#0B132B\] { color: var(--d-text); }
+.dark .text-\[\#0B132B\]\/80 { color: rgb(229 236 246 / 0.85); }
+.dark .text-\[\#0B132B\]\/60 { color: var(--d-muted); }
+.dark .text-gray-700, .dark .text-gray-600, .dark .text-slate-600 { color: var(--d-text-2); }
+.dark .text-gray-500, .dark .text-slate-500, .dark .text-gray-400, .dark .text-slate-400 { color: var(--d-muted); }
+.dark .placeholder-gray-500::placeholder { color: var(--d-muted); }
+.dark .text-\[\#0072b2\], .dark .text-\[\#0e71af\], .dark .text-\[\#0b5a8c\],
+.dark .text-\[\#00A3FF\], .dark .text-blue-600 { color: var(--d-accent); }
+.dark .text-red-700 { color: #fca5a5; }
+.dark .text-emerald-700, .dark .text-green-700 { color: #6ee7b7; }
+.dark .text-amber-700, .dark .text-orange-700, .dark .text-yellow-800 { color: #fcd34d; }
+.dark .text-cyan-700 { color: #67e8f9; }
+.dark .text-indigo-500 { color: #a5b4fc; }
+
+/* Fondos tenues de estado / color de integrante */
+.dark .bg-red-50, .dark .bg-red-50\/50 { background-color: rgb(248 113 113 / 0.12); }
+.dark .bg-red-100 { background-color: rgb(248 113 113 / 0.2); }
+.dark .bg-emerald-50, .dark .bg-green-50 { background-color: rgb(52 211 153 / 0.12); }
+.dark .bg-amber-50, .dark .bg-yellow-50, .dark .bg-orange-50 { background-color: rgb(251 191 36 / 0.12); }
+.dark .bg-blue-50, .dark .bg-\[\#1296E8\]\/5, .dark .bg-\[\#1296E8\]\/10, .dark .bg-\[\#00A3FF\]\/10 { background-color: rgb(92 184 240 / 0.14); }
+.dark .bg-blue-100, .dark .bg-\[\#00A3FF\]\/20 { background-color: rgb(92 184 240 / 0.2); }
+.dark .bg-purple-50 { background-color: rgb(192 132 252 / 0.14); }
+.dark .border-red-200 { border-color: rgb(248 113 113 / 0.35); }
+.dark .border-emerald-200, .dark .border-green-200 { border-color: rgb(52 211 153 / 0.35); }
+.dark .border-amber-200, .dark .border-amber-200\/50, .dark .border-yellow-200, .dark .border-orange-200 { border-color: rgb(251 191 36 / 0.35); }
+.dark .border-\[\#1296E8\]\/20, .dark .border-\[\#1296E8\]\/30 { border-color: rgb(92 184 240 / 0.35); }
+
+/* Estados interactivos de las clases reasignadas */
+.dark .hover\:bg-slate-50:hover, .dark .hover\:bg-slate-50\/50:hover, .dark .hover\:bg-blue-50:hover { background-color: var(--d-surface-3); }
+.dark .hover\:bg-slate-200:hover, .dark .group:hover .group-hover\:bg-slate-200 { background-color: #2c3b58; }
+.dark .hover\:bg-red-50:hover { background-color: rgb(248 113 113 / 0.14); }
+.dark .hover\:bg-red-100:hover, .dark .group:hover .group-hover\:bg-red-200 { background-color: rgb(248 113 113 / 0.26); }
+.dark .hover\:bg-emerald-100:hover { background-color: rgb(52 211 153 / 0.22); }
+.dark .hover\:bg-amber-100:hover { background-color: rgb(251 191 36 / 0.22); }
+.dark .hover\:bg-\[\#1296E8\]\/20:hover, .dark .group:hover .group-hover\:bg-blue-200 { background-color: rgb(92 184 240 / 0.26); }
+.dark .hover\:bg-\[\#0e71af\]:hover { background-color: #0e71af; }
+.dark .hover\:bg-\[\#0072b2\]:hover { background-color: #0072b2; }
+.dark .hover\:text-\[\#0e71af\]:hover { color: var(--d-accent); }
+.dark .hover\:text-red-700:hover, .dark .group:hover .group-hover\:text-red-700 { color: #fca5a5; }
+.dark .hover\:text-\[\#07152F\]:hover, .dark .hover\:text-\[\#0B132B\]:hover,
+.dark .group:hover .group-hover\:text-\[\#07152F\], .dark .group:hover .group-hover\:text-\[\#1a365d\] { color: #ffffff; }
+.dark .group:hover .group-hover\:text-gray-600 { color: var(--d-text-2); }
+.dark .group:hover .group-hover\:text-\[\#2b6cb0\] { color: var(--d-accent); }
+.dark .hover\:text-white:hover { color: #ffffff; }
+.dark .hover\:border-gray-300:hover { border-color: var(--d-border-strong); }
+.dark .focus\:border-\[\#0e71af\]:focus { border-color: var(--d-accent); }
+.dark .disabled\:bg-gray-300:disabled { background-color: var(--d-surface-3); }
+
+/* Tarjetas de módulos (hover de grupo con nombre) */
+.dark .group\/card:hover .group-hover\/card\:text-\[\#0072b2\] { color: var(--d-accent); }
+.dark .group\/card:hover .group-hover\/card\:text-cyan-700 { color: #67e8f9; }
+.dark .group\/card:hover .group-hover\/card\:text-indigo-500 { color: #a5b4fc; }
+.dark .group\/card:hover .group-hover\/card\:text-\[\#0B132B\]\/80 { color: rgb(229 236 246 / 0.85); }
+
+/* Elementos azul marino dentro del contenido (barra de balance, botón reintentar):
+   se aclaran para distinguirse del fondo oscuro. El header conserva su color. */
+.dark main .bg-\[\#0B132B\] { background-color: #64748b; }
+
+/* Login / registro: fondo del panel derecho y botón principal */
+.dark .from-gray-200 { --tw-gradient-from: var(--d-surface-2); }
+.dark .via-gray-300 { --tw-gradient-via: var(--d-surface); }
+.dark .to-gray-400 { --tw-gradient-to: var(--d-bg); }
+.dark .bg-white\/40 { background-color: rgb(92 184 240 / 0.08); }
+.dark .from-\[\#0B132B\] { --tw-gradient-from: #0e71af; }
+.dark .to-\[\#1a264a\] { --tw-gradient-to: #0b5a8c; }
+
+/* Cronograma y paleta de integrantes */
+.dark .bg-purple-700 { background-color: #9333ea; } /* contraste 3:1 sobre superficie oscura */
+.dark .bg-amber-50\/60, .dark .bg-amber-50\/40 { background-color: rgb(251 191 36 / 0.08); }
+.dark .bg-slate-100\/70 { background-color: var(--d-surface-2); }
+.dark .bg-green-50 { background-color: rgb(52 211 153 / 0.12); }
+.dark .border-green-700 { border-color: #22c55e; }
