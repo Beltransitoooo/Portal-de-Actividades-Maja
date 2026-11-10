@@ -1,8 +1,11 @@
 import { useState, useId } from 'react';
+import { X, CalendarDays } from 'lucide-react';
 import { PanelToast } from './TicketPanel/PanelToast';
 import { TicketMetaInfo } from './TicketPanel/TicketMetaInfo';
 import { TimeTracker } from './TicketPanel/TimeTracker';
 import { useDialog } from '../../hooks/useDialog';
+import { formatDateMx } from '../../utils/dates';
+import { spanDays } from '../../utils/schedule';
 
 // Se monta con key={ticket.db_id}: al abrir otro ticket, el estado inicia desde cero sin efectos
 export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
@@ -14,6 +17,8 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
 
     if (!ticket) return null;
 
+    const days = ticket.startDate ? spanDays(ticket.startDate, ticket.dueDate) : 0;
+
     return (
         <div className="fixed inset-0 z-50 flex justify-end bg-gray-900/40 backdrop-blur-sm transition-opacity">
             <div
@@ -24,22 +29,22 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
                 tabIndex={-1}
                 className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-slide-left relative outline-none"
             >
-                
+
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-slate-50">
                     <div className="flex items-center gap-3">
                         <span className="text-xs font-black bg-[#07152F] text-white px-2.5 py-1 rounded-md tracking-widest">
                             {ticket.id}
                         </span>
                         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${
-                            ticket.priority === 'CRÍTICA' ? 'text-red-700 bg-red-50 border-red-200' : 
-                            ticket.priority === 'ALTA' ? 'text-orange-700 bg-orange-50 border-orange-200' : 
+                            ticket.priority === 'CRÍTICA' ? 'text-red-700 bg-red-50 border-red-200' :
+                            ticket.priority === 'ALTA' ? 'text-orange-700 bg-orange-50 border-orange-200' :
                             'text-green-700 bg-green-50 border-green-200'
                         }`}>
                             {ticket.priority || 'NORMAL'}
                         </span>
                     </div>
                     <button type="button" onClick={onClose} aria-label="Cerrar detalle de la actividad" className="text-gray-500 hover:text-red-700 transition-colors p-1">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <X className="w-6 h-6" aria-hidden="true" />
                     </button>
                 </div>
 
@@ -51,9 +56,20 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated }) => {
                         <p className="text-sm text-gray-500">{ticket.description || 'Sin descripción detallada.'}</p>
                     </div>
 
+                    {ticket.startDate && (
+                        <div className="flex items-center gap-2 bg-slate-50 border border-gray-100 rounded-lg p-3">
+                            <CalendarDays className="w-4 h-4 text-[#0e71af] shrink-0" aria-hidden="true" />
+                            <p className="text-xs font-bold text-[#0B132B]">
+                                {formatDateMx(ticket.startDate)}
+                                {ticket.dueDate && ticket.dueDate !== ticket.startDate ? ` → ${formatDateMx(ticket.dueDate)}` : ''}
+                                <span className="text-gray-500 font-semibold ml-2">({days} día{days !== 1 ? 's' : ''})</span>
+                            </p>
+                        </div>
+                    )}
+
                     <TicketMetaInfo assignee={ticket.assignee} type={ticket.type} />
 
-                    <TimeTracker 
+                    <TimeTracker
                         ticketId={ticket.db_id}
                         maxHours={ticket.maxHours}
                         horasTrabajadas={horasTrabajadas}

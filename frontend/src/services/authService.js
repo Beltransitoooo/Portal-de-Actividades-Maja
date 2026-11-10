@@ -1,3 +1,5 @@
+import { clearSessionStorage } from '../utils/theme';
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'; // Se define con VITE_API_URL al construir la imagen
 
 // Extrae un mensaje legible de una respuesta de error de FastAPI (incluye validaciones 422 de Pydantic)
@@ -60,7 +62,7 @@ export const fetchWithAuth = async (endpoint, options = {}) => {
 
     // Sesión expirada o token inválido: se limpia la sesión y se regresa al login
     if (response.status === 401 && token) {
-        localStorage.clear();
+        clearSessionStorage();
         window.location.assign('/');
     }
 

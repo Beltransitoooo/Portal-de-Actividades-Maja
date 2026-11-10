@@ -7,79 +7,7 @@ import { QACalendar } from '../components/QA/QACalendar';
 import { QANewTicketModal } from '../components/QA/QANewTicketModal';
 import { QATicketPanel } from '../components/QA/QATicketPanel';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
-import { getInitials } from '../utils/initials';
-
-const COLOR_PALETTES = [
-    { main: 'bg-[#0e71af]', light: 'bg-blue-50', border: 'border-[#0e71af]' },
-    { main: 'bg-emerald-700', light: 'bg-emerald-50', border: 'border-emerald-500' },
-    { main: 'bg-purple-700', light: 'bg-purple-50', border: 'border-purple-500' },
-    { main: 'bg-amber-700', light: 'bg-amber-50', border: 'border-amber-500' }
-];
-
-// Obtiene equipo y actividades del API y los transforma para la vista (sin tocar estado de React)
-const fetchDashboardData = async () => {
-    const resUsers = await fetchWithAuth('/usuarios/');
-    if (!resUsers.ok) {
-        throw new Error(await readErrorMessage(resUsers, 'No se pudo cargar la información del equipo.'));
-    }
-    const usersData = await resUsers.json();
-    const formattedUsers = usersData.map((user, index) => ({
-        raw_id: user.id,
-        id: getInitials(user.name_users || user.usuario),
-        name: user.name_users || user.usuario,
-        role: user.es_admin ? 'Administrador' : 'QA Tester',
-        theme: COLOR_PALETTES[index % COLOR_PALETTES.length],
-        email: user.usuario
-    }));
-
-    const resTasks = await fetchWithAuth('/actividades/');
-    if (!resTasks.ok) {
-        throw new Error(await readErrorMessage(resTasks, 'No se pudieron cargar las actividades.'));
-    }
-    const tasksData = await resTasks.json();
-
-    const formattedTasks = tasksData.map(t => {
-        const assignedUser = formattedUsers.find(u => u.raw_id === t.asignado_a_id);
-        const max = parseFloat(t.estimacion_max_hrs || 0);
-        const logged = parseFloat(t.estimacion_min_hrs || 0);
-        const calculatedProgress = max > 0 ? Math.min(Math.round((logged / max) * 100), 100) : 0;
-        const finalProgress = t.completada ? 100 : calculatedProgress;
-
-        let status = 'PENDIENTE';
-        if (t.completada) status = 'COMPLETADA';
-        else if (logged > 0) status = 'EN PROGRESO';
-
-        return {
-            db_id: t.id,
-            id: `QA-${t.id}`,
-            title: t.titulo,
-            description: t.descripcion,
-            status: status,
-            priority: (t.prioridad || 'MEDIA').toUpperCase(),
-            startDate: t.fecha_inicio,
-            dueDate: t.fecha_vencimiento || t.fecha_inicio,
-            minHours: logged,
-            maxHours: max,
-            progressPct: finalProgress,
-            assignee: assignedUser ? assignedUser.id : 'NA',
-            assignee_raw_id: t.asignado_a_id,
-            type: t.tipo_actividad,
-            completada: t.completada
-        };
-    });
-
-    const usersWithStats = formattedUsers.map(user => {
-        const userTasks = formattedTasks.filter(t => t.assignee_raw_id === user.raw_id);
-        const tasksCount = userTasks.length;
-        const avgProgress = tasksCount > 0 
-            ? Math.round(userTasks.reduce((sum, task) => sum + task.progressPct, 0) / tasksCount)
-            : 0;
-        
-        return { ...user, tasksCount, progressPct: avgProgress };
-    });
-
-    return { teamUsers: usersWithStats, tasks: formattedTasks };
-};
+import { fetchDashboardData } from '../services/qaData';
 
 export const QADashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -158,7 +86,7 @@ export const QADashboard = () => {
 
     return (
         <DashboardLayout>
-            <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8 animate-fade-in xl:h-[calc(100vh-90px)] xl:min-h-[1080px]">
+            <div className="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-5 animate-fade-in xl:h-[calc(100vh-112px)] xl:min-h-[620px]">
                 
                 {/* Sidebar */}
                 <div className="w-full xl:w-72 shrink-0 xl:h-full min-h-0 flex flex-col">

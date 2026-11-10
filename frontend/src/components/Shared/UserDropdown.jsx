@@ -1,7 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal } from './Modal';
 import { getInitials } from '../../utils/initials';
+import { getStoredTheme, applyTheme, clearSessionStorage } from '../../utils/theme';
+import { UserRound, Settings, LogOut, Moon, Sun } from 'lucide-react';
 
 export const UserDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +15,15 @@ export const UserDropdown = () => {
     const initials = getInitials(username);
     // Solo informativo para la interfaz; los permisos reales los valida el backend
     const roleLabel = localStorage.getItem('es_admin') === 'true' ? 'Administrador' : 'Colaborador';
+
+    const [isDark, setIsDark] = useState(() => getStoredTheme() === 'dark');
+    const themeLabelId = useId();
+
+    const toggleTheme = () => {
+        const next = !isDark;
+        setIsDark(next);
+        applyTheme(next ? 'dark' : 'light');
+    };
 
     const openProfile = () => {
         setIsOpen(false);
@@ -38,7 +49,7 @@ export const UserDropdown = () => {
 
     
     const handleLogout = () => {
-        localStorage.clear(); 
+        clearSessionStorage();
         navigate('/', { replace: true }); 
     };
 
@@ -67,9 +78,7 @@ export const UserDropdown = () => {
                         </p>
                         <div className="flex items-center mt-1">
                             <div className="bg-blue-100 text-blue-600 rounded-full w-8 h-8 flex items-center justify-center mr-2 shrink-0">
-                                <svg fill="currentColor" viewBox="0 0 20 20" className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path clipRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" fillRule="evenodd"></path>
-                                </svg>
+                                <UserRound className="h-4 w-4" aria-hidden="true" />
                             </div>
                             <p className="text-sm font-medium text-white truncate relative">
                                 {username}
@@ -82,9 +91,7 @@ export const UserDropdown = () => {
                         <button type="button" onClick={openProfile} className="w-full group relative flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 transition-all duration-200">
                             <div className="absolute left-0 top-0 h-full w-1 bg-blue-500 rounded-r opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:scale-y-100 scale-y-80"></div>
                             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3 shrink-0 group-hover:bg-blue-200 transition-colors duration-200">
-                                <svg fill="currentColor" viewBox="0 0 20 20" className="h-5 w-5 text-blue-600 group-hover:text-[#2b6cb0]" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path clipRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" fillRule="evenodd"></path>
-                                </svg>
+                                <UserRound className="h-5 w-5 text-blue-600 group-hover:text-[#2b6cb0]" aria-hidden="true" />
                             </div>
                             <span className="font-medium text-gray-700 group-hover:text-[#1a365d]">Perfil</span>
                         </button>
@@ -93,9 +100,7 @@ export const UserDropdown = () => {
                         <button type="button" disabled title="Próximamente" className="w-full group relative flex items-center px-4 py-2.5 text-sm text-gray-700 transition-all duration-200 opacity-60 cursor-not-allowed">
                             <div className="absolute left-0 top-0 h-full w-1 bg-blue-600 rounded-r opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:scale-y-100 scale-y-80"></div>
                             <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3 shrink-0 group-hover:bg-blue-200 transition-colors duration-200">
-                                <svg fill="currentColor" viewBox="0 0 20 20" className="h-5 w-5 text-blue-600 group-hover:text-[#2b6cb0]" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path clipRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" fillRule="evenodd"></path>
-                                </svg>
+                                <Settings className="h-5 w-5 text-blue-600" aria-hidden="true" />
                             </div>
                             <span className="font-medium text-gray-700">Configuración</span>
                             <span className="ml-auto text-[9px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">Próximamente</span>
@@ -108,9 +113,7 @@ export const UserDropdown = () => {
                         >
                             <div className="absolute left-0 top-0 h-full w-1 bg-red-500 rounded-r opacity-0 group-hover:opacity-100 transition-all duration-200 group-hover:scale-y-100 scale-y-80"></div>
                             <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center mr-3 shrink-0 group-hover:bg-red-200 transition-colors duration-200">
-                                <svg fill="currentColor" viewBox="0 0 20 20" className="h-5 w-5 text-red-700 group-hover:text-red-700" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                    <path clipRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" fillRule="evenodd"></path>
-                                </svg>
+                                <LogOut className="h-5 w-5 text-red-700" aria-hidden="true" />
                             </div>
                             <span className="font-medium text-gray-700 group-hover:text-red-700">Cerrar sesión</span>
                         </button>
@@ -128,6 +131,33 @@ export const UserDropdown = () => {
                         <p className="text-base font-black text-[#07152F] truncate">{username}</p>
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{roleLabel}</p>
                     </div>
+                </div>
+
+                {/* Preferencia de apariencia: se guarda en este navegador */}
+                <div className="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                        <p id={themeLabelId} className="text-sm font-bold text-[#07152F]">Modo oscuro</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{isDark ? 'Activado' : 'Desactivado'}</p>
+                    </div>
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={isDark}
+                        aria-labelledby={themeLabelId}
+                        onClick={toggleTheme}
+                        className={`theme-switch relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border-2 transition-colors duration-200 ${isDark ? 'bg-[#0072b2] border-[#0072b2]' : 'bg-slate-500 border-slate-500'}`}
+                    >
+                        <span
+                            aria-hidden="true"
+                            className={`inline-flex h-5 w-5 items-center justify-center rounded-full bg-white shadow transition-transform duration-200 ${isDark ? 'translate-x-5' : 'translate-x-0.5'}`}
+                        >
+                            {isDark ? (
+                                <Moon className="h-3 w-3 text-[#0072b2]" aria-hidden="true" />
+                            ) : (
+                                <Sun className="h-3 w-3 text-amber-600" aria-hidden="true" />
+                            )}
+                        </span>
+                    </button>
                 </div>
             </Modal>
         </div>

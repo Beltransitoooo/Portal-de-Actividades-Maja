@@ -1,4 +1,5 @@
 import { useState, useId } from 'react';
+import { X, Hourglass } from 'lucide-react';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../../services/authService';
 import { useDialog } from '../../hooks/useDialog';
 
@@ -10,8 +11,7 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
     const [techLeadId, setTechLeadId] = useState('');
     const [startDate, setStartDate] = useState('');
     const [dueDate, setDueDate] = useState('');
-    const [minHours, setMinHours] = useState('');
-    const [maxHours, setMaxHours] = useState('');
+    const [estimatedHours, setEstimatedHours] = useState('');
     const [description, setDescription] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
@@ -46,8 +46,9 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
             prioridad: priority,
             fecha_inicio: startDate || null,
             fecha_vencimiento: dueDate || null,
-            estimacion_min_hrs: minHours ? parseFloat(minHours) : null,
-            estimacion_max_hrs: maxHours ? parseFloat(maxHours) : null,
+            // Estimación única; estimacion_min_hrs acumula las horas utilizadas y arranca en 0
+            estimacion_max_hrs: estimatedHours ? parseFloat(estimatedHours) : null,
+            estimacion_min_hrs: 0,
             asignado_a_id: assigneeId ? parseInt(assigneeId, 10) : null,
             lider_tecnico_id: techLeadId ? parseInt(techLeadId, 10) : null,
         };
@@ -71,8 +72,7 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
             setDescription('');
             setStartDate('');
             setDueDate('');
-            setMinHours('');
-            setMaxHours('');
+            setEstimatedHours('');
             setAssigneeId('');
             setTechLeadId('');
             onClose();
@@ -99,12 +99,15 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
 
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-slate-50">
-                    <div>
-                        <p className="text-[10px] text-[#0e71af] font-bold tracking-widest uppercase mb-1">QA & Testing</p>
-                        <h2 id={ids.heading} className="text-xl font-black text-[#07152F] uppercase tracking-tight">Crear nueva tarea</h2>
+                    <div className="flex items-stretch gap-3">
+                        <span aria-hidden="true" className="w-1 bg-[#0072b2] rounded-sm -skew-x-12 shrink-0"></span>
+                        <div>
+                            <p className="text-[10px] text-[#0e71af] font-bold tracking-widest uppercase mb-1">QA & Testing</p>
+                            <h2 id={ids.heading} className="text-xl font-black italic text-[#07152F] uppercase tracking-tight">Crear nueva tarea</h2>
+                        </div>
                     </div>
                     <button type="button" onClick={onClose} aria-label="Cerrar" className="text-gray-500 hover:text-red-700 transition-colors p-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <X className="w-5 h-5" aria-hidden="true" />
                     </button>
                 </div>
 
@@ -141,18 +144,18 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
                             <div>
                                 <label htmlFor={ids.type} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Tipo de Actividad</label>
                                 <select id={ids.type} value={type} onChange={(e) => setType(e.target.value)} className="w-full bg-white border border-gray-200 p-2.5 text-xs text-[#07152F] focus:outline-none focus:border-[#0e71af] rounded-md cursor-pointer">
-                                    <option value="Tarea">☑️ Tarea</option>
-                                    <option value="Bug">🐛 Error / Bug</option>
-                                    <option value="Pruebas">🔬 Solicitud de Pruebas</option>
+                                    <option value="Tarea">Tarea</option>
+                                    <option value="Bug">Error / Bug</option>
+                                    <option value="Pruebas">Solicitud de pruebas</option>
                                 </select>
                             </div>
                             <div>
                                 <label htmlFor={ids.priority} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Prioridad</label>
                                 <select id={ids.priority} value={priority} onChange={(e) => setPriority(e.target.value)} className="w-full bg-white border border-gray-200 p-2.5 text-xs text-[#07152F] focus:outline-none focus:border-[#0e71af] rounded-md cursor-pointer">
-                                    <option value="Crítica">🚨 Crítica</option>
-                                    <option value="Alta">🔴 Alta</option>
-                                    <option value="Media">🟡 Media</option>
-                                    <option value="Baja">🔵 Baja</option>
+                                    <option value="Crítica">Crítica</option>
+                                    <option value="Alta">Alta</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Baja">Baja</option>
                                 </select>
                             </div>
                         </div>
@@ -202,25 +205,20 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
                                 </div>
                             </div>
 
-                            <div role="group" aria-labelledby={ids.hours} className="bg-slate-50 border border-gray-200 rounded-lg p-4 flex flex-col justify-center">
-                                <p id={ids.hours} className="block text-[10px] font-bold text-[#0e71af] uppercase tracking-widest mb-3">
-                                    Estimación de Horas
+                            <div className="bg-slate-50 border border-gray-200 rounded-lg p-4 flex flex-col justify-center">
+                                <label htmlFor={ids.hours} className="flex items-center gap-1.5 text-[10px] font-bold text-[#0e71af] uppercase tracking-widest mb-3">
+                                    <Hourglass className="w-3 h-3" aria-hidden="true" />
+                                    Estimación de horas
+                                </label>
+                                <input
+                                    id={ids.hours}
+                                    type="number" step="0.5" min="0" value={estimatedHours} onChange={(e) => setEstimatedHours(e.target.value)}
+                                    placeholder="Ej: 8"
+                                    className="w-full bg-white border border-gray-200 p-2.5 text-xs text-[#07152F] focus:outline-none focus:border-[#0e71af] rounded-md text-center font-bold"
+                                />
+                                <p className="text-[9px] text-gray-500 font-medium mt-2 leading-relaxed">
+                                    Se reparte entre los días de ejecución (sábado cuenta medio día).
                                 </p>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="number" step="0.5" min="0" value={minHours} onChange={(e) => setMinHours(e.target.value)}
-                                        placeholder="Mín"
-                                        aria-label="Horas mínimas estimadas"
-                                        className="w-full bg-white border border-gray-200 p-2.5 text-xs text-[#07152F] focus:outline-none focus:border-[#0e71af] rounded-md text-center font-bold"
-                                    />
-                                    <span className="text-gray-500 font-bold" aria-hidden="true">-</span>
-                                    <input
-                                        type="number" step="0.5" min="0" value={maxHours} onChange={(e) => setMaxHours(e.target.value)}
-                                        placeholder="Máx"
-                                        aria-label="Horas máximas estimadas"
-                                        className="w-full bg-white border border-gray-200 p-2.5 text-xs text-[#07152F] focus:outline-none focus:border-[#0e71af] rounded-md text-center font-bold"
-                                    />
-                                </div>
                             </div>
                         </div>
                     </form>

@@ -1,10 +1,12 @@
 import React from 'react';
 
+import { Clock3, ClipboardList } from 'lucide-react';
+
 export const DeviationTable = ({ trackingData = [] }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 lg:p-8 flex flex-col h-full">
             <h2 className="text-sm font-black text-[#0B132B] uppercase tracking-wider flex items-center gap-2 mb-6">
-                <svg className="w-4 h-4 text-[#00A3FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <Clock3 className="w-4 h-4 text-[#0072b2]" aria-hidden="true" />
                 Desviación de tiempos
             </h2>
 
@@ -38,7 +40,7 @@ export const DeviationTable = ({ trackingData = [] }) => {
                     /* ESTADO VACÍO (Empty State) */
                     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
                         <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-100 mb-4 shadow-sm text-gray-500">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                            <ClipboardList className="w-6 h-6" aria-hidden="true" />
                         </div>
                         <p className="text-sm font-bold text-[#0B132B]">No hay actividades registradas</p>
                         <p className="text-xs text-gray-500 mt-1.5 max-w-[280px]">

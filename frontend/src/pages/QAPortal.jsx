@@ -3,18 +3,14 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
 import { getQuarterWeeks, overlapsPeriod, toLocalDateStr, formatDateMx } from '../utils/dates';
 import { getInitials } from '../utils/initials';
+import { COLOR_PALETTES } from '../services/qaData';
 
 import { PortalHeader } from '../components/QA/Portal/PortalHeader';
 import { CapacityTable } from '../components/QA/Portal/CapacityTable';
 import { DeviationTable } from '../components/QA/Portal/DeviationTable';
 import { EffortBalance } from '../components/QA/Portal/EffortBalance';
 
-const COLOR_PALETTES = [
-    'bg-[#0e71af]',
-    'bg-emerald-700',
-    'bg-purple-700',
-    'bg-amber-700'
-];
+
 
 export const QAPortal = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -91,7 +87,7 @@ export const QAPortal = () => {
                 logged: assignedHours,
                 max: 40,
                 status,
-                color: COLOR_PALETTES[index % COLOR_PALETTES.length],
+                color: COLOR_PALETTES[index % COLOR_PALETTES.length].main,
                 statusColor
             };
         });

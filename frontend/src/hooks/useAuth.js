@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { clearSessionStorage } from '../utils/theme';
 import { loginApi, registerApi, loginWithGoogleApi, toUserMessage } from '../services/authService';
 
 export const useAuth = () => {
@@ -54,7 +55,7 @@ export const useAuth = () => {
     };
 
     const logout = () => {
-        localStorage.clear();
+        clearSessionStorage();
         window.location.href = '/';
     };
 

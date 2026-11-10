@@ -6,6 +6,7 @@ export const HomeLayout = ({ children }) => {
         <div className="min-h-screen bg-slate-50 flex flex-col">
             <header className="h-16 bg-[#0B132B] flex items-center justify-between px-6 shadow-md shrink-0">
                 <div className="flex items-center gap-3">
+                    <span aria-hidden="true" className="w-1 h-7 bg-[#00A3FF] -skew-x-12 rounded-sm"></span>
                     <img 
                         src={logoMaja} 
                         alt="" 
