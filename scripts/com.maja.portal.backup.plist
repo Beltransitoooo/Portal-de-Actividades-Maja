@@ -12,7 +12,7 @@
   </array>
 
   <!-- Una vez al día a las 13:00. Si el equipo estaba dormido a esa hora, macOS lo ejecuta al despertar.
-       Si estaba apagado, NO se ejecuta hasta el día siguiente. -->
+      Si estaba apagado, NO se ejecuta hasta el día siguiente. -->
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key><integer>13</integer>
