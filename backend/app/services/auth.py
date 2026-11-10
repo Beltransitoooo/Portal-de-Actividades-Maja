@@ -1,3 +1,5 @@
+import hashlib
+from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi import HTTPException, status
@@ -105,3 +107,32 @@ def autenticar_con_google(db: Session, token_google: str):
         "es_admin": usuario_db.es_admin,
         "area_id": usuario_db.area_id,
     }
+
+
+def restablecer_contrasena(db: Session, datos: schemas.RestablecerContrasenaRequest):
+    """Define una contraseña nueva con un enlace de un solo uso (ver usuarios.generar_restablecimiento)."""
+    token_hash = hashlib.sha256(datos.token.encode("utf-8")).hexdigest()
+    registro = (
+        db.query(models.TokenRestablecimiento)
+        .filter(models.TokenRestablecimiento.token_hash == token_hash)
+        .first()
+    )
+
+    # Mismo mensaje para token inexistente, usado o vencido: no se revela cuál fue el caso
+    if not registro or registro.usado or registro.expira < datetime.utcnow():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El enlace no es válido o ya venció. Pide uno nuevo a un administrador.",
+        )
+
+    usuario_db = db.query(models.Usuario).filter(models.Usuario.id == registro.usuario_id).first()
+    if not usuario_db:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El enlace no es válido o ya venció. Pide uno nuevo a un administrador.",
+        )
+
+    usuario_db.contrasena = security.hash_contrasena(datos.contrasena)
+    registro.usado = True
+    db.commit()
+    return {"mensaje": "Contraseña actualizada. Ya puedes iniciar sesión."}

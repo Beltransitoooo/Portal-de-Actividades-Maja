@@ -18,23 +18,28 @@ class UsuarioBase(BaseModel):
         return value
 
 
+def validar_fortaleza_contrasena(value: str) -> str:
+    """Reglas de contraseña compartidas por el registro y el restablecimiento."""
+    if len(value) < 8:
+        raise ValueError("La contraseña debe tener al menos 8 caracteres")
+
+    if not re.search(r"[A-Z]", value):
+        raise ValueError("La contraseña debe contener al menos una letra mayúscula")
+
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
+        raise ValueError("La contraseña debe contener al menos un carácter especial (!@#$%^&*)")
+
+    return value
+
+
 class UsuarioCreate(UsuarioBase):
     contrasena: str
 
     @field_validator("contrasena")
     @classmethod
-    def validar_fortaleza_contrasena(cls, value: str) -> str:
-        if len(value) < 8:
-            raise ValueError("La contraseña debe tener al menos 8 caracteres")
+    def validar_fortaleza(cls, value: str) -> str:
+        return validar_fortaleza_contrasena(value)
 
-        if not re.search(r"[A-Z]", value):
-            raise ValueError("La contraseña debe contener al menos una letra mayúscula")
-
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', value):
-            raise ValueError("La contraseña debe contener al menos un carácter especial (!@#$%^&*)")
-
-        return value
-    
 
 class UsuarioResponse(UsuarioBase):
     id: int
@@ -60,10 +65,12 @@ class ActividadBase(BaseModel):
     estimacion_max_hrs: Optional[float] = None
     horas_utilizadas: float = Field(default=0, ge=0)
     estado: Optional[EstadoActividad] = None
+    motivo_bloqueo: Optional[str] = Field(default=None, max_length=500)
 
 class ActividadCreate(ActividadBase):
     asignado_a_id: Optional[int] = None
     lider_tecnico_id: Optional[int] = None
+    lider_catalogo_id: Optional[int] = None
     area_id: Optional[int] = None
 
 class ActividadUpdate(BaseModel):
@@ -76,10 +83,11 @@ class ActividadUpdate(BaseModel):
     fecha_vencimiento: Optional[date] = None
     estimacion_min_hrs: Optional[float] = None
     estimacion_max_hrs: Optional[float] = None
-    horas_utilizadas: Optional[float] = Field(default=None, ge=0)
     estado: Optional[EstadoActividad] = None
+    motivo_bloqueo: Optional[str] = Field(default=None, max_length=500)
     asignado_a_id: Optional[int] = None
     lider_tecnico_id: Optional[int] = None
+    lider_catalogo_id: Optional[int] = None
     area_id: Optional[int] = None
 
 class ActividadResponse(ActividadBase):
@@ -89,6 +97,7 @@ class ActividadResponse(ActividadBase):
     creador_id: int
     asignado_a_id: Optional[int] = None
     lider_tecnico_id: Optional[int] = None
+    lider_catalogo_id: Optional[int] = None
     area_id: Optional[int] = None
 
     class Config:
@@ -119,3 +128,115 @@ class LoginRequest(BaseModel):
 
 class GoogleLoginRequest(BaseModel):
     token: str
+
+
+# ---------- Líderes técnicos (catálogo) ----------
+class LiderTecnicoCreate(BaseModel):
+    nombre: str = Field(min_length=2, max_length=100)
+
+    @field_validator("nombre")
+    @classmethod
+    def limpiar_nombre(cls, value: str) -> str:
+        value = " ".join(value.split())
+        if len(value) < 2:
+            raise ValueError("El nombre es demasiado corto")
+        return value
+
+
+class LiderTecnicoUpdate(BaseModel):
+    nombre: Optional[str] = Field(default=None, min_length=2, max_length=100)
+    activo: Optional[bool] = None
+
+
+class LiderTecnicoResponse(BaseModel):
+    id: int
+    nombre: str
+    activo: bool
+
+    class Config:
+        from_attributes = True
+
+
+# ---------- Horas por día ----------
+class RegistroHorasCreate(BaseModel):
+    fecha: date
+    horas: float = Field(gt=0, le=24)
+    nota: Optional[str] = Field(default=None, max_length=300)
+
+
+class RegistroHorasResponse(BaseModel):
+    id: int
+    actividad_id: int
+    fecha: date
+    horas: float
+    nota: Optional[str] = None
+    usuario_id: Optional[int] = None
+    usuario_nombre: Optional[str] = None
+    creado: datetime
+
+
+# ---------- Comentarios y evidencias ----------
+class ComentarioCreate(BaseModel):
+    texto: str = Field(min_length=1, max_length=2000)
+    url: Optional[str] = Field(default=None, max_length=500)
+
+    @field_validator("texto")
+    @classmethod
+    def texto_no_vacio(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("El comentario no puede estar vacío")
+        return value
+
+    @field_validator("url")
+    @classmethod
+    def validar_url(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        value = value.strip()
+        if not value:
+            return None
+        # Solo http/https: evita enlaces javascript: o data: que se ejecutarían al abrirlos
+        if not re.match(r"^https?://[^\s]+$", value, flags=re.IGNORECASE):
+            raise ValueError("El enlace debe empezar con http:// o https://")
+        return value
+
+
+class ComentarioResponse(BaseModel):
+    id: int
+    actividad_id: int
+    usuario_id: Optional[int] = None
+    usuario_nombre: Optional[str] = None
+    texto: str
+    url: Optional[str] = None
+    creado: datetime
+
+
+# ---------- Historial ----------
+class HistorialResponse(BaseModel):
+    id: int
+    actividad_id: int
+    usuario_id: Optional[int] = None
+    usuario_nombre: Optional[str] = None
+    campo: str
+    valor_anterior: Optional[str] = None
+    valor_nuevo: Optional[str] = None
+    creado: datetime
+
+
+# ---------- Restablecimiento de contraseña ----------
+class RestablecerContrasenaRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=200)
+    contrasena: str
+
+    @field_validator("contrasena")
+    @classmethod
+    def validar_fortaleza(cls, value: str) -> str:
+        return validar_fortaleza_contrasena(value)
+
+
+class EnlaceRestablecimientoResponse(BaseModel):
+    token: str
+    expira: datetime
+    usuario_id: int
+    usuario_nombre: Optional[str] = None

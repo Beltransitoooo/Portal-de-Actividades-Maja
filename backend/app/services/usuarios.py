@@ -1,6 +1,10 @@
+import hashlib
+import secrets
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app import models, schemas
+from app.config import settings
 
 def listar(db: Session, usuario_actual: models.Usuario):
     if usuario_actual.es_admin:
@@ -63,3 +67,44 @@ def eliminar(db: Session, usuario_id: int, usuario_actual: models.Usuario):
     db.delete(usuario_db)
     db.commit()
     return None
+
+
+def generar_restablecimiento(db: Session, usuario_id: int, usuario_actual: models.Usuario):
+    """Crea un enlace de un solo uso para que la persona defina una contraseña nueva.
+
+    No hay envío de correo: el administrador comparte el enlace por un canal de confianza.
+    En la base solo se guarda el hash del token; el valor en claro se devuelve una única vez.
+    """
+    if not usuario_actual.es_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solo el administrador puede generar enlaces de restablecimiento"
+        )
+
+    usuario_db = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
+    if not usuario_db:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+
+    # Un enlace nuevo invalida los anteriores sin usar
+    (
+        db.query(models.TokenRestablecimiento)
+        .filter(models.TokenRestablecimiento.usuario_id == usuario_db.id, models.TokenRestablecimiento.usado.is_(False))
+        .update({"usado": True})
+    )
+
+    token = secrets.token_urlsafe(32)
+    expira = datetime.utcnow() + timedelta(minutes=settings.RESET_TOKEN_MINUTES)
+    db.add(models.TokenRestablecimiento(
+        usuario_id=usuario_db.id,
+        token_hash=hashlib.sha256(token.encode("utf-8")).hexdigest(),
+        expira=expira,
+        creado_por_id=usuario_actual.id,
+    ))
+    db.commit()
+
+    return {
+        "token": token,
+        "expira": expira,
+        "usuario_id": usuario_db.id,
+        "usuario_nombre": usuario_db.name_users or usuario_db.usuario,
+    }

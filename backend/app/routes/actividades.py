@@ -46,3 +46,74 @@ def eliminar_actividad(
     usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
 ):
     return actividades_service.eliminar(db, actividad_id, usuario_actual)
+
+
+# ---------- Horas por día ----------
+@router.get("/{actividad_id}/horas", response_model=List[schemas.RegistroHorasResponse])
+def listar_horas_actividad(
+    actividad_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    actividades_service._obtener_actividad(db, actividad_id, usuario_actual)
+    return actividades_service.listar_horas(db, usuario_actual, actividad_id=actividad_id)
+
+
+@router.post("/{actividad_id}/horas", response_model=schemas.RegistroHorasResponse, status_code=status.HTTP_201_CREATED)
+def registrar_horas(
+    actividad_id: int,
+    datos: schemas.RegistroHorasCreate,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    return actividades_service.registrar_horas(db, actividad_id, datos, usuario_actual)
+
+
+@router.delete("/{actividad_id}/horas/{registro_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_horas(
+    actividad_id: int,
+    registro_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    return actividades_service.eliminar_horas(db, actividad_id, registro_id, usuario_actual)
+
+
+# ---------- Comentarios y evidencias ----------
+@router.get("/{actividad_id}/comentarios", response_model=List[schemas.ComentarioResponse])
+def listar_comentarios(
+    actividad_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    return actividades_service.listar_comentarios(db, actividad_id, usuario_actual)
+
+
+@router.post("/{actividad_id}/comentarios", response_model=schemas.ComentarioResponse, status_code=status.HTTP_201_CREATED)
+def agregar_comentario(
+    actividad_id: int,
+    datos: schemas.ComentarioCreate,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    return actividades_service.agregar_comentario(db, actividad_id, datos, usuario_actual)
+
+
+@router.delete("/{actividad_id}/comentarios/{comentario_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_comentario(
+    actividad_id: int,
+    comentario_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    return actividades_service.eliminar_comentario(db, actividad_id, comentario_id, usuario_actual)
+
+
+# ---------- Historial ----------
+@router.get("/{actividad_id}/historial", response_model=List[schemas.HistorialResponse])
+def listar_historial(
+    actividad_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    return actividades_service.listar_historial(db, actividad_id, usuario_actual)

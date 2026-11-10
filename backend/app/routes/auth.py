@@ -19,3 +19,8 @@ def login_google(
     datos: schemas.GoogleLoginRequest, db: Session = Depends(get_db)
 ):
     return auth_service.autenticar_con_google(db, datos.token)
+
+
+@router.post("/restablecer")
+def restablecer_contrasena(datos: schemas.RestablecerContrasenaRequest, db: Session = Depends(get_db)):
+    return auth_service.restablecer_contrasena(db, datos)

@@ -1,0 +1,4 @@
+# Dependencias solo para pruebas (no se instalan en la imagen de producción)
+-r requirements.txt
+pytest
+httpx

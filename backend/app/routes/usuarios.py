@@ -15,6 +15,20 @@ def mostrar_usuarios(
     return usuarios_service.listar(db, usuario_actual)
 
 
+@router.get("/me", response_model=schemas.UsuarioResponse)
+def mi_perfil(usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)):
+    return usuario_actual
+
+
+@router.post("/{usuario_id}/restablecimiento", response_model=schemas.EnlaceRestablecimientoResponse)
+def generar_enlace_restablecimiento(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    return usuarios_service.generar_restablecimiento(db, usuario_id, usuario_actual)
+
+
 @router.put("/{usuario_id}", response_model=schemas.UsuarioResponse)
 def actualizar_usuario(
     usuario_id: int,
