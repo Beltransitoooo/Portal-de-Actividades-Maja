@@ -15,7 +15,7 @@ import { useActivityFilters } from '../hooks/useActivityFilters';
 import { STATUS_CONFIG } from '../services/qaData';
 import { toLocalDateStr, formatDateMx } from '../utils/dates';
 import { distributeHours, fmtHours, getEquivalentWorkingDays } from '../utils/schedule';
-import { dayCapacity } from '../utils/capacity';
+import { dayCapacity, CAPACITY_SUMMARY, WEEKDAY_SCHEDULE_TEXT, SATURDAY_SCHEDULE_TEXT } from '../utils/capacity';
 import { toCsv, downloadCsv } from '../utils/csv';
 import { printPage } from '../utils/print';
 
@@ -462,8 +462,8 @@ export const QASchedule = () => {
                         </div>
 
                         <p className="text-[10px] text-gray-500 font-medium -mt-2 px-1">
-                            La estimación se reparte entre los días de ejecución (sábado cuenta medio día y domingo se descansa). Bajo cada barra se muestran las horas reales de cada día: en rojo cuando superan lo planeado.
-                            En "Carga planeada", el rojo indica que las actividades de ese día suman más horas de las disponibles (8 h, sábado 4 h; 44 h por semana).
+                            La estimación se reparte entre los días de ejecución según la jornada ({WEEKDAY_SCHEDULE_TEXT} entre semana; sábado {SATURDAY_SCHEDULE_TEXT}; domingo se descansa). Bajo cada barra se muestran las horas reales de cada día: en rojo cuando superan lo planeado.
+                            En "Carga planeada", el rojo indica que las actividades de ese día suman más horas de las disponibles ({CAPACITY_SUMMARY}).
                         </p>
                     </>
                 )}

@@ -5,6 +5,7 @@ import { StatusBadge } from '../Shared/StatusBadge';
 import { toLocalDateStr, formatDateMx } from '../../utils/dates';
 import { distributeHours, fmtHours } from '../../utils/schedule';
 import { STATUS_CONFIG } from '../../services/qaData';
+import { SATURDAY_SHORT_TEXT } from '../../utils/capacity';
 
 // --- COMPONENTE PRINCIPAL: CALENDARIO ---
 export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onStatusChange }) => {
@@ -128,7 +129,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
 
                                     {isSaturday && cell.isCurrentMonth && (
                                         <div className="flex items-center bg-amber-50 border border-amber-200/50 text-amber-700 px-1 py-0.5 rounded">
-                                            <span className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden lg:block">9–13 h</span>
+                                            <span className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden lg:block">{SATURDAY_SHORT_TEXT}</span>
                                         </div>
                                     )}
 

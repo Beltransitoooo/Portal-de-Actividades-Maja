@@ -21,12 +21,15 @@ describe('distributeHours', () => {
         }
     });
 
-    it('el sábado recibe la mitad y el domingo nada', () => {
+    it('el sábado recibe 5/7 de un día entre semana y el domingo nada', () => {
         // viernes 13, sábado 14 y domingo 15
-        const dist = distributeHours(6, '2026-11-13', '2026-11-15');
+        const dist = distributeHours(12, '2026-11-13', '2026-11-15');
         expect(dist['2026-11-15']).toBeUndefined();
         expect(dist['2026-11-13']).toBeGreaterThan(dist['2026-11-14']);
-        expect(sum(dist)).toBe(6);
+        expect(sum(dist)).toBe(12);
+        // Una semana completa de 40 h cae exactamente en la jornada: 7 h por día y 5 h el sábado
+        const semana = distributeHours(40, '2026-11-09', '2026-11-15');
+        expect(Object.values(semana)).toEqual([7, 7, 7, 7, 7, 5]);
     });
 
     it('un rango solo de domingo deja todo en la fecha de inicio', () => {
@@ -45,9 +48,9 @@ describe('distributeHours', () => {
 });
 
 describe('utilidades de horas y días', () => {
-    it('cuenta días laborales equivalentes (sábado medio día, domingo nada)', () => {
+    it('cuenta días laborales equivalentes (sábado 5/7 de día, domingo nada)', () => {
         expect(getEquivalentWorkingDays('2026-11-09', '2026-11-13')).toBe(5);
-        expect(getEquivalentWorkingDays('2026-11-09', '2026-11-15')).toBe(5.5);
+        expect(getEquivalentWorkingDays('2026-11-09', '2026-11-15')).toBeCloseTo(5 + 5 / 7, 9);
         expect(getEquivalentWorkingDays('2026-11-15', '2026-11-15')).toBe(1); // nunca 0
     });
 

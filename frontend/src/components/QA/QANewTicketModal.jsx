@@ -3,6 +3,7 @@ import { X, Hourglass } from 'lucide-react';
 import { createActivity, updateActivity } from '../../services/qaApi';
 import { toUserMessage } from '../../services/authService';
 import { useDialog } from '../../hooks/useDialog';
+import { WEEKDAY_HOURS, SATURDAY_HOURS } from '../../utils/capacity';
 
 const PRIORITIES = ['Crítica', 'Alta', 'Media', 'Baja'];
 
@@ -207,7 +208,7 @@ export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers =
                                     className={`${fieldClass} bg-white p-2.5 rounded-md text-center font-bold`}
                                 />
                                 <p className="text-[9px] text-gray-500 font-medium mt-2 leading-relaxed">
-                                    Se reparte entre los días de ejecución (sábado cuenta medio día).
+                                    Se reparte entre los días de ejecución según la jornada ({WEEKDAY_HOURS} h entre semana, {SATURDAY_HOURS} h el sábado).
                                 </p>
                             </div>
                         </div>

@@ -1,11 +1,12 @@
 import { toLocalDateStr } from './dates';
+import { WEEKDAY_HOURS, SATURDAY_HOURS } from './capacity';
 
-// Reglas de jornada del equipo (mismas que usa el calendario):
-// Lun–Vie cuentan como día completo, Sábado como medio día (9–13 h) y Domingo se descansa.
+// Peso de cada día para repartir una estimación, según las horas que se trabajan (ver utils/capacity.js):
+// lunes a viernes = 1 día completo (7 h), sábado = 5/7 de un día (5 h) y domingo se descansa.
 export const dayWeight = (date) => {
     const dow = date.getDay();
     if (dow === 0) return 0;
-    if (dow === 6) return 0.5;
+    if (dow === 6) return SATURDAY_HOURS / WEEKDAY_HOURS;
     return 1;
 };
 

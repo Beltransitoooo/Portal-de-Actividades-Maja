@@ -11,7 +11,7 @@ import { STATUS_CODES } from '../services/qaData';
 import { toUserMessage } from '../services/authService';
 import { toLocalDateStr, formatDateMx } from '../utils/dates';
 import { distributeHours, fmtHours } from '../utils/schedule';
-import { dayCapacity } from '../utils/capacity';
+import { dayCapacity, scheduleText } from '../utils/capacity';
 import { buildAlerts } from '../utils/alerts';
 
 const ALERT_STYLES = {
@@ -144,7 +144,7 @@ export const QAMyDay = () => {
                                 icon={Hourglass}
                                 label="Plan de hoy"
                                 value={`${fmtHours(plannedToday)}h`}
-                                detail={activeScope === 'mine' ? (isRestDay ? 'Hoy es día de descanso' : `de ${fmtHours(capacityToday)} h disponibles`) : undefined}
+                                detail={activeScope === 'mine' ? (isRestDay ? 'Hoy es día de descanso' : `de ${fmtHours(capacityToday)} h disponibles (${scheduleText(today)})`) : undefined}
                                 alert={activeScope === 'mine' && capacityToday > 0 && plannedToday > capacityToday + 0.05}
                             />
                             <Summary

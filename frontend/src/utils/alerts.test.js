@@ -42,7 +42,7 @@ describe('buildAlerts', () => {
     });
 
     it('sobrecarga: más horas planeadas que la capacidad del día', () => {
-        // Dos actividades de 8 h el mismo martes = 16 h para una persona que tiene 8 h
+        // Dos actividades de 8 h el mismo martes = 16 h para una persona que tiene 7 h
         const alerts = buildAlerts([
             task({ db_id: 1 }),
             task({ db_id: 2, id: 'QA-2' }),
@@ -50,15 +50,15 @@ describe('buildAlerts', () => {
         const overload = alerts.find(a => a.kind === 'overload');
         expect(overload).toBeTruthy();
         expect(overload.worst.planned).toBe(16);
-        expect(overload.worst.capacity).toBe(8);
+        expect(overload.worst.capacity).toBe(7);
     });
 
     it('sobrecarga: no cuenta el domingo ni a personas distintas juntas', () => {
         const alerts = buildAlerts([
-            task({ db_id: 1, assignee_raw_id: 7 }),
-            task({ db_id: 2, assignee_raw_id: 8, assigneeName: 'Persona Dos' }),
+            task({ db_id: 1, assignee_raw_id: 7, maxHours: 7 }),
+            task({ db_id: 2, assignee_raw_id: 8, assigneeName: 'Persona Dos', maxHours: 7 }),
         ], { today: TODAY });
-        expect(kinds(alerts)).not.toContain('overload'); // 8 h cada quien: cabe
+        expect(kinds(alerts)).not.toContain('overload'); // 7 h cada quien: cabe en la jornada
     });
 
     it('ordena por importancia: vencidas, bloqueadas, sobrecarga y por vencer', () => {
