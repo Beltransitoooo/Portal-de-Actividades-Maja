@@ -3,52 +3,63 @@ import { Clock3, ChevronDown, Hourglass } from 'lucide-react';
 import { Modal } from '../Shared/Modal';
 import { toLocalDateStr, formatDateMx } from '../../utils/dates';
 import { distributeHours, fmtHours } from '../../utils/schedule';
-
-// --- CONFIGURACIÓN VISUAL DE ESTADOS ---
-const STATUS_CONFIG = {
-    'PENDIENTE':   { color: 'text-slate-600', bg: 'bg-slate-100', dot: 'bg-slate-400', border: 'border-slate-200', hover: 'hover:bg-slate-200' },
-    'EN PROGRESO': { color: 'text-[#0b5a8c]', bg: 'bg-[#1296E8]/10', dot: 'bg-[#0e71af]', border: 'border-[#1296E8]/20', hover: 'hover:bg-[#1296E8]/20' },
-    'EN REVISIÓN': { color: 'text-amber-700', bg: 'bg-amber-50', dot: 'bg-amber-500', border: 'border-amber-200', hover: 'hover:bg-amber-100' },
-    'COMPLETADA':  { color: 'text-emerald-700', bg: 'bg-emerald-50', dot: 'bg-emerald-500', border: 'border-emerald-200', hover: 'hover:bg-emerald-100' },
-    'BLOQUEADA':   { color: 'text-red-700', bg: 'bg-red-50', dot: 'bg-red-500', border: 'border-red-200', hover: 'hover:bg-red-100' }
-};
-
-// Estados que el backend aún no puede guardar (la actividad solo tiene el campo "completada").
-// Se muestran deshabilitados hasta que exista soporte en el servidor.
-const UNSUPPORTED_STATUSES = ['EN REVISIÓN', 'BLOQUEADA'];
+import { STATUS_CONFIG } from '../../services/qaData';
 
 // --- COMPONENTE: BADGE INTERACTIVO DE ESTADO ---
+// El menú usa posición fija calculada desde el botón: así ninguna ventana (overflow) lo recorta
+// y, si abajo no hay espacio, se abre hacia arriba.
+const MENU_WIDTH = 132;
+const MENU_HEIGHT = Object.keys(STATUS_CONFIG).length * 28 + 8;
+
 const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
-    const [isOpen, setIsOpen] = useState(false);
+    const [menuPos, setMenuPos] = useState(null); // null = cerrado
     const dropdownRef = useRef(null);
     const config = STATUS_CONFIG[currentStatus] || STATUS_CONFIG['PENDIENTE'];
+    const isOpen = menuPos !== null;
+
+    const toggleMenu = (e) => {
+        e.stopPropagation();
+        if (isOpen) { setMenuPos(null); return; }
+        const rect = e.currentTarget.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const openUp = spaceBelow < MENU_HEIGHT + 8 && rect.top > spaceBelow;
+        const left = Math.min(Math.max(8, rect.left), window.innerWidth - MENU_WIDTH - 8);
+        setMenuPos({ left, top: openUp ? Math.max(8, rect.top - MENU_HEIGHT - 4) : rect.bottom + 4 });
+    };
 
     useEffect(() => {
+        if (!isOpen) return undefined;
+        const close = () => setMenuPos(null);
         const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) close();
         };
+        // En captura: Escape cierra solo el menú y no la ventana del día que lo contiene
         const handleEscape = (event) => {
-            if (event.key === 'Escape') setIsOpen(false);
+            if (event.key === 'Escape') { event.stopPropagation(); close(); }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        document.addEventListener('keydown', handleEscape);
+        document.addEventListener('keydown', handleEscape, true);
+        window.addEventListener('resize', close);
+        document.addEventListener('scroll', close, true);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('keydown', handleEscape);
+            document.removeEventListener('keydown', handleEscape, true);
+            window.removeEventListener('resize', close);
+            document.removeEventListener('scroll', close, true);
         };
-    }, []);
+    }, [isOpen]);
 
     const handleSelect = (status, e) => {
         e.stopPropagation();
         onChangeStatus(status);
-        setIsOpen(false);
+        setMenuPos(null);
     };
 
     return (
-        <div className="relative min-w-0 max-w-full" ref={dropdownRef}>
+        <div className="min-w-0 max-w-full" ref={dropdownRef}>
             <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+                onClick={toggleMenu}
                 aria-haspopup="menu"
                 aria-expanded={isOpen}
                 aria-label={`Estado: ${currentStatus}. Cambiar estado`}
@@ -61,23 +72,25 @@ const CustomStatusBadge = ({ currentStatus, onChangeStatus }) => {
             </button>
 
             {isOpen && (
-                <div className="absolute top-full left-0 mt-1 w-32 bg-white border border-slate-200 rounded-lg shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] z-[100] overflow-hidden animate-fade-in origin-top-left">
+                <div
+                    role="menu"
+                    aria-label="Cambiar estado"
+                    style={{ position: 'fixed', left: menuPos.left, top: menuPos.top, width: MENU_WIDTH }}
+                    className="bg-white border border-slate-200 rounded-lg shadow-[0_10px_25px_-5px_rgba(0,0,0,0.15)] z-[100] overflow-hidden animate-fade-in"
+                >
                     <div className="p-1 flex flex-col gap-0.5">
                         {Object.keys(STATUS_CONFIG).map((status) => {
                             const opt = STATUS_CONFIG[status];
-                            const isUnsupported = UNSUPPORTED_STATUSES.includes(status);
                             return (
                                 <button
                                     key={status}
                                     type="button"
-                                    disabled={isUnsupported}
+                                    role="menuitem"
                                     onClick={(e) => handleSelect(status, e)}
-                                    title={isUnsupported ? 'Próximamente: este estado aún no se puede guardar' : undefined}
-                                    className={`flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md text-[8.5px] font-black tracking-widest uppercase transition-colors hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent ${currentStatus === status ? opt.bg + ' ' + opt.color : 'text-slate-600'}`}
+                                    className={`flex items-center gap-2 w-full text-left px-2 py-1.5 rounded-md text-[8.5px] font-black tracking-widest uppercase transition-colors hover:bg-slate-50 ${currentStatus === status ? opt.bg + ' ' + opt.color : 'text-slate-600'}`}
                                 >
                                     <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`}></span>
                                     {status}
-                                    {isUnsupported && <span className="ml-auto text-[8px] font-bold text-slate-600 normal-case tracking-normal">Próx.</span>}
                                 </button>
                             );
                         })}

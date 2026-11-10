@@ -3,7 +3,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
 import { getQuarterWeeks, overlapsPeriod, toLocalDateStr, formatDateMx } from '../utils/dates';
 import { getInitials } from '../utils/initials';
-import { COLOR_PALETTES } from '../services/qaData';
+import { COLOR_PALETTES, loggedHoursOf } from '../services/qaData';
 
 import { PortalHeader } from '../components/QA/Portal/PortalHeader';
 import { CapacityTable } from '../components/QA/Portal/CapacityTable';
@@ -95,7 +95,7 @@ export const QAPortal = () => {
         const processedTracking = periodTasks.map(task => {
             const assignedUser = processedCapacity.find(u => u.raw_id === task.asignado_a_id) || { name: 'Sin Asignar', id: 'NA' };
             const est = parseFloat(task.estimacion_max_hrs || 8);
-            const logged = parseFloat(task.estimacion_min_hrs || 0);
+            const logged = loggedHoursOf(task);
             const diffValue = logged - est;
 
             let status = 'success';
@@ -111,7 +111,8 @@ export const QAPortal = () => {
                 diffText = `${diffValue} hrs (A tiempo)`;
             }
 
-            if ((task.prioridad || '').toUpperCase() === 'CRÍTICA' && !task.completada) {
+            // Bloqueo real (antes se aproximaba con la prioridad "Crítica")
+            if (task.estado === 'BLOQUEADA') {
                 status = 'blocked';
                 diffText = 'Bloqueado';
             }

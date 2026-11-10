@@ -19,8 +19,11 @@ export const TimeTracker = ({ ticketId, maxHours, horasTrabajadas, setHorasTraba
         try {
             const payload = { completada: isCompleted };
             if (horasTrabajadas !== undefined && horasTrabajadas !== '') {
-                // estimacion_min_hrs acumula las horas utilizadas de la actividad
-                payload.estimacion_min_hrs = parseFloat(horasTrabajadas);
+                const hours = parseFloat(horasTrabajadas);
+                payload.horas_utilizadas = hours;
+                // TEMPORAL: también en el campo anterior mientras el servidor compartido no tenga
+                // la migración b7c1d2e3f4a5. Quitar cuando todos los ambientes estén actualizados.
+                payload.estimacion_min_hrs = hours;
             }
 
             const response = await fetchWithAuth(`/actividades/${ticketId}`, {

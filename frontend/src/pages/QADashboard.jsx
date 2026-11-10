@@ -7,7 +7,7 @@ import { QACalendar } from '../components/QA/QACalendar';
 import { QANewTicketModal } from '../components/QA/QANewTicketModal';
 import { QATicketPanel } from '../components/QA/QATicketPanel';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
-import { fetchDashboardData } from '../services/qaData';
+import { fetchDashboardData, STATUS_CODES } from '../services/qaData';
 
 export const QADashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +62,8 @@ export const QADashboard = () => {
             const response = await fetchWithAuth(`/actividades/${task.db_id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ completada: isCompleted })
+                // "estado" es el dato real; "completada" mantiene compatibilidad con servidores sin migrar
+                body: JSON.stringify({ estado: STATUS_CODES[newStatus], completada: isCompleted })
             });
             if (!response.ok) {
                 throw new Error(await readErrorMessage(response, 'No se pudo actualizar el estado de la actividad.'));

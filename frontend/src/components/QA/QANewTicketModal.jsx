@@ -46,9 +46,9 @@ export const QANewTicketModal = ({ isOpen, onClose, onSubmit, teamUsers = [] }) 
             prioridad: priority,
             fecha_inicio: startDate || null,
             fecha_vencimiento: dueDate || null,
-            // Estimación única; estimacion_min_hrs acumula las horas utilizadas y arranca en 0
+            // Estimación única; las horas reales arrancan en 0 y el estado lo asigna el servidor
             estimacion_max_hrs: estimatedHours ? parseFloat(estimatedHours) : null,
-            estimacion_min_hrs: 0,
+            horas_utilizadas: 0,
             asignado_a_id: assigneeId ? parseInt(assigneeId, 10) : null,
             lider_tecnico_id: techLeadId ? parseInt(techLeadId, 10) : null,
         };
