@@ -1,10 +1,10 @@
 import { useState, useId, useEffect } from 'react';
-import { KeyRound, Copy, Check, UserPlus, ShieldCheck, ShieldAlert, Users, RotateCcw, Power, Layers } from 'lucide-react';
+import { KeyRound, Copy, Check, UserPlus, ShieldCheck, ShieldAlert, Users, RotateCcw, Power, Layers, Pencil, X } from 'lucide-react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { PageHeader } from '../components/Shared/PageHeader';
 import { Modal } from '../components/Shared/Modal';
 import { useQAData } from '../hooks/useQAData';
-import { createResetLink, createLeader, updateLeader, listAreas, createArea, setUserArea } from '../services/qaApi';
+import { createResetLink, createLeader, updateLeader, listAreas, createArea, setUserArea, renameArea } from '../services/qaApi';
 import { toUserMessage } from '../services/authService';
 import { formatDateTimeMx } from '../utils/dates';
 
@@ -77,6 +77,21 @@ export const QATeam = () => {
             .catch(error => { if (active) setAreaError(toUserMessage(error, 'No se pudieron cargar las áreas.')); });
         return () => { active = false; };
     }, [areasKey]);
+
+    const [editingArea, setEditingArea] = useState(null); // { id, nombre }
+
+    const saveAreaName = async (event) => {
+        event.preventDefault();
+        if (!editingArea || editingArea.nombre.trim().length < 2) { setAreaError('Escribe el nombre del área.'); return; }
+        setAreaError(null);
+        try {
+            await renameArea(editingArea.id, editingArea.nombre.trim());
+            setEditingArea(null);
+            setAreasKey(k => k + 1);
+        } catch (error) {
+            setAreaError(toUserMessage(error, 'No se pudo renombrar el área.'));
+        }
+    };
 
     const changeUserArea = async (person, value) => {
         setBusyUserId(person.raw_id);
@@ -239,10 +254,35 @@ export const QATeam = () => {
 
                             <ul className="flex flex-wrap gap-2 mb-4">
                                 {areas.length === 0 && <li className="text-xs text-gray-500">Todavía no hay áreas.</li>}
-                                {areas.map(area => (
-                                    <li key={area.id} className="h-8 px-3 bg-slate-50 border border-gray-200 rounded-lg text-[11px] font-bold text-[#07152F] flex items-center">
+                                {areas.map(area => editingArea?.id === area.id ? (
+                                    <li key={area.id}>
+                                        <form onSubmit={saveAreaName} className="flex items-center gap-1.5">
+                                            <label htmlFor={`renombrar-${area.id}`} className="sr-only">Nuevo nombre para {area.nombre}</label>
+                                            <input
+                                                id={`renombrar-${area.id}`}
+                                                autoFocus
+                                                type="text"
+                                                maxLength={60}
+                                                value={editingArea.nombre}
+                                                onChange={(e) => setEditingArea({ ...editingArea, nombre: e.target.value })}
+                                                onKeyDown={(e) => { if (e.key === 'Escape') setEditingArea(null); }}
+                                                className="h-8 w-36 bg-white border border-[#0e71af] rounded-lg px-2 text-[11px] font-bold text-[#07152F]"
+                                            />
+                                            <button type="submit" className="h-8 px-2.5 bg-[#07152F] hover:bg-[#0e71af] text-white rounded-lg flex items-center" aria-label={`Guardar nombre de ${area.nombre}`}>
+                                                <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                                            </button>
+                                            <button type="button" onClick={() => setEditingArea(null)} className="h-8 px-2.5 bg-white border border-gray-200 hover:bg-slate-50 rounded-lg flex items-center text-gray-600" aria-label="Cancelar">
+                                                <X className="w-3.5 h-3.5" aria-hidden="true" />
+                                            </button>
+                                        </form>
+                                    </li>
+                                ) : (
+                                    <li key={area.id} className="h-8 pl-3 pr-1 bg-slate-50 border border-gray-200 rounded-lg text-[11px] font-bold text-[#07152F] flex items-center">
                                         {area.nombre}
                                         <span className="ml-2 text-[10px] font-semibold text-gray-500">{teamUsers.filter(u => u.areaId === area.id).length}</span>
+                                        <button type="button" onClick={() => { setAreaError(null); setEditingArea({ id: area.id, nombre: area.nombre }); }} className="ml-1 w-6 h-6 rounded-md flex items-center justify-center text-gray-500 hover:text-[#07152F] hover:bg-slate-200 transition-colors" aria-label={`Renombrar ${area.nombre}`}>
+                                            <Pencil className="w-3 h-3" aria-hidden="true" />
+                                        </button>
                                     </li>
                                 ))}
                             </ul>

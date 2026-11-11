@@ -150,3 +150,31 @@ def test_encabezados_de_seguridad_y_docs_apagados(client):
     assert r.headers["X-Frame-Options"] == "DENY"
     assert client.get("/docs").status_code == 404
     assert client.get("/openapi.json").status_code == 404
+
+
+# ---------- Lo propio se sigue viendo al recibir un área (prueba en producción, 11/11/2026) ----------
+def test_al_recibir_area_sigue_viendo_lo_que_creo_sin_area(client, f, db, mundo, crear_actividad):
+    nuevo = f.usuario("nuevo2@example.com", "Nuevo Dos")
+    propia = crear_actividad(nuevo, titulo="Creada sin área")
+    de_qa = crear_actividad(mundo["ana"], titulo="De QA")
+    ajena_sin_area = crear_actividad(f.usuario("otro@example.com", "Otro Sin Area"), titulo="Ajena")
+
+    nuevo.area_id = mundo["qa"].id
+    db.commit()
+
+    ids = {a["id"] for a in client.get("/actividades/", headers=f.auth(nuevo)).json()}
+    assert ids == {propia["id"], de_qa["id"]}
+    assert ajena_sin_area["id"] not in ids
+    assert client.get(f"/actividades/{propia['id']}/comentarios", headers=f.auth(nuevo)).status_code == 200
+    # Sus horas también siguen visibles
+    client.post(f"/actividades/{propia['id']}/horas", json={"fecha": "2026-11-10", "horas": 1}, headers=f.auth(nuevo))
+    assert len(client.get("/horas/", headers=f.auth(nuevo)).json()) == 1
+
+
+def test_admin_renombra_area(client, f, mundo):
+    admin = f.auth(mundo["admin"])
+    r = client.put(f"/areas/{mundo['qa'].id}", json={"nombre": "  Calidad  "}, headers=admin)
+    assert r.status_code == 200 and r.json()["nombre"] == "Calidad"
+    assert client.put(f"/areas/{mundo['qa'].id}", json={"nombre": "dev"}, headers=admin).status_code == 400
+    assert client.put(f"/areas/{mundo['qa'].id}", json={"nombre": "Otra"}, headers=f.auth(mundo["ana"])).status_code == 403
+    assert client.put("/areas/9999", json={"nombre": "Otra"}, headers=admin).status_code == 404

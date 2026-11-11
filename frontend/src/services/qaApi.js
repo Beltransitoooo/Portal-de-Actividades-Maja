@@ -42,6 +42,7 @@ export const listHistory = (activityId) => call(`/actividades/${activityId}/hist
 // ---- Áreas y área de cada usuario ----
 export const listAreas = () => call('/areas/', { fallback: 'No se pudieron cargar las áreas.' });
 export const createArea = (nombre) => call('/areas/', { method: 'POST', body: { nombre }, fallback: 'No se pudo crear el área.' });
+export const renameArea = (id, nombre) => call(`/areas/${id}`, { method: 'PUT', body: { nombre }, fallback: 'No se pudo renombrar el área.' });
 export const setUserArea = (userId, areaId) => call(`/usuarios/${userId}`, { method: 'PUT', body: { area_id: areaId }, fallback: 'No se pudo cambiar el área.' });
 
 // ---- Restablecimiento de contraseña ----

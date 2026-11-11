@@ -75,7 +75,12 @@ export const QAMyDay = () => {
     [scoped, todayStr]);
 
     const plannedToday = todayTasks.reduce((sum, item) => sum + item.planned, 0);
-    const loggedToday = scoped.reduce((sum, t) => sum + (t.hoursByDate[todayStr] || 0), 0);
+    // "Mis actividades": las horas que registraste tú hoy (en cualquier actividad, aunque ya no
+    // esté asignada a ti). "Todo el equipo": todo lo registrado hoy.
+    const loggedToday = tasks
+        .flatMap(t => t.hoursEntries || [])
+        .filter(e => e.fecha === todayStr && (activeScope === 'team' || (me && e.usuario_id === me.id)))
+        .reduce((sum, e) => sum + e.horas, 0);
     const capacityToday = dayCapacity(today);
     const alerts = useMemo(() => buildAlerts(scoped, { today }), [scoped, today]);
 

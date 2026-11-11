@@ -66,28 +66,30 @@ def _registrar_historial(db: Session, actividad_id: int, usuario: models.Usuario
 
 
 def _puede_ver(actividad: models.Actividad, usuario: models.Usuario) -> bool:
-    """Administradores: todo. Con área: las de su área. Sin área: solo las que creó o tiene asignadas.
+    """Administradores: todo. Los demás: lo que crearon o tienen asignado, más lo de su área.
 
-    "Sin área" no es un área compartida: antes area_id NULL == NULL dejaba a todas las cuentas
-    nuevas ver (y editar) las actividades de las demás cuentas sin área.
+    "Sin área" no es un área compartida (antes area_id NULL == NULL dejaba a todas las cuentas
+    nuevas ver las actividades de las demás). Y lo propio se sigue viendo al recibir un área:
+    las actividades creadas antes de tenerla quedaron sin área y desaparecían de su vista.
     """
     if usuario.es_admin:
         return True
-    if usuario.area_id is not None:
-        return actividad.area_id == usuario.area_id
-    return usuario.id in (actividad.creador_id, actividad.asignado_a_id)
+    if usuario.id in (actividad.creador_id, actividad.asignado_a_id):
+        return True
+    return usuario.area_id is not None and actividad.area_id == usuario.area_id
 
 
 def _filtrar_visibles(query, usuario: models.Usuario):
     """Mismo criterio que _puede_ver, aplicado a una consulta que incluye models.Actividad."""
     if usuario.es_admin:
         return query
-    if usuario.area_id is not None:
-        return query.filter(models.Actividad.area_id == usuario.area_id)
-    return query.filter(or_(
+    condiciones = [
         models.Actividad.creador_id == usuario.id,
         models.Actividad.asignado_a_id == usuario.id,
-    ))
+    ]
+    if usuario.area_id is not None:
+        condiciones.append(models.Actividad.area_id == usuario.area_id)
+    return query.filter(or_(*condiciones))
 
 
 def _obtener_actividad(db: Session, actividad_id: int, usuario: models.Usuario) -> models.Actividad:
