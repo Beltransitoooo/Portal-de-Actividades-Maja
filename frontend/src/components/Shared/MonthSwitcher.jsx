@@ -8,7 +8,7 @@ export const MonthSwitcher = ({ currentDate, onPrevMonth, onNextMonth }) => (
         <button type="button" onClick={onPrevMonth} aria-label="Mes anterior" className="px-3 text-gray-500 hover:text-[#0e71af] hover:bg-slate-50 h-full transition-colors flex items-center justify-center">
             <ChevronLeft className="w-4 h-4" aria-hidden="true" />
         </button>
-        <span aria-live="polite" className="text-[10px] font-black text-[#07152F] uppercase tracking-widest min-w-[130px] text-center">
+        <span aria-live="polite" className="text-[12px] font-bold text-[#07152F] min-w-[130px] text-center">
             {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
         </span>
         <button type="button" onClick={onNextMonth} aria-label="Mes siguiente" className="px-3 text-gray-500 hover:text-[#0e71af] hover:bg-slate-50 h-full transition-colors flex items-center justify-center">

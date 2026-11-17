@@ -29,7 +29,7 @@ export const BlockReasonDialog = ({ task, onConfirm, onCancel }) => {
                 </p>
 
                 <div>
-                    <label htmlFor={fieldId} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                    <label htmlFor={fieldId} className="block text-[12px] font-bold text-gray-500 mb-1.5">
                         ¿Qué la está bloqueando?
                     </label>
                     <textarea
@@ -53,10 +53,10 @@ export const BlockReasonDialog = ({ task, onConfirm, onCancel }) => {
                 </div>
 
                 <div className="flex justify-end items-center gap-3 pt-1">
-                    <button type="button" onClick={onCancel} className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-[#07152F] px-4 py-2 transition-colors">
+                    <button type="button" onClick={onCancel} className="text-[12px] font-bold text-gray-500 hover:text-[#07152F] px-4 py-2 transition-colors">
                         Cancelar
                     </button>
-                    <button type="submit" className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 text-[10px] font-bold tracking-widest uppercase shadow-md transition-colors rounded-lg flex items-center gap-2">
+                    <button type="submit" className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 text-[12px] font-bold shadow-md transition-colors rounded-lg flex items-center gap-2">
                         <Ban className="w-3.5 h-3.5" aria-hidden="true" />
                         Bloquear actividad
                     </button>

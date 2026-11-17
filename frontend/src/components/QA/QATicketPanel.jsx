@@ -112,7 +112,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
                 <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-slate-50">
                     <div className="flex items-center gap-3">
                         <span className="text-xs font-black bg-[#07152F] text-white px-2.5 py-1 rounded-md tracking-widest">{ticket.id}</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border ${PRIORITY_STYLES[ticket.priority] || 'text-green-700 bg-green-50 border-green-200'}`}>
+                        <span className={`text-[12px] font-bold px-2 py-1 rounded-md border ${PRIORITY_STYLES[ticket.priority] || 'text-green-700 bg-green-50 border-green-200'}`}>
                             {ticket.priority || 'NORMAL'}
                         </span>
                     </div>
@@ -134,7 +134,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
                             aria-controls={`${titleId}-panel-${id}`}
                             tabIndex={tab === id ? 0 : -1}
                             onClick={() => setTab(id)}
-                            className={`flex items-center gap-1.5 px-3 min-h-11 text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-2 transition-colors ${tab === id ? 'border-[#0e71af] text-[#0b5a8c]' : 'border-transparent text-gray-500 hover:text-[#07152F]'}`}
+                            className={`flex items-center gap-1.5 px-3 min-h-11 text-[12px] font-bold whitespace-nowrap border-b-2 transition-colors ${tab === id ? 'border-[#0e71af] text-[#0b5a8c]' : 'border-transparent text-gray-500 hover:text-[#07152F]'}`}
                         >
                             <Icon className="w-3.5 h-3.5" aria-hidden="true" />
                             {label}
@@ -153,7 +153,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
                     {tab === 'detalle' && (
                         <>
                             <div>
-                                <h2 id={titleId} className="text-xl font-black text-[#07152F] uppercase tracking-tight mb-2 break-words">{ticket.title}</h2>
+                                <h2 id={titleId} className="font-dorsal text-[34px] text-[#07152F] uppercase mb-2 break-words">{ticket.title}</h2>
                                 <p className="text-sm text-gray-500 whitespace-pre-wrap break-words">{ticket.description || 'Sin descripción detallada.'}</p>
                             </div>
 
@@ -161,7 +161,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
                                 <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl p-4">
                                     <Ban className="w-5 h-5 text-red-700 shrink-0 mt-0.5" aria-hidden="true" />
                                     <div className="min-w-0">
-                                        <p className="text-[10px] font-black text-red-700 uppercase tracking-widest">Bloqueada</p>
+                                        <p className="text-[12px] font-bold text-red-700">Bloqueada</p>
                                         <p className="text-xs text-[#07152F] mt-1 break-words">{ticket.blockReason || 'Sin motivo registrado.'}</p>
                                     </div>
                                 </div>
@@ -171,25 +171,25 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="bg-slate-50 p-3 rounded-lg border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Estado</p>
+                                    <p className="text-[12px] font-bold text-gray-500 mb-1.5">Estado</p>
                                     <StatusBadge currentStatus={ticket.status} onChangeStatus={(s) => requestStatusChange(ticket, s)} size="md" />
                                 </div>
                                 <div className="bg-slate-50 p-3 rounded-lg border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Tipo</p>
-                                    <p className="flex items-center gap-1.5 text-xs font-bold text-[#07152F] uppercase tracking-widest min-h-8">
+                                    <p className="text-[12px] font-bold text-gray-500 mb-1.5">Tipo</p>
+                                    <p className="flex items-center gap-1.5 text-[13px] font-bold text-[#07152F] min-h-8">
                                         <Tag className="w-3 h-3 text-[#0e71af]" aria-hidden="true" />
                                         {ticket.type || 'Tarea'}
                                     </p>
                                 </div>
                                 <div className="bg-slate-50 p-3 rounded-lg border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Responsable</p>
+                                    <p className="text-[12px] font-bold text-gray-500 mb-1.5">Responsable</p>
                                     <div className="flex items-center gap-2 min-w-0">
                                         <span className="w-6 h-6 rounded-full bg-[#0072b2] text-white flex items-center justify-center text-[8px] font-black shrink-0">{ticket.assignee}</span>
                                         <p className="text-xs font-bold text-[#07152F] truncate">{ticket.assigneeName}</p>
                                     </div>
                                 </div>
                                 <div className="bg-slate-50 p-3 rounded-lg border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Líder técnico</p>
+                                    <p className="text-[12px] font-bold text-gray-500 mb-1.5">Líder técnico</p>
                                     <p className="flex items-center gap-1.5 text-xs font-bold text-[#07152F] min-w-0">
                                         <ShieldCheck className="w-3.5 h-3.5 text-[#0e71af] shrink-0" aria-hidden="true" />
                                         <span className="truncate">{ticket.leaderName || 'Sin líder'}</span>
@@ -210,11 +210,11 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
 
                             <div>
                                 <div className="flex justify-between items-center mb-1.5">
-                                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                    <span className="flex items-center gap-1.5 text-[12px] font-bold text-gray-500">
                                         <Hourglass className="w-3 h-3" aria-hidden="true" />
                                         {fmtHours(ticket.loggedHours)}h de {fmtHours(ticket.maxHours)}h
                                     </span>
-                                    <button type="button" onClick={() => setTab('horas')} className="min-h-6 text-[10px] font-black uppercase tracking-widest text-[#0b5a8c] hover:underline">
+                                    <button type="button" onClick={() => setTab('horas')} className="min-h-6 text-[12px] font-bold text-[#0b5a8c] hover:underline">
                                         Registrar horas
                                     </button>
                                 </div>
@@ -225,12 +225,12 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
                             </div>
 
                             <div className="flex flex-wrap gap-2 border-t border-gray-100 mt-1 pt-5">
-                                <button type="button" onClick={() => setIsEditing(true)} className="h-10 px-4 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-colors flex items-center gap-2">
+                                <button type="button" onClick={() => setIsEditing(true)} className="h-10 px-4 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2">
                                     <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
                                     Editar
                                 </button>
                                 {me?.es_admin && (
-                                    <button type="button" onClick={() => { setDeleteError(null); setConfirmDelete(true); }} className="h-10 px-4 bg-white border border-red-200 text-red-700 hover:bg-red-50 text-[10px] font-black uppercase tracking-widest rounded-lg transition-colors flex items-center gap-2">
+                                    <button type="button" onClick={() => { setDeleteError(null); setConfirmDelete(true); }} className="h-10 px-4 bg-white border border-red-200 text-red-700 hover:bg-red-50 text-[12px] font-bold rounded-lg transition-colors flex items-center gap-2">
                                         <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
                                         Eliminar
                                     </button>
@@ -249,6 +249,7 @@ export const QATicketPanel = ({ ticket, onClose, onTicketUpdated, onDeleted, lea
             {isEditing && (
                 <QANewTicketModal
                     ticket={ticket}
+                    allTasks={allTasks}
                     teamUsers={teamUsers}
                     leaders={leaders}
                     isAdmin={Boolean(me?.es_admin)}

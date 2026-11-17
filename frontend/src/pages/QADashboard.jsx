@@ -95,7 +95,7 @@ export const QADashboard = () => {
 
                     {!isLoading && !loadError && undatedTasks.length > 0 && (
                         <section aria-labelledby="sin-fechas-titulo" className="shrink-0 bg-amber-50/60 border border-amber-200 rounded-xl px-4 py-3 mb-3">
-                            <h2 id="sin-fechas-titulo" className="text-[10px] font-black text-amber-800 uppercase tracking-widest flex items-center gap-2 mb-2">
+                            <h2 id="sin-fechas-titulo" className="text-[12px] font-bold text-amber-800 flex items-center gap-2 mb-2">
                                 <CalendarOff className="w-3.5 h-3.5" aria-hidden="true" />
                                 Sin fechas ({undatedTasks.length}) · no aparecen en el calendario
                             </h2>
@@ -129,13 +129,13 @@ export const QADashboard = () => {
                     {isLoading ? (
                         <div className="w-full flex-1 min-h-0 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2">
                             <div className="w-10 h-10 border-[3px] border-gray-100 border-t-[#0e71af] rounded-full animate-spin mb-4"></div>
-                            <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase animate-pulse">Sincronizando con base de datos...</p>
+                            <p className="text-[12px] font-bold text-gray-500 animate-pulse">Sincronizando con base de datos...</p>
                         </div>
                     ) : loadError ? (
                         <div role="alert" className="w-full flex-1 min-h-0 flex flex-col items-center justify-center text-center bg-white border border-gray-100 rounded-xl shadow-sm mt-2 p-6">
                             <p className="text-sm font-bold text-[#07152F]">No se pudo cargar la información</p>
                             <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">{loadError}</p>
-                            <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
+                            <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-md transition-colors">
                                 Reintentar
                             </button>
                         </div>
@@ -155,6 +155,7 @@ export const QADashboard = () => {
                 <QANewTicketModal
                     onClose={() => setIsModalOpen(false)}
                     onSubmit={reload}
+                    allTasks={tasks}
                     teamUsers={teamUsers}
                     leaders={leaders}
                     isAdmin={Boolean(me?.es_admin)}

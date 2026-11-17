@@ -44,7 +44,7 @@ const Summary = ({ icon: Icon, label, value, detail, alert = false }) => (
             <Icon className="w-5 h-5" aria-hidden="true" />
         </div>
         <div className="min-w-0">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{label}</p>
+            <p className="text-[12px] font-bold text-gray-500">{label}</p>
             <p className="text-2xl font-black text-[#07152F] tabular-nums leading-tight">{value}</p>
             {detail && <p className={`text-[10px] font-bold mt-0.5 ${alert ? 'text-red-700' : 'text-gray-500'}`}>{detail}</p>}
         </div>
@@ -118,7 +118,7 @@ export const QAMyDay = () => {
                                     type="button"
                                     aria-pressed={activeScope === id}
                                     onClick={() => setScope(id)}
-                                    className={`h-8 px-3 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors ${activeScope === id ? 'bg-[#07152F] text-white' : 'text-gray-600 hover:bg-slate-50'}`}
+                                    className={`h-8 px-3 rounded-md text-[12px] font-bold flex items-center gap-1.5 transition-colors ${activeScope === id ? 'bg-[#07152F] text-white' : 'text-gray-600 hover:bg-slate-50'}`}
                                 >
                                     <Icon className="w-3.5 h-3.5" aria-hidden="true" />
                                     {label}
@@ -131,13 +131,13 @@ export const QAMyDay = () => {
                 {isLoading ? (
                     <div className="w-full h-64 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm">
                         <div className="w-10 h-10 border-[3px] border-gray-100 border-t-[#0e71af] rounded-full animate-spin mb-4"></div>
-                        <p role="status" className="text-[10px] font-bold text-gray-500 tracking-widest uppercase animate-pulse">Preparando tu día...</p>
+                        <p role="status" className="text-[12px] font-bold text-gray-500 animate-pulse">Preparando tu día...</p>
                     </div>
                 ) : loadError ? (
                     <div role="alert" className="w-full flex flex-col items-center justify-center text-center bg-white border border-gray-100 rounded-xl shadow-sm py-16 px-6">
                         <p className="text-sm font-bold text-[#07152F]">No se pudo cargar la información</p>
                         <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">{loadError}</p>
-                        <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors flex items-center gap-2">
+                        <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-md transition-colors flex items-center gap-2">
                             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                             Reintentar
                         </button>
@@ -169,7 +169,7 @@ export const QAMyDay = () => {
                         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
                             {/* Para hoy */}
                             <section aria-labelledby="hoy-titulo" className="xl:col-span-3 bg-white border border-gray-200 rounded-2xl shadow-sm p-5 lg:p-6">
-                                <h2 id="hoy-titulo" className="text-sm font-black text-[#07152F] uppercase tracking-wider flex items-center gap-2 mb-4">
+                                <h2 id="hoy-titulo" className="text-[17px] font-bold tracking-tight text-[#07152F] flex items-center gap-2 mb-4">
                                     <CalendarCheck className="w-4 h-4 text-[#0072b2]" aria-hidden="true" />
                                     Para hoy
                                 </h2>
@@ -196,7 +196,7 @@ export const QAMyDay = () => {
                                                         <div className="flex-1 min-w-0">
                                                             <button type="button" onClick={() => openPanel(task)} className="text-left min-h-6 max-w-full">
                                                                 <p className="text-sm font-bold text-[#07152F] break-words">{task.title}</p>
-                                                                <p className="text-[10px] font-black tracking-widest text-gray-500 uppercase mt-0.5">
+                                                                <p className="text-[12px] font-bold text-gray-500 mt-0.5">
                                                                     {task.id}{activeScope === 'team' ? ` · ${task.assigneeName}` : ''}{task.leaderName ? ` · Líder: ${task.leaderName}` : ''}
                                                                 </p>
                                                             </button>
@@ -216,7 +216,7 @@ export const QAMyDay = () => {
                                                             </div>
                                                             <p className="text-[10px] text-gray-500 font-medium mt-1">{fmtHours(task.loggedHours)}h de {fmtHours(task.maxHours)}h estimadas</p>
                                                         </div>
-                                                        <button type="button" onClick={() => openPanel(task, 'horas')} className="shrink-0 h-9 px-3 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
+                                                        <button type="button" onClick={() => openPanel(task, 'horas')} className="shrink-0 h-9 px-3 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-sm transition-colors flex items-center gap-1.5">
                                                             <Clock3 className="w-3.5 h-3.5" aria-hidden="true" />
                                                             Registrar horas
                                                         </button>
@@ -230,7 +230,7 @@ export const QAMyDay = () => {
 
                             {/* Avisos */}
                             <section aria-labelledby="avisos-titulo" className="xl:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm p-5 lg:p-6">
-                                <h2 id="avisos-titulo" className="text-sm font-black text-[#07152F] uppercase tracking-wider flex items-center gap-2 mb-4">
+                                <h2 id="avisos-titulo" className="text-[17px] font-bold tracking-tight text-[#07152F] flex items-center gap-2 mb-4">
                                     <TriangleAlert className="w-4 h-4 text-[#0072b2]" aria-hidden="true" />
                                     Requiere atención
                                 </h2>
@@ -253,7 +253,7 @@ export const QAMyDay = () => {
                                                     <button type="button" onClick={() => openPanel(alert.task)} className={`w-full text-left border rounded-xl p-3 flex items-start gap-3 hover:shadow-sm transition-shadow ${style.tone}`}>
                                                         <Icon className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
                                                         <span className="min-w-0">
-                                                            <span className="block text-[10px] font-black uppercase tracking-widest">{style.label}</span>
+                                                            <span className="block text-[12px] font-bold">{style.label}</span>
                                                             {alert.kind !== 'overload' && <span className="block text-xs font-bold text-[#07152F] break-words mt-0.5">{alert.task.title}</span>}
                                                             <span className="block text-[11px] font-medium text-[#07152F] break-words mt-0.5">{alertText(alert, me)}</span>
                                                             {activeScope === 'team' && alert.kind !== 'overload' && <span className="block text-[10px] font-semibold text-gray-600 mt-0.5">{alert.task.assigneeName}</span>}

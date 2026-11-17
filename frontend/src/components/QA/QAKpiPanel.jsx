@@ -18,7 +18,7 @@ export const QAKpiPanel = ({ filteredTasks = [] }) => {
             <div className="flex items-center gap-6 xl:w-1/4 xl:border-r border-slate-100 xl:pr-6 shrink-0">
                 <div className="w-full">
                     <div className="flex justify-between items-center mb-2">
-                        <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Actividades</h2>
+                        <h2 className="text-[12px] font-bold text-slate-500">Total de actividades</h2>
                         {total > 0 && (
                             <span className="text-[10px] font-black text-[#0e71af] bg-[#1296E8]/10 px-2 py-1 rounded-md tracking-wider">
                                 {progressPct}% AVANCE
@@ -47,8 +47,8 @@ export const QAKpiPanel = ({ filteredTasks = [] }) => {
                 {/* Leyendas (Tarjetas de métrica) */}
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     <MetricCard label="Completadas" count={completed} color="bg-emerald-500" />
-                    <MetricCard label="En Progreso" count={inProgress} color="bg-[#0e71af]" />
-                    <MetricCard label="En Revisión" count={inReview} color="bg-amber-400" />
+                    <MetricCard label="En progreso" count={inProgress} color="bg-[#0e71af]" />
+                    <MetricCard label="En revisión" count={inReview} color="bg-amber-400" />
                     <MetricCard label="Pendientes" count={pending} color="bg-slate-300" />
                     <MetricCard label="Bloqueadas" count={blocked} color="bg-red-500" isAlert={blocked > 0} />
                 </div>
@@ -64,7 +64,7 @@ const MetricCard = ({ label, count, color, isAlert }) => (
         {/* La etiqueta se ajusta en dos líneas si no cabe (antes se truncaba: "COMPL…") */}
         <div className="flex items-start gap-2 mb-1.5">
             <div className={`w-2 h-2 mt-[3px] rounded-full shrink-0 ${color} ${isAlert ? 'shadow-[0_0_8px_rgba(239,68,68,0.6)]' : ''}`} aria-hidden="true"></div>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wide leading-tight break-words min-w-0">{label}</span>
+            <span className="text-[11.5px] font-bold text-slate-500 leading-tight min-w-0 hyphens-none [overflow-wrap:normal]">{label}</span>
         </div>
         <span className={`text-lg font-black leading-none tabular-nums ${isAlert ? 'text-red-700' : 'text-[#07152F]'}`}>{count}</span>
     </div>

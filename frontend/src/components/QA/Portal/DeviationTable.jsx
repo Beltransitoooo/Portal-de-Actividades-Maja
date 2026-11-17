@@ -13,14 +13,14 @@ const DIFF_COLORS = {
 export const DeviationTable = ({ trackingData = [] }) => {
     return (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 lg:p-8 flex flex-col h-full">
-            <h2 className="text-sm font-black text-[#0B132B] uppercase tracking-wider flex items-center gap-2 mb-6">
+            <h2 className="text-[17px] font-bold tracking-tight text-[#0B132B] flex items-center gap-2 mb-6">
                 <Clock3 className="w-4 h-4 text-[#0072b2]" aria-hidden="true" />
                 Desviación de tiempos
             </h2>
 
             <div className="flex-1 border border-gray-100 rounded-xl overflow-hidden bg-slate-50/50 flex flex-col">
                 {/* Header de la tabla */}
-                <div className="grid grid-cols-5 gap-4 p-4 border-b border-gray-100 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white">
+                <div className="grid grid-cols-5 gap-4 p-4 border-b border-gray-100 text-[12px] font-bold text-gray-500 bg-white">
                     <span>Código</span>
                     <span className="col-span-2">Actividad</span>
                     <span>Tester</span>

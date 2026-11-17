@@ -3,7 +3,7 @@ import { Sidebar } from '../components/Sidebar';
 
 export const DashboardLayout = ({ children }) => {
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased text-[#0B132B]">
+        <div className="min-h-screen plano-pagina flex flex-col font-sans antialiased text-[#0B132B]">
             {/* Header global; el usuario y sus iniciales los resuelve UserDropdown */}
             <Header />
 
@@ -12,7 +12,7 @@ export const DashboardLayout = ({ children }) => {
                 <Sidebar />
 
                 {/* Contenido principal */}
-                <main className="flex-1 p-4 lg:p-6 min-w-0 overflow-y-auto">
+                <main className="flex-1 p-4 lg:p-7 min-w-0 overflow-y-auto">
                     {children}
                 </main>
             </div>

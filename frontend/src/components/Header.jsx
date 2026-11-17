@@ -1,23 +1,19 @@
 import logoMaja from '../assets/Logo_MAJA.png';
 import { UserDropdown } from './Shared/UserDropdown';
 
+// Encabezado global: marino con textura de punto, marca en registro de dorsal y el corte tartán MAJA
 export const Header = () => {
     return (
-        <header className="h-16 bg-[#0B132B] flex items-center justify-between px-6 shadow-md shrink-0 z-40">
-            {/* Logo de imagen + Texto de MAJA */}
-            <div className="flex items-center gap-3">
-                <span aria-hidden="true" className="w-1 h-7 bg-[#00A3FF] -skew-x-12 rounded-sm"></span>
-                <img 
-                    src={logoMaja} 
-                    alt="" 
-                    className="h-6 w-auto object-contain"
-                />
-                <span className="text-white font-black text-xl tracking-widest flex items-center gap-2">
-                    MAJA <span className="text-[10px] font-normal tracking-[0.3em] text-[#00A3FF] uppercase mt-1">Sportswear</span>
-                </span>
+        <header className="no-print relative h-16 bg-pista textura-punto flex items-center justify-between px-4 sm:px-6 shrink-0 z-40 border-b border-white/5">
+            <div className="flex items-center gap-3 min-w-0">
+                <span aria-hidden="true" className="w-1.5 h-8 bg-tartan -skew-x-[14deg] rounded-[1px]"></span>
+                <img src={logoMaja} alt="" className="h-6 w-auto object-contain" />
+                <p className="flex items-baseline gap-2.5 min-w-0">
+                    <span className="font-dorsal text-white text-[28px] leading-none">MAJA</span>
+                    <span className="hidden sm:inline font-condensada text-[13px] font-medium text-white/60 truncate">Portal de actividades</span>
+                </p>
             </div>
 
-            {/* Menú de Usuario */}
             <UserDropdown />
         </header>
     );

@@ -82,15 +82,15 @@ export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
             {/* Resumen frente a la estimación */}
             <div className="grid grid-cols-3 gap-2">
                 <div className="bg-slate-50 border border-gray-100 rounded-lg p-3">
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Estimadas</p>
+                    <p className="text-[11px] font-bold text-gray-500">Estimadas</p>
                     <p className="text-lg font-black text-[#07152F] tabular-nums">{fmtHours(estimated)}h</p>
                 </div>
                 <div className="bg-slate-50 border border-gray-100 rounded-lg p-3">
-                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Utilizadas</p>
+                    <p className="text-[11px] font-bold text-gray-500">Utilizadas</p>
                     <p className={`text-lg font-black tabular-nums ${over ? 'text-red-700' : 'text-[#07152F]'}`}>{fmtHours(logged)}h</p>
                 </div>
                 <div className={`border rounded-lg p-3 ${over ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-gray-100'}`}>
-                    <p className={`text-[9px] font-bold uppercase tracking-widest ${over ? 'text-red-700' : 'text-gray-500'}`}>{over ? 'Excede' : 'Restan'}</p>
+                    <p className={`text-[11px] font-bold ${over ? 'text-red-700' : 'text-gray-500'}`}>{over ? 'Excede' : 'Restan'}</p>
                     <p className={`text-lg font-black tabular-nums ${over ? 'text-red-700' : 'text-[#07152F]'}`}>
                         {estimated > 0 ? `${fmtHours(Math.abs(diff))}h` : '—'}
                     </p>
@@ -99,7 +99,7 @@ export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
 
             {/* Alta de horas del día */}
             <form onSubmit={submit} noValidate className="border border-gray-100 rounded-xl p-4 flex flex-col gap-3">
-                <h3 className="text-xs font-black text-[#07152F] uppercase tracking-widest flex items-center gap-2">
+                <h3 className="text-[13px] font-bold text-[#07152F] flex items-center gap-2">
                     <Clock3 className="w-4 h-4 text-[#0e71af]" aria-hidden="true" />
                     Registrar horas
                 </h3>
@@ -114,11 +114,11 @@ export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
                 />
                 <div className="grid grid-cols-[110px_1fr] gap-3">
                     <div>
-                        <label htmlFor={ids.hours} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Horas</label>
+                        <label htmlFor={ids.hours} className="block text-[12px] font-bold text-gray-500 mb-1">Horas</label>
                         <input id={ids.hours} type="number" step="0.5" min="0.5" max="24" value={hours} onChange={(e) => setHours(e.target.value)} placeholder="Ej: 2.5" className={inputClass} />
                     </div>
                     <div>
-                        <label htmlFor={ids.note} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Nota (opcional)</label>
+                        <label htmlFor={ids.note} className="block text-[12px] font-bold text-gray-500 mb-1">Nota (opcional)</label>
                         <input id={ids.note} type="text" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="¿Qué hiciste?" className={`${inputClass} font-medium`} />
                     </div>
                 </div>
@@ -129,7 +129,7 @@ export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
                     </div>
                 )}
                 {error && <div role="alert" className="bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 rounded font-medium">{error}</div>}
-                <button type="submit" disabled={saving} className="h-10 bg-[#07152F] hover:bg-[#0e71af] disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                <button type="submit" disabled={saving} className="h-10 bg-[#07152F] hover:bg-[#0e71af] disabled:opacity-60 text-white text-[12px] font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
                     <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                     {saving ? 'Guardando...' : 'Registrar horas'}
                 </button>
@@ -137,7 +137,7 @@ export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
 
             {/* Registros por día */}
             <div>
-                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Horas por día</h3>
+                <h3 className="text-[12px] font-bold text-gray-500 mb-2">Horas por día</h3>
                 {entries.length === 0 ? (
                     <p className="text-xs text-gray-500 bg-slate-50 border border-gray-100 rounded-lg p-4">Todavía no hay horas registradas. Anota aquí el tiempo real que dedicas cada día.</p>
                 ) : (

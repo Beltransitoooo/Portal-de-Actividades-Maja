@@ -1,6 +1,6 @@
 import { Download, Printer } from 'lucide-react';
 
-const buttonClass = 'h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 hover:bg-slate-50 rounded-lg shadow-sm text-[10px] font-black uppercase tracking-widest text-[#07152F] flex items-center gap-2 transition-colors';
+const buttonClass = 'h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 hover:bg-slate-50 rounded-lg shadow-sm text-[12px] font-bold text-[#07152F] flex items-center gap-2 transition-colors';
 
 // Botones para llevarse la vista: CSV (se abre en Excel) e imprimir / guardar como PDF
 export const ExportBar = ({ onCsv, onPrint }) => (

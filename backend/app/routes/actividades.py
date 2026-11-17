@@ -20,6 +20,15 @@ def listar_actividades(
     return actividades_service.listar(db, usuario_actual, equipo, fecha_inicio, fecha_fin)
 
 
+@router.get("/cierres", response_model=List[schemas.CierreResponse])
+def listar_cierres(
+    db: Session = Depends(get_db),
+    usuario_actual: models.Usuario = Depends(security.obtener_usuario_actual)
+):
+    """Fecha en que se completó cada actividad visible (para las gráficas de entregas)."""
+    return actividades_service.listar_cierres(db, usuario_actual)
+
+
 @router.post("/", response_model=schemas.ActividadResponse, status_code=status.HTTP_201_CREATED)
 def crear_actividad(
     actividad: schemas.ActividadCreate,

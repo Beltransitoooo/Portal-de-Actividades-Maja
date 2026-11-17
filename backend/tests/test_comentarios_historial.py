@@ -57,3 +57,36 @@ def test_historial_no_registra_cambios_vacios(client, f, mundo, crear_actividad)
     url = f"/actividades/{a['id']}"
     client.put(url, json={"titulo": a["titulo"], "prioridad": a["prioridad"]}, headers=h)  # mismos valores
     assert [x["campo"] for x in client.get(f"{url}/historial", headers=h).json()] == ["creada"]
+
+
+def test_cierres_fecha_de_completado_y_permisos(client, f, mundo, crear_actividad):
+    admin = f.auth(mundo["admin"])
+    de_ana = crear_actividad(mundo["ana"], asignado_a_id=mundo["ana"].id)
+    de_dani = crear_actividad(mundo["dani"], asignado_a_id=mundo["dani"].id)
+    abierta = crear_actividad(mundo["ana"])
+    for a in (de_ana, de_dani):
+        assert client.put(f"/actividades/{a['id']}", json={"estado": "COMPLETADA"}, headers=admin).status_code == 200
+
+    todas = {c["actividad_id"] for c in client.get("/actividades/cierres", headers=admin).json()}
+    assert todas == {de_ana["id"], de_dani["id"]}  # la abierta no aparece
+
+    # Beto (QA) ve lo de su área, no lo de DEV
+    de_beto = {c["actividad_id"] for c in client.get("/actividades/cierres", headers=f.auth(mundo["beto"])).json()}
+    assert de_beto == {de_ana["id"]}
+    assert abierta["id"] not in de_beto
+
+
+def test_cierres_reabierta_no_cuenta_y_vuelve_a_cerrar(client, f, mundo, crear_actividad):
+    admin = f.auth(mundo["admin"])
+    a = crear_actividad(mundo["ana"])
+    url = f"/actividades/{a['id']}"
+    client.put(url, json={"estado": "COMPLETADA"}, headers=admin)
+    client.put(url, json={"estado": "EN_PROGRESO"}, headers=admin)
+    assert client.get("/actividades/cierres", headers=admin).json() == []  # reabierta: ya no está completada
+    client.put(url, json={"estado": "COMPLETADA"}, headers=admin)
+    cierres = client.get("/actividades/cierres", headers=admin).json()
+    assert [c["actividad_id"] for c in cierres] == [a["id"]]
+
+
+def test_cierres_requiere_sesion(client):
+    assert client.get("/actividades/cierres").status_code == 401

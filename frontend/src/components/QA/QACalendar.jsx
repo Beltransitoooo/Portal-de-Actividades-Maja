@@ -89,7 +89,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
             {/* Header Fijo */}
             <div className="grid grid-cols-7 min-w-[640px] border-b border-slate-200 bg-slate-50/80 shrink-0 rounded-t-2xl overflow-hidden">
                 {weekDays.map((day, idx) => (
-                    <div key={day} className={`py-2 text-center text-[10px] font-black tracking-widest uppercase ${idx === 6 ? 'text-slate-500' : idx === 5 ? 'text-amber-700' : 'text-slate-500'}`}>
+                    <div key={day} className={`py-2 text-center text-[12px] font-bold ${idx === 6 ? 'text-slate-500' : idx === 5 ? 'text-amber-700' : 'text-slate-500'}`}>
                         {day}
                     </div>
                 ))}
@@ -129,13 +129,13 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
 
                                     {isSaturday && cell.isCurrentMonth && (
                                         <div className="flex items-center bg-amber-50 border border-amber-200/50 text-amber-700 px-1 py-0.5 rounded">
-                                            <span className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden lg:block">{SATURDAY_SHORT_TEXT}</span>
+                                            <span className="text-[10px] font-bold whitespace-nowrap hidden lg:block">{SATURDAY_SHORT_TEXT}</span>
                                         </div>
                                     )}
 
                                     {isSunday && cell.isCurrentMonth && (
                                         <div className="bg-slate-100 border border-slate-200/60 text-slate-600 px-1 py-0.5 rounded">
-                                            <span className="text-[8px] font-black uppercase tracking-widest whitespace-nowrap hidden lg:block">Descanso</span>
+                                            <span className="text-[10px] font-bold whitespace-nowrap hidden lg:block">Descanso</span>
                                         </div>
                                     )}
                                 </div>
@@ -204,7 +204,7 @@ export const QACalendar = ({ tasks, currentDate, onTicketClick, teamUsers, onSta
                                         aria-label={`Abrir ${task.id}: ${task.title}`}
                                     >
                                         <p className="text-xs font-bold text-[#07152F] truncate group-hover/item:text-[#0e71af] transition-colors">{task.title}</p>
-                                        <p className="text-[9px] font-black tracking-widest text-slate-500 uppercase mt-0.5">{task.id}</p>
+                                        <p className="text-[11px] font-bold text-slate-500 mt-0.5">{task.id}</p>
                                     </button>
                                     <StatusBadge
                                         currentStatus={task.status}

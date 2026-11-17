@@ -32,7 +32,7 @@ const BLOCKED_STRIPES = 'repeating-linear-gradient(135deg, rgba(0,0,0,0.30) 0 5p
 const StatusPill = ({ status }) => {
     const config = STATUS_CONFIG[status] || STATUS_CONFIG['PENDIENTE'];
     return (
-        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[8px] font-black uppercase tracking-wider whitespace-nowrap ${config.bg} ${config.border} ${config.color}`}>
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-bold whitespace-nowrap ${config.bg} ${config.border} ${config.color}`}>
             {status === 'BLOQUEADA' ? <Ban className="w-2.5 h-2.5" aria-hidden="true" />
                 : status === 'EN REVISIÓN' ? <Eye className="w-2.5 h-2.5" aria-hidden="true" />
                 : <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} aria-hidden="true"></span>}
@@ -47,7 +47,7 @@ const StatTile = ({ icon: Icon, label, value, detail, alert = false }) => (
             <Icon className="w-5 h-5" aria-hidden="true" />
         </div>
         <div className="min-w-0">
-            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{label}</p>
+            <p className="text-[12px] font-bold text-gray-500">{label}</p>
             <p className="text-2xl font-black text-[#07152F] tabular-nums leading-tight">{value}</p>
             {detail && <p className={`text-[10px] font-bold mt-0.5 ${alert ? 'text-red-700' : 'text-gray-500'}`}>{detail}</p>}
         </div>
@@ -159,7 +159,7 @@ export const QASchedule = () => {
                         type="button"
                         onClick={() => setHistoryOpen(true)}
                         disabled={isLoading || Boolean(loadError)}
-                        className="no-print h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 rounded-lg shadow-sm flex items-center gap-2 text-[10px] font-bold text-[#07152F] uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="no-print h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 rounded-lg shadow-sm flex items-center gap-2 text-[12px] font-bold text-[#07152F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <HistoryIcon className="w-3.5 h-3.5 text-gray-500" aria-hidden="true" />
                         Historial
@@ -171,7 +171,7 @@ export const QASchedule = () => {
                     {/* Filtro por integrante (select nativo transparente sobre el control visual) */}
                     <div className="no-print focus-ring-within relative h-10 bg-white border border-gray-200 hover:border-gray-300 rounded-lg shadow-sm flex items-center px-4 cursor-pointer transition-colors">
                         <Users className="w-3.5 h-3.5 text-gray-500 mr-2" aria-hidden="true" />
-                        <span className="text-[10px] font-bold text-[#07152F] uppercase tracking-widest max-w-[160px] truncate" aria-hidden="true">{memberName}</span>
+                        <span className="text-[12px] font-bold text-[#07152F] max-w-[160px] truncate" aria-hidden="true">{memberName}</span>
                         <ChevronDown className="w-3 h-3 ml-2 text-gray-500" aria-hidden="true" />
                         <select
                             value={memberFilter}
@@ -198,13 +198,13 @@ export const QASchedule = () => {
                 {isLoading ? (
                     <div className="w-full h-64 flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl shadow-sm">
                         <div className="w-10 h-10 border-[3px] border-gray-100 border-t-[#0e71af] rounded-full animate-spin mb-4"></div>
-                        <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase animate-pulse">Cargando cronograma...</p>
+                        <p className="text-[12px] font-bold text-gray-500 animate-pulse">Cargando cronograma...</p>
                     </div>
                 ) : loadError ? (
                     <div role="alert" className="w-full flex flex-col items-center justify-center text-center bg-white border border-gray-100 rounded-xl shadow-sm py-16 px-6">
                         <p className="text-sm font-bold text-[#07152F]">No se pudo cargar la información</p>
                         <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">{loadError}</p>
-                        <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors flex items-center gap-2">
+                        <button type="button" onClick={reload} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-md transition-colors flex items-center gap-2">
                             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                             Reintentar
                         </button>
@@ -246,7 +246,7 @@ export const QASchedule = () => {
                                 </div>
                                 <p className="text-sm font-bold text-[#07152F]">Todas las actividades de {MONTH_NAMES[month]} están completadas</p>
                                 <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">Consulta cómo se movieron en el historial.</p>
-                                <button type="button" onClick={() => setHistoryOpen(true)} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
+                                <button type="button" onClick={() => setHistoryOpen(true)} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-md transition-colors">
                                     Ver historial
                                 </button>
                             </div>
@@ -259,7 +259,7 @@ export const QASchedule = () => {
                                     <>
                                         <p className="text-sm font-bold text-[#07152F]">Ninguna actividad coincide con los filtros</p>
                                         <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">Prueba con otra búsqueda o quita algún filtro.</p>
-                                        <button type="button" onClick={() => { reset(); setMemberFilter(''); }} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
+                                        <button type="button" onClick={() => { reset(); setMemberFilter(''); }} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-md transition-colors">
                                             Limpiar filtros
                                         </button>
                                     </>
@@ -267,7 +267,7 @@ export const QASchedule = () => {
                                     <>
                                         <p className="text-sm font-bold text-[#07152F]">Sin actividades en {MONTH_NAMES[month]}</p>
                                         <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">Las actividades con fechas dentro de este mes aparecerán aquí automáticamente.</p>
-                                        <Link to="/qa/actividades" className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors inline-flex items-center">
+                                        <Link to="/qa/actividades" className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-md transition-colors inline-flex items-center">
                                             Ir al gestor de actividades
                                         </Link>
                                     </>
@@ -280,7 +280,7 @@ export const QASchedule = () => {
 
                                         {/* Encabezado de días */}
                                         <div className="flex bg-slate-50/80 border-b border-slate-200">
-                                            <div className={`${LABEL_COL} bg-slate-50/80 px-4 py-2.5 flex items-center text-[10px] font-black text-slate-500 uppercase tracking-widest`}>
+                                            <div className={`${LABEL_COL} bg-slate-50/80 px-4 py-2.5 flex items-center text-[12px] font-bold text-slate-500`}>
                                                 Actividad
                                             </div>
                                             <div className="flex-1 grid" style={dayGridStyle}>
@@ -333,7 +333,7 @@ export const QASchedule = () => {
                                                             <p className="text-xs font-bold text-[#07152F] truncate" title={task.title}>{task.title}</p>
                                                         </div>
                                                         <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 pl-7">
-                                                            <span className="text-[8px] font-black tracking-widest text-slate-500 uppercase">{task.id}</span>
+                                                            <span className="text-[10px] font-bold text-slate-500">{task.id}</span>
                                                             <span className="flex items-center gap-1 text-[9px] font-bold text-slate-500">
                                                                 <Hourglass className="w-2.5 h-2.5" aria-hidden="true" />
                                                                 Est {fmtH(estimated)}h
@@ -420,7 +420,7 @@ export const QASchedule = () => {
 
                                         {/* Horas reales por día */}
                                         <div className="flex border-t-2 border-slate-200 bg-slate-50/80">
-                                            <div className={`${LABEL_COL} bg-slate-50/80 px-4 py-2.5 flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest`}>
+                                            <div className={`${LABEL_COL} bg-slate-50/80 px-4 py-2.5 flex items-center gap-2 text-[12px] font-bold text-slate-500`}>
                                                 <Activity className="w-3.5 h-3.5" aria-hidden="true" />
                                                 Horas reales
                                                 <span className="font-bold normal-case tracking-normal">(h por día)</span>

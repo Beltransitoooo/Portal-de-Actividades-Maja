@@ -115,6 +115,7 @@ export const fetchDashboardData = async () => {
             hoursEntries,
             hoursByDate,
             type: t.tipo_actividad,
+            areaId: t.area_id ?? null,
             completada: t.estado === 'COMPLETADA'
         };
     });

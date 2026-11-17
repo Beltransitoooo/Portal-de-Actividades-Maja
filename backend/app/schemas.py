@@ -227,6 +227,11 @@ class ComentarioResponse(BaseModel):
 
 
 # ---------- Historial ----------
+class CierreResponse(BaseModel):
+    actividad_id: int
+    fecha_cierre: datetime
+
+
 class HistorialResponse(BaseModel):
     id: int
     actividad_id: int

@@ -22,7 +22,7 @@ export const QAHeader = ({ onNewTicketClick, currentDate, onPrevMonth, onNextMon
             {/* Filtro por estado (select nativo transparente sobre el control visual) */}
             <div className="focus-ring-within relative h-10 bg-white border border-gray-200 hover:border-gray-300 rounded-lg shadow-sm flex items-center px-4 cursor-pointer transition-colors">
                 <ListFilter className="w-3.5 h-3.5 text-gray-500 mr-2" aria-hidden="true" />
-                <span className="text-[10px] font-bold text-[#07152F] uppercase tracking-widest" aria-hidden="true">{currentFilterLabel}</span>
+                <span className="text-[12px] font-bold text-[#07152F]" aria-hidden="true">{currentFilterLabel}</span>
                 <ChevronDown className="w-3 h-3 ml-2 text-gray-500" aria-hidden="true" />
                 <select
                     value={statusFilter}
@@ -40,7 +40,7 @@ export const QAHeader = ({ onNewTicketClick, currentDate, onPrevMonth, onNextMon
             <button
                 type="button"
                 onClick={onNewTicketClick}
-                className="h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2"
+                className="h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 flex items-center gap-2"
             >
                 <Plus className="w-4 h-4" aria-hidden="true" />
                 Nueva Actividad

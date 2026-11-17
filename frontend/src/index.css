@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
 @theme {
+  /* Tipografía: Archivo en todo el portal; el ancho distingue los roles
+     (extracondensada negra itálica = registro de dorsal; ancho normal = lectura) */
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Sistema "Tejido y pista" */
+  --color-pista: #0a1630;     /* marino: estructura, encabezados */
+  --color-tartan: #e4572e;    /* tartán de pista atlética: solo "estás aquí" y lo urgente */
+  --color-electrico: #2ec5ff; /* líneas y foco sobre marino */
+  --color-carril: #eef2f8;    /* fondo de página: frío, no crema */
+
   --color-maja-bg: #f8fafc;
   --color-maja-card: #ffffff;
   --color-maja-primary: #0f172a;
@@ -166,6 +176,109 @@ body {
 .dark .bg-slate-100\/70 { background-color: var(--d-surface-2); }
 .dark .bg-green-50 { background-color: rgb(52 211 153 / 0.12); }
 .dark .border-green-700 { border-color: #22c55e; }
+
+/* =====================================================================
+   SISTEMA "TEJIDO Y PISTA" (fase 1 del rediseño)
+   ===================================================================== */
+/* Registro de dorsal: Archivo extracondensada, negra e itálica (títulos y números de marca) */
+.font-dorsal {
+  font-stretch: 62%;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.005em;
+  line-height: 0.92;
+}
+.font-condensada { font-stretch: 75%; }
+
+/* Plano de la página */
+.plano-pagina { background-color: var(--color-carril); }
+.dark .plano-pagina { background-color: var(--d-bg); }
+/* Equivalencias en oscuro de los tonos nuevos del rediseño */
+.dark .text-\[\#334155\], .dark .text-\[\#475569\] { color: var(--d-text-2); }
+.dark .text-\[\#64748b\], .dark .text-\[\#5b6a80\] { color: var(--d-muted); } /* #5b6a80: 4.9:1 sobre el plano claro (AA) */
+.dark .border-\[\#dfe5ee\] { border-color: var(--d-border); }
+.dark .hover\:bg-white\/60:hover { background-color: var(--d-surface-2); }
+/* Acceso */
+.dark .border-\[\#d6dee9\] { border-color: var(--d-border-strong); }
+.dark .boton-acceso { background-color: #0e71af; }
+.dark .boton-acceso:hover { background-color: #1287d1; }
+.dark .bg-\[\#f5f8fc\], .dark .focus\:bg-white:focus { background-color: var(--d-surface-2); }
+.dark .bg-\[\#e2e8f0\] { background-color: var(--d-border); }
+
+/* Estrella MAJA del acceso: un cuarto de vuelta cada 3 s (la estrella tiene simetría de 90°,
+   así el ciclo no tiene saltos) y una vuelta completa al pasar el cursor. */
+@keyframes estrella-cuarto {
+  0%, 62% { transform: rotate(0deg); }
+  100% { transform: rotate(90deg); }
+}
+@keyframes estrella-vuelta {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.estrella-ciclo { animation: estrella-cuarto 3s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+.estrella-vuelta { animation: estrella-vuelta 0.9s cubic-bezier(0.65, 0, 0.35, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .estrella-ciclo, .estrella-vuelta { animation: none; }
+}
+/* Pausa manual (botón "Pausar animación"): WCAG 2.2.2 */
+.animaciones-pausadas .estrella-ciclo, .animaciones-pausadas .estrella-vuelta { animation: none; }
+
+/* Textura de punto (rib knit) para superficies marino: líneas finas verticales */
+.textura-punto {
+  background-image:
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 5px),
+    radial-gradient(120% 140% at 85% 20%, rgb(46 197 255 / 0.18), transparent 55%);
+}
+
+/* =====================================================================
+   GRÁFICAS (pestaña Gráficos del Panel de rendimiento)
+   Paleta "Tejido y pista" (azul MAJA, tartán, césped, ciruela, oro + gris para "Otros"),
+   validada con el script del método dataviz contra blanco y #111a2c. La fuente en código es
+   components/QA/Charts/chartPalette.js; estas variables la reflejan para leyendas y bordes.
+   Los estados (bien / aviso / crítico) no se usan como series y siempre llevan texto.
+   ===================================================================== */
+:root {
+  --viz-series-1: #0e71af;   /* azul MAJA: estimado / a tiempo / serie principal */
+  --viz-series-2: #e4572e;   /* tartán: real / con retraso */
+  /* Pasteles: 6 posiciones en orden fijo (validadas en pares vecinos, incluido 6↔1).
+     En claro, 3, 4 y 5 quedan bajo 3:1 contra blanco: por eso cada rebanada lleva su % visible y tabla.
+     Texto dentro de la rebanada (contraste medido): oscuro en 1–5 y blanco en 6, en ambos temas. */
+  --viz-series-3: #2a9d6f;
+  --viz-series-4: #9b3f86;
+  --viz-series-5: #d4a017;
+  --viz-series-6: #8b97a8;
+  --viz-diverge-neg: #0e71af; /* por debajo de lo estimado */
+  --viz-diverge-pos: #e4572e; /* por encima de lo estimado */
+  --viz-good: #0ca30c;
+  --viz-warning: #d4a017;
+  --viz-critical: #e4572e;
+  --viz-track: #e2e8f0;
+  --viz-surface: #ffffff;
+  --viz-grid: #e2e8f0;
+  --viz-axis: #cbd5e1;
+  --viz-text: #07152f;
+  --viz-text-2: #475569;
+  --viz-muted: #64748b;
+  --viz-cursor: rgb(15 23 42 / 0.05);
+}
+:root.dark {
+  --viz-series-1: #3a8fd2;
+  --viz-series-2: #dc5a33;
+  --viz-series-3: #21906a;
+  --viz-series-4: #c75fb0;
+  --viz-series-5: #ad7f19;
+  --viz-series-6: #6b7a90;
+  --viz-diverge-neg: #3a8fd2;
+  --viz-diverge-pos: #dc5a33;
+  --viz-track: #22304b;
+  --viz-surface: #111a2c;
+  --viz-grid: #26334d;
+  --viz-axis: #3a4a66;
+  --viz-text: #e5ecf6;
+  --viz-text-2: #c3cfdf;
+  --viz-muted: #9aa9bf;
+  --viz-cursor: rgb(255 255 255 / 0.05);
+}
 
 /* =====================================================================
    IMPRESIÓN / PDF

@@ -1,3 +1,5 @@
+import { Meter3D } from '../Charts/Volume3D';
+import { PALETTE } from '../Charts/chartPalette';
 import React from 'react';
 
 import { BarChart3 } from 'lucide-react';
@@ -52,24 +54,25 @@ export const CapacityTable = ({ capacityData = [] }) => {
 
                                 {/* Tareas */}
                                 <div className="md:w-1/6">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Tareas</p>
+                                    <p className="text-[12px] text-slate-400 font-bold mb-1">Tareas</p>
                                     <p className="text-sm font-semibold text-white">{tester.tasks}</p>
                                 </div>
 
                                 {/* Progreso / Esfuerzo */}
                                 <div className="md:w-2/5">
                                     <div className="flex justify-between items-end mb-1.5">
-                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Esfuerzo Asignado</span>
+                                        <span className="text-[12px] text-slate-400 font-bold">Esfuerzo Asignado</span>
                                         <span className="text-xs font-semibold text-white">
                                             {tester.logged} <span className="text-slate-400 font-normal">/ {tester.max}h</span>
                                         </span>
                                     </div>
-                                    <div className="h-1.5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50 relative">
-                                        <div 
-                                            className="h-full rounded-full bg-[#00A3FF] transition-all duration-1000 shadow-[0_0_10px_rgba(0,163,255,0.5)]" 
-                                            style={{ width: `${progressPercentage}%` }}
-                                        ></div>
-                                    </div>
+                                    {/* Medidor 3D: color por estado (azul óptimo, oro al límite, tartán sobrecargado) */}
+                                    <Meter3D
+                                        pct={progressPercentage}
+                                        color={tester.status === 'Sobrecargado' ? PALETTE.dark[1] : tester.status === 'Al Límite' ? PALETTE.dark[4] : PALETTE.dark[0]}
+                                        trackColor="#22304b"
+                                        height={10}
+                                    />
                                 </div>
 
                                 {/* Estado */}

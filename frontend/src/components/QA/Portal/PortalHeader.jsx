@@ -1,17 +1,16 @@
 import { ChevronDown } from 'lucide-react';
-import { PageHeader } from '../../Shared/PageHeader';
 import { ExportBar } from '../../Shared/ExportBar';
 
-export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints, periodRange, onExportCsv, onPrint }) => {
+// Controles del Resumen: exportación y periodo semanal (la pestaña Gráficos tiene sus propios filtros).
+// El título del Panel vive en PerformanceHero.
+export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints, periodRange, onExportCsv, onPrint, showControls = true }) => {
+    if (!showControls) return null;
     return (
-        <PageHeader
-            title="Panel de rendimiento"
-            subtitle="Visualiza el progreso, la carga de trabajo y el estado de las actividades del equipo."
-        >
+        <div className="flex flex-wrap items-end gap-3">
             <ExportBar onCsv={onExportCsv} onPrint={onPrint} />
 
             <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">
+                <span className="text-[12px] font-bold text-gray-500 px-1">
                     Período de trabajo
                 </span>
 
@@ -48,6 +47,6 @@ export const PortalHeader = ({ selectedSprint, setSelectedSprint, optionsSprints
                     </span>
                 )}
             </div>
-        </PageHeader>
+        </div>
     );
 };

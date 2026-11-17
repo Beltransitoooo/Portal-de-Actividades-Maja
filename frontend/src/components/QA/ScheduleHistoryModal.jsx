@@ -20,13 +20,13 @@ const PlanVsReal = ({ task, real }) => {
     return (
         <div className="flex flex-col gap-1.5" aria-hidden="true">
             <div className="flex items-center gap-2">
-                <span className="w-10 shrink-0 text-[8px] font-black uppercase tracking-widest text-slate-500">Plan</span>
+                <span className="w-10 shrink-0 text-[10px] font-bold text-slate-500">Plan</span>
                 <div className="relative flex-1 h-2.5 bg-slate-100 rounded">
                     <div className="absolute inset-y-0 bg-[#0e71af]/70 rounded" style={{ left: `${pct(planStart)}%`, width: `${width(planStart, planEnd)}%` }}></div>
                 </div>
             </div>
             <div className="flex items-center gap-2">
-                <span className="w-10 shrink-0 text-[8px] font-black uppercase tracking-widest text-slate-500">Real</span>
+                <span className="w-10 shrink-0 text-[10px] font-bold text-slate-500">Real</span>
                 <div className="relative flex-1 h-2.5 bg-slate-100 rounded">
                     {Array.from({ length: total }, (_, i) => addDays(from, i))
                         .filter(d => task.hoursByDate[d] > 0)
@@ -60,7 +60,7 @@ const HistoryItem = ({ task }) => {
         <li className="border border-slate-200 rounded-xl p-4 flex flex-col gap-3">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <p className="text-[8px] font-black tracking-widest text-slate-500 uppercase">{task.id} · {task.assigneeName || 'Sin asignar'}</p>
+                    <p className="text-[10px] font-bold text-slate-500">{task.id} · {task.assigneeName || 'Sin asignar'}</p>
                     <p className="text-sm font-bold text-[#07152F] break-words">{task.title}</p>
                     {task.leaderName && (
                         <p className="flex items-center gap-1 text-[9px] font-semibold text-slate-500 mt-0.5">
@@ -69,7 +69,7 @@ const HistoryItem = ({ task }) => {
                         </p>
                     )}
                 </div>
-                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[8px] font-black uppercase tracking-wider whitespace-nowrap shrink-0 ${
+                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-bold whitespace-nowrap shrink-0 ${
                     over ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
                 }`}>
                     <CheckCircle2 className="w-2.5 h-2.5" aria-hidden="true" />
@@ -79,21 +79,21 @@ const HistoryItem = ({ task }) => {
 
             <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
                 <div>
-                    <dt className="flex items-center gap-1 font-bold text-slate-500 uppercase tracking-widest text-[8px]"><CalendarClock className="w-2.5 h-2.5" aria-hidden="true" />Plan</dt>
+                    <dt className="flex items-center gap-1 font-bold text-slate-500 text-[10px]"><CalendarClock className="w-2.5 h-2.5" aria-hidden="true" />Plan</dt>
                     <dd className="font-bold text-[#07152F] tabular-nums">{formatDateMx(task.startDate)} – {formatDateMx(planEnd)}</dd>
                 </div>
                 <div>
-                    <dt className="flex items-center gap-1 font-bold text-slate-500 uppercase tracking-widest text-[8px]"><Clock3 className="w-2.5 h-2.5" aria-hidden="true" />Real</dt>
+                    <dt className="flex items-center gap-1 font-bold text-slate-500 text-[10px]"><Clock3 className="w-2.5 h-2.5" aria-hidden="true" />Real</dt>
                     <dd className="font-bold text-[#07152F] tabular-nums">
                         {real ? `${formatDateMx(real.first)} – ${formatDateMx(real.last)}` : 'Sin horas registradas'}
                     </dd>
                 </div>
                 <div>
-                    <dt className="flex items-center gap-1 font-bold text-slate-500 uppercase tracking-widest text-[8px]"><Hourglass className="w-2.5 h-2.5" aria-hidden="true" />Horas</dt>
+                    <dt className="flex items-center gap-1 font-bold text-slate-500 text-[10px]"><Hourglass className="w-2.5 h-2.5" aria-hidden="true" />Horas</dt>
                     <dd className={`font-bold tabular-nums ${over ? 'text-red-700' : 'text-[#07152F]'}`}>{fmtHours(logged)} de {fmtHours(estimated)} estimadas</dd>
                 </div>
                 <div>
-                    <dt className="font-bold text-slate-500 uppercase tracking-widest text-[8px]">Cierre</dt>
+                    <dt className="font-bold text-slate-500 text-[10px]">Cierre</dt>
                     <dd className={`font-bold ${lateDays > 0 ? 'text-red-700' : 'text-[#07152F]'}`}>
                         {!real ? '—' : lateDays > 0 ? `${lateDays} día${lateDays > 1 ? 's' : ''} después del vencimiento` : 'Dentro del plan'}
                         {real && ` · ${real.count} día${real.count > 1 ? 's' : ''} trabajado${real.count > 1 ? 's' : ''}`}
@@ -108,7 +108,7 @@ const HistoryItem = ({ task }) => {
                 onClick={() => setOpen(o => !o)}
                 aria-expanded={open}
                 aria-controls={open ? panelId : undefined}
-                className="self-start flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-[#0e71af] hover:text-[#07152F] transition-colors"
+                className="self-start flex items-center gap-1 text-[12px] font-bold text-[#0e71af] hover:text-[#07152F] transition-colors"
             >
                 <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
                 {open ? 'Ocultar movimientos' : 'Ver movimientos'}

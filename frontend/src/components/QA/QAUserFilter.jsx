@@ -11,7 +11,7 @@ export const QAUserFilter = ({ teamUsers, tasks = [], selectedUser, onSelectUser
             <div className="bg-white border border-gray-200 shadow-sm rounded-2xl p-5 flex flex-col h-full min-h-0">
                 
                 <div className="flex items-center justify-between mb-5 shrink-0">
-                    <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                    <h2 className="text-[12px] font-bold text-gray-500">
                         Equipo & Progreso
                     </h2>
                     <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -37,7 +37,7 @@ export const QAUserFilter = ({ teamUsers, tasks = [], selectedUser, onSelectUser
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className={`text-xs font-bold truncate ${selectedUser === null ? 'text-[#07152F]' : 'text-gray-600'}`}>Vista Global</p>
-                                <p className="text-[9px] text-gray-500 uppercase tracking-widest truncate">Todos los tickets</p>
+                                <p className="text-[11px] text-gray-500 truncate">Todos los tickets</p>
                             </div>
                         </div>
 
@@ -81,7 +81,7 @@ export const QAUserFilter = ({ teamUsers, tasks = [], selectedUser, onSelectUser
                                         <p className={`text-xs font-bold truncate transition-colors ${selectedUser === user.raw_id ? 'text-[#07152F]' : 'text-gray-600 group-hover:text-[#07152F]'}`}>
                                             {user.name}
                                         </p>
-                                        <p className="text-[9px] text-gray-500 uppercase tracking-widest truncate">
+                                        <p className="text-[11px] text-gray-500 truncate">
                                             {user.role}
                                         </p>
                                     </div>

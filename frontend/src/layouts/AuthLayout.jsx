@@ -1,46 +1,38 @@
-import logoMaja from '../assets/Logo_MAJA.png';
+import { useRef } from 'react';
+import { SpinningStar } from '../components/Brand/SpinningStar';
+import { MotionToggle } from '../components/Brand/MotionToggle';
 
+// Acceso: a la izquierda la marca (con la estrella MAJA del logo girando); a la derecha el formulario.
+// En pantallas chicas la marca se vuelve una franja arriba.
 export const AuthLayout = ({ children }) => {
+    const logoRef = useRef(null);
     return (
-        <div className="flex h-screen w-full font-sans">
-            
-            {/* LADO IZQUIERDO */}
-            <header className="hidden lg:flex w-1/2 bg-[#0B132B] text-white flex-col justify-between relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-[120%] h-[150%] bg-[#060B19] transform rotate-12 translate-x-[40%] -translate-y-[10%] z-0"></div>
-                <div className="absolute inset-0 opacity-[0.15] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-
-                {/* Logo MAJA Proporcionado */}
-                <div className="relative z-10 p-12 lg:p-16">
-                    <div className="flex items-center gap-5">
-                        <img src={logoMaja} alt="" className="w-12 h-12 object-contain" />
-                        <div className="flex flex-col mt-1">
-                            <p className="font-black text-5xl tracking-widest italic leading-none">MAJA</p>
-                            <span className="font-light text-[10px] tracking-[0.55em] text-[#00A3FF] mt-1.5 pl-0.5">SPORTSWEAR</span>
-                        </div>
-                    </div>
+        <div className="min-h-screen w-full font-sans flex flex-col lg:flex-row plano-pagina">
+            <header className="relative overflow-hidden bg-pista textura-punto text-white isolate lg:w-[52%] lg:min-h-screen flex flex-col justify-between">
+                <MotionToggle className="absolute right-5 top-5 sm:right-8 sm:top-8 z-10" />
+                {/* Logo: la estrella gira cada 3 s y da una vuelta al pasar el cursor por todo el logo */}
+                <div ref={logoRef} className="relative self-start flex items-center gap-3 p-6 sm:p-10 lg:p-14">
+                    <span aria-hidden="true" className="w-1.5 h-9 -mt-[17px] bg-tartan -skew-x-[14deg] rounded-[1px]"></span>
+                    {/* 50 px de caja = 28 px de estrella visible, el alto de las letras de "MAJA" (el PNG trae margen transparente); -mt la centra con "MAJA", no con "MAJA + Sportswear" */}
+                    <SpinningStar size={50} triggerRef={logoRef} className="-mt-[17px] -mx-[8px]" />
+                    <p className="flex flex-col leading-none">
+                        <span className="font-dorsal text-[40px]">MAJA</span>
+                        <span className="font-condensada text-[13px] text-white/65 mt-1">Sportswear</span>
+                    </p>
                 </div>
 
-                <div className="relative z-10 p-12 lg:p-16 mb-8">
-                    <p className="text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-5">
-                        EL IMPULSO <br/>
-                        <span className="text-[#00A3FF]">QUE NECESITAS.</span>
+                <div className="relative px-6 sm:px-10 lg:px-14 pb-8 lg:pb-16">
+                    <p className="font-dorsal uppercase text-[46px] sm:text-[64px] lg:text-[88px] max-w-[11ch]">
+                        El impulso que necesitas.
                     </p>
-                    <p className="text-gray-400 text-sm lg:text-base max-w-md leading-relaxed">
-                        Gestión de alto rendimiento para equipos que no se detienen.
+                    <p className="text-[15px] text-white/75 mt-5 max-w-[42ch] leading-relaxed">
+                        Portal de actividades del equipo: carga, avances y entregas en un solo lugar.
                     </p>
                 </div>
             </header>
 
-            {/* LADO DERECHO: Fondo gris corporativo */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-20 bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 relative z-10 overflow-hidden shadow-[inset_20px_0_40px_rgba(0,0,0,0.05)]">
-                
-                {/* Malla oscura sutil para textura */}
-                <div className="absolute inset-0 opacity-[0.06] pointer-events-none z-0" style={{ backgroundImage: 'radial-gradient(#0B132B 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-
-                <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-white/40 rounded-full blur-[100px] pointer-events-none z-0"></div>
-
-                {/* Contenedor del Formulario (Más ancho) */}
-                <main className="relative z-20 w-full max-w-[460px]">
+            <div className="flex-1 flex items-center justify-center px-5 py-10 sm:p-10 lg:p-16">
+                <main className="w-full max-w-[420px]">
                     {children}
                 </main>
             </div>

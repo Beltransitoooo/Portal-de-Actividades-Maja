@@ -1,4 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { LayoutList, ChartColumn } from 'lucide-react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { fetchWithAuth, readErrorMessage, toUserMessage } from '../services/authService';
 import { getQuarterWeeks, overlapsPeriod, toLocalDateStr, formatDateMx } from '../utils/dates';
@@ -9,13 +11,36 @@ import { toCsv, downloadCsv } from '../utils/csv';
 import { printPage } from '../utils/print';
 
 import { PortalHeader } from '../components/QA/Portal/PortalHeader';
+import { PerformanceHero } from '../components/QA/Portal/PerformanceHero';
 import { CapacityTable } from '../components/QA/Portal/CapacityTable';
 import { DeviationTable } from '../components/QA/Portal/DeviationTable';
 import { EffortBalance } from '../components/QA/Portal/EffortBalance';
+// Recharts solo se descarga al abrir la pestaña Gráficos
+const ChartsView = lazy(() => import('../components/QA/Charts/ChartsView').then(m => ({ default: m.ChartsView })));
+
+// Gráficos es la pestaña principal; el Resumen queda como segunda
+const TABS = [
+    { key: 'graficos', label: 'Gráficos', icon: ChartColumn },
+    { key: 'resumen', label: 'Resumen', icon: LayoutList },
+];
 
 
 
 export const QAPortal = () => {
+    // Pestaña activa en la URL (?vista=resumen) para poder compartirla o volver a ella; por defecto, Gráficos
+    const [searchParams, setSearchParams] = useSearchParams();
+    const tab = searchParams.get('vista') === 'resumen' ? 'resumen' : 'graficos';
+    const tabRefs = useRef({});
+    const selectTab = (key, focus = false) => {
+        setSearchParams(key === 'graficos' ? {} : { vista: key }, { replace: true });
+        if (focus) tabRefs.current[key]?.focus();
+    };
+    // Flechas izquierda/derecha entre pestañas (patrón ARIA de tabs)
+    const onTabKey = (e) => {
+        const i = TABS.findIndex(t => t.key === tab);
+        const next = e.key === 'ArrowRight' ? TABS[(i + 1) % TABS.length] : e.key === 'ArrowLeft' ? TABS[(i - 1 + TABS.length) % TABS.length] : null;
+        if (next) { e.preventDefault(); selectTab(next.key, true); }
+    };
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState(null);
     const [reloadKey, setReloadKey] = useState(0);
@@ -170,27 +195,62 @@ export const QAPortal = () => {
     return (
         <DashboardLayout>
             <div className="max-w-[1500px] mx-auto flex flex-col gap-6 animate-fade-in">
-                <PortalHeader
-                    onExportCsv={exportCsv}
-                    onPrint={printPage}
-                    selectedSprint={selectedSprint}
-                    setSelectedSprint={setSelectedSprint}
-                    optionsSprints={optionsSprints}
-                    periodRange={`${formatDateMx(selectedWeek.start)} – ${formatDateMx(selectedWeek.end)}`}
-                />
+                <PerformanceHero />
 
+                <div className="flex flex-wrap items-end justify-between gap-4 -mt-1">
+                    <div role="tablist" aria-label="Secciones del panel" onKeyDown={onTabKey} className="no-print flex gap-1">
+                        {TABS.map(t => (
+                            <button
+                                key={t.key}
+                                ref={el => { tabRefs.current[t.key] = el; }}
+                                id={`panel-tab-${t.key}`}
+                                type="button"
+                                role="tab"
+                                aria-selected={tab === t.key}
+                                aria-controls={`panel-${t.key}`}
+                                tabIndex={tab === t.key ? 0 : -1}
+                                onClick={() => selectTab(t.key)}
+                                className={`relative h-11 px-4 flex items-center gap-2 rounded-[10px] text-[14px] font-bold transition-colors ${
+                                    tab === t.key ? 'bg-white text-[#07152F] shadow-[0_8px_20px_-14px_rgb(10_22_48/0.5)]' : 'text-[#475569] hover:text-[#07152F]'
+                                }`}
+                            >
+                                <t.icon className={`w-4 h-4 ${tab === t.key ? 'text-[#0e71af]' : ''}`} aria-hidden="true" />
+                                {t.label}
+                                {tab === t.key && <span aria-hidden="true" className="absolute left-3 right-3 -bottom-[3px] h-[3px] bg-tartan -skew-x-[14deg]"></span>}
+                            </button>
+                        ))}
+                    </div>
+                    <PortalHeader
+                        onExportCsv={exportCsv}
+                        onPrint={printPage}
+                        selectedSprint={selectedSprint}
+                        setSelectedSprint={setSelectedSprint}
+                        optionsSprints={optionsSprints}
+                        periodRange={`${formatDateMx(selectedWeek.start)} – ${formatDateMx(selectedWeek.end)}`}
+                        showControls={tab === 'resumen'}
+                    />
+                </div>
+
+                {tab === 'graficos' ? (
+                    <div role="tabpanel" id="panel-graficos" aria-labelledby="panel-tab-graficos">
+                        <Suspense fallback={<p role="status" className="text-xs text-gray-500 py-10 text-center">Cargando gráficas...</p>}>
+                            <ChartsView />
+                        </Suspense>
+                    </div>
+                ) : (
+                <div role="tabpanel" id="panel-resumen" aria-labelledby="panel-tab-resumen" className="flex flex-col gap-6">
                 {isLoading ? (
                     <div className="w-full h-64 flex items-center justify-center bg-white border border-gray-100 mt-6 rounded-xl shadow-sm">
                         <div className="flex flex-col items-center">
                             <div className="w-8 h-8 border-[3px] border-gray-100 border-t-[#0e71af] rounded-full animate-spin mb-3"></div>
-                            <p className="text-xs font-bold text-gray-500 tracking-widest uppercase animate-pulse">Sincronizando portal...</p>
+                            <p className="text-[13px] font-bold text-gray-500 animate-pulse">Sincronizando portal...</p>
                         </div>
                     </div>
                 ) : loadError ? (
                     <div role="alert" className="w-full flex flex-col items-center justify-center text-center bg-white border border-gray-100 mt-6 rounded-xl shadow-sm py-16 px-6">
                         <p className="text-sm font-bold text-[#0B132B]">No se pudo cargar la información</p>
                         <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">{loadError}</p>
-                        <button type="button" onClick={() => setReloadKey(k => k + 1)} className="mt-5 h-10 px-5 bg-[#0B132B] hover:bg-[#00A3FF] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
+                        <button type="button" onClick={() => setReloadKey(k => k + 1)} className="mt-5 h-10 px-5 bg-[#0B132B] hover:bg-[#00A3FF] text-white text-[12px] font-bold rounded-lg shadow-md transition-colors">
                             Reintentar
                         </button>
                     </div>
@@ -207,6 +267,8 @@ export const QAPortal = () => {
                             </div>
                         </div>
                     </>
+                )}
+                </div>
                 )}
             </div>
         </DashboardLayout>

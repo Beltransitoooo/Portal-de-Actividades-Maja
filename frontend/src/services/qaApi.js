@@ -19,6 +19,8 @@ export const getMe = () => call('/usuarios/me', { fallback: 'No se pudo cargar t
 // ---- Actividades ----
 export const createActivity = (body) => call('/actividades/', { method: 'POST', body, fallback: 'Error al crear la actividad.' });
 export const updateActivity = (id, body) => call(`/actividades/${id}`, { method: 'PUT', body, fallback: 'No se pudo actualizar la actividad.' });
+// Fecha en que se completó cada actividad visible (último cambio de estado a COMPLETADA)
+export const listClosures = () => call('/actividades/cierres', { fallback: 'No se pudieron cargar las fechas de cierre.' });
 export const deleteActivity = (id) => call(`/actividades/${id}`, { method: 'DELETE', fallback: 'No se pudo eliminar la actividad.' });
 
 // ---- Líderes técnicos (catálogo) ----

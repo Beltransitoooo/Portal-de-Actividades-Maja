@@ -94,13 +94,13 @@ export const Login = () => {
     return (
         <AuthLayout>
             {/* Contenedor relativo para posicionar el loader encima de los formularios */}
-            <div className="relative w-full max-w-[400px]">
+            <div className="relative w-full">
 
                 {/* Overlay del Loader que cubre exactamente la tarjeta del formulario */}
                 {showLoader && (
-                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-md rounded-[40px] shadow-lg">
+                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/85 backdrop-blur-md rounded-[18px]">
                         <Loader />
-                        <p role="status" className="mt-8 text-xs font-bold tracking-[0.2em] text-[#0B132B] uppercase animate-pulse">
+                        <p role="status" className="mt-8 text-[13px] font-bold text-[#0B132B] animate-pulse">
                             {loaderText}
                         </p>
                     </div>

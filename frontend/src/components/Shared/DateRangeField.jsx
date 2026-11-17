@@ -22,12 +22,18 @@ const useIsWide = () => {
     return wide;
 };
 
-const MonthGrid = ({ view, start, end, preview, focused, today, bounds, single, onPick, onHover, onKeyNav }) => {
+// Marcas opcionales por día (p. ej. disponibilidad de la persona asignada)
+const MARKER_STYLE = {
+    lleno: { dot: 'bg-red-600', label: 'jornada llena de la persona asignada' },
+    parcial: { dot: 'bg-amber-500', label: 'persona asignada parcialmente ocupada' },
+};
+
+const MonthGrid = ({ view, start, end, preview, focused, today, bounds, single, markers, onPick, onHover, onKeyNav }) => {
     const rangeEnd = end || preview;
 
     return (
         <div className="w-[238px]">
-            <p className="text-center text-[11px] font-black uppercase tracking-widest text-[#07152F] mb-2">
+            <p className="text-center text-[12px] font-bold text-[#07152F] mb-2">
                 {MONTH_NAMES[view.m]} {view.y}
             </p>
             <div className="grid grid-cols-7 mb-1" aria-hidden="true">
@@ -44,8 +50,10 @@ const MonthGrid = ({ view, start, end, preview, focused, today, bounds, single, 
                     const inRange = !single && start && rangeEnd && date > start && date < rangeEnd;
                     const isToday = date === today;
                     const edge = isStart || isEnd;
+                    const marker = MARKER_STYLE[markers?.[date]];
 
                     const states = [
+                        marker?.label,
                         single && isStart && 'seleccionado',
                         !single && isStart && 'inicio',
                         !single && date === end && 'vencimiento',
@@ -80,6 +88,9 @@ const MonthGrid = ({ view, start, end, preview, focused, today, bounds, single, 
                                 } ${isToday && !edge ? 'ring-1 ring-inset ring-[#0e71af] font-black' : ''}`}
                             >
                                 {parseDay(date).getDate()}
+                                {marker && (
+                                    <span aria-hidden="true" className={`absolute bottom-[3px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${edge ? 'bg-white' : marker.dot}`}></span>
+                                )}
                             </button>
                         </div>
                     );
@@ -96,7 +107,7 @@ const MonthGrid = ({ view, start, end, preview, focused, today, bounds, single, 
  * Teclado: flechas mueven el día, Re Pág / Av Pág cambian de mes, Inicio / Fin van al lunes / domingo,
  * Enter selecciona y Escape cierra sin cerrar el modal que contiene el campo.
  */
-export const DateRangeField = ({ id, label, start, end = '', onChange, single = false, min, max, maxMonths = 2, presets }) => {
+export const DateRangeField = ({ id, label, start, end = '', onChange, single = false, min, max, maxMonths = 2, presets, markers, markersLabel, disabled = false }) => {
     const today = toLocalDateStr(new Date());
     const isWide = useIsWide();
     const uid = useId();
@@ -219,7 +230,7 @@ export const DateRangeField = ({ id, label, start, end = '', onChange, single = 
 
     return (
         <div ref={wrapperRef} onKeyDown={onWrapperKeyDown} className="relative">
-            <label id={labelId} htmlFor={id} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">{label}</label>
+            <label id={labelId} htmlFor={id} className="block text-[12px] font-bold text-gray-500 mb-1.5">{label}</label>
 
             <div className="relative">
                 <button
@@ -227,12 +238,13 @@ export const DateRangeField = ({ id, label, start, end = '', onChange, single = 
                     ref={triggerRef}
                     type="button"
                     onClick={() => (open ? close() : openPanel())}
+                    disabled={disabled}
                     // Nombre accesible = etiqueta + fechas elegidas (con solo <label> el lector omitiría las fechas)
                     aria-labelledby={`${labelId} ${valueId}`}
                     aria-expanded={open}
                     aria-controls={open ? panelId : undefined}
                     aria-haspopup="dialog"
-                    className={`w-full ${single ? 'min-h-[40px]' : 'min-h-[46px]'} flex items-center gap-3 pl-3 pr-10 py-2 bg-slate-50 border rounded-lg text-left transition-colors ${
+                    className={`w-full ${single ? 'min-h-[40px]' : 'min-h-[46px]'} disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-3 pl-3 pr-10 py-2 bg-slate-50 border rounded-lg text-left transition-colors ${
                         open ? 'border-[#0e71af] ring-2 ring-[#0e71af]/30' : 'border-gray-200 hover:border-gray-300'
                     }`}
                 >
@@ -247,21 +259,21 @@ export const DateRangeField = ({ id, label, start, end = '', onChange, single = 
                     <span aria-hidden="true" className="contents">
                     {single ? (
                         start
-                            ? <span className="text-sm font-bold text-[#07152F] tabular-nums">{formatDateMx(start)}{start === today ? <span className="ml-2 text-[9px] font-black uppercase tracking-wider text-[#0e71af]">Hoy</span> : null}</span>
+                            ? <span className="text-sm font-bold text-[#07152F] tabular-nums">{formatDateMx(start)}{start === today ? <span className="ml-2 text-[11px] font-bold text-[#0e71af]">Hoy</span> : null}</span>
                             : <span className="text-xs text-gray-500 font-medium">Selecciona el día</span>
                     ) : (start || end) ? (
                         <span className="flex items-center flex-wrap gap-x-2 gap-y-1 min-w-0">
                             <span className="flex flex-col">
-                                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Inicio</span>
+                                <span className="text-[10px] font-bold text-gray-500">Inicio</span>
                                 <span className="text-xs font-bold text-[#07152F] tabular-nums">{start ? formatDateMx(start) : 'Sin definir'}</span>
                             </span>
                             <ArrowRight className="w-3.5 h-3.5 text-gray-400 shrink-0" aria-hidden="true" />
                             <span className="flex flex-col">
-                                <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Vencimiento</span>
+                                <span className="text-[10px] font-bold text-gray-500">Vencimiento</span>
                                 <span className="text-xs font-bold text-[#07152F] tabular-nums">{end ? formatDateMx(end) : 'Sin definir'}</span>
                             </span>
                             {start && end && (
-                                <span className="ml-1 px-2 py-0.5 rounded-full bg-[#1296E8]/10 text-[#0e71af] text-[9px] font-black uppercase tracking-wider whitespace-nowrap">
+                                <span className="ml-1 px-2 py-0.5 rounded-full bg-[#1296E8]/10 text-[#0e71af] text-[11px] font-bold whitespace-nowrap">
                                     {days} {days === 1 ? 'día' : 'días'}
                                 </span>
                             )}
@@ -271,7 +283,7 @@ export const DateRangeField = ({ id, label, start, end = '', onChange, single = 
                     )}
                     </span>
                 </button>
-                {(start || end) && !single ? (
+                {(start || end) && !single && !disabled ? (
                     <button
                         type="button"
                         onClick={() => { emit('', ''); setPickingEnd(false); triggerRef.current?.focus(); }}
@@ -345,6 +357,7 @@ export const DateRangeField = ({ id, label, start, end = '', onChange, single = 
                                 today={today}
                                 bounds={bounds}
                                 single={single}
+                                markers={markers}
                                 onPick={pick}
                                 onHover={(d) => pickingEnd && setHover(d)}
                                 onKeyNav={onKeyNav}
@@ -352,12 +365,20 @@ export const DateRangeField = ({ id, label, start, end = '', onChange, single = 
                         ))}
                     </div>
 
+                    {markers && markersLabel && (
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-[9px] font-bold text-gray-500" aria-hidden="true">
+                            <span>{markersLabel}:</span>
+                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>Jornada llena</span>
+                            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Parcial</span>
+                        </div>
+                    )}
+
                     <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-gray-100">
                         <p id={statusId} role="status" className="text-[10px] font-medium text-gray-500">{statusText}</p>
                         <button
                             type="button"
                             onClick={() => close()}
-                            className="h-8 px-4 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-colors shrink-0"
+                            className="h-8 px-4 bg-[#07152F] hover:bg-[#0e71af] text-white text-[12px] font-bold rounded-lg shadow-sm transition-colors shrink-0"
                         >
                             {single ? 'Cerrar' : 'Listo'}
                         </button>

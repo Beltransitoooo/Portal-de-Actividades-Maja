@@ -8,7 +8,7 @@ const TYPES = [
     { value: 'Pruebas', label: 'Pruebas' },
 ];
 
-const selectClass = 'h-9 rounded-lg border border-gray-200 bg-white px-3 text-[10px] font-bold uppercase tracking-widest text-[#07152F] shadow-sm cursor-pointer hover:border-gray-300 focus:outline-none focus:border-[#0e71af] focus:ring-2 focus:ring-[#0e71af]/30 transition-colors';
+const selectClass = 'h-9 rounded-lg border border-gray-200 bg-white px-3 text-[12px] font-bold text-[#07152F] shadow-sm cursor-pointer hover:border-gray-300 focus:outline-none focus:border-[#0e71af] focus:ring-2 focus:ring-[#0e71af]/30 transition-colors';
 
 // Barra de búsqueda y filtros. showStatus agrega el filtro por estado detallado (el Gestor ya tiene el suyo).
 export const ActivityFilters = ({ filters, setFilter, reset, activeCount, showStatus = false, resultCount }) => (
@@ -43,7 +43,7 @@ export const ActivityFilters = ({ filters, setFilter, reset, activeCount, showSt
         )}
 
         {activeCount > 0 && (
-            <button type="button" onClick={reset} className="h-9 px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-[#0b5a8c] hover:bg-[#1296E8]/10 flex items-center gap-1.5 transition-colors">
+            <button type="button" onClick={reset} className="h-9 px-3 rounded-lg text-[12px] font-bold text-[#0b5a8c] hover:bg-[#1296E8]/10 flex items-center gap-1.5 transition-colors">
                 <FilterX className="w-3.5 h-3.5" aria-hidden="true" />
                 Limpiar
             </button>

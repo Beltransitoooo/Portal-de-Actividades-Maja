@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
+// Archivo (variable en ancho y peso, con itálica): una sola familia para todo el portal
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/archivo/wdth-italic.css';
 import './index.css';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 

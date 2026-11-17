@@ -8,6 +8,7 @@
     <!-- Aplica el tema guardado antes de pintar (evita un destello claro en modo oscuro) -->
     <script>
       try { if (localStorage.getItem('maja-theme') === 'dark') document.documentElement.classList.add('dark'); } catch (e) {}
+      try { if (localStorage.getItem('maja-animaciones') === 'pausadas') document.documentElement.classList.add('animaciones-pausadas'); } catch (e) {}
     </script>
   </head>
   <body>

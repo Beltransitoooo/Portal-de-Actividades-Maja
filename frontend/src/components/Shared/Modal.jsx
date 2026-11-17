@@ -26,8 +26,8 @@ export const Modal = ({ isOpen, onClose, title, eyebrow, children, maxWidth = 'm
 
                 <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-slate-50">
                     <div>
-                        {eyebrow && <p className="text-[10px] text-[#0e71af] font-bold tracking-widest uppercase mb-1">{eyebrow}</p>}
-                        <h2 id={titleId} className="text-xl font-black text-[#07152F] uppercase tracking-tight">{title}</h2>
+                        {eyebrow && <p className="text-[12px] text-[#0e71af] font-bold mb-1">{eyebrow}</p>}
+                        <h2 id={titleId} className="font-dorsal text-[34px] text-[#07152F] uppercase">{title}</h2>
                     </div>
                     <button type="button" onClick={onClose} aria-label="Cerrar" className="text-gray-500 hover:text-red-700 transition-colors p-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>

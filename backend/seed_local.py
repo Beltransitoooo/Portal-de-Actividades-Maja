@@ -153,8 +153,41 @@ def main():
                 original = (hoy + timedelta(days=ven - 1)).isoformat()
                 bitacora(creador.id, "fecha_vencimiento", original, act.fecha_vencimiento.isoformat(), 1)
 
+        # Entregas de semanas anteriores (a tiempo y con retraso) para las gráficas del Panel.
+        # (título, asignado, área, inicio, vencimiento, cierre, estimación, [(día, horas)]) — días relativos a hoy
+        entregas = [
+            ("Regresión del checkout", qa1, "QA", -24, -20, -21, 8, [(-24, 2), (-22, 3), (-21, 3)]),
+            ("Validar cupones de descuento", qa2, "QA", -17, -15, -13, 5, [(-17, 2), (-15, 2), (-13, 2)]),
+            ("Corregir error en el carrito", dev1, "Desarrollo", -15, -12, -12, 6, [(-15, 3), (-12, 3)]),
+            ("Revisión de accesibilidad del menú", diseno1, "Diseño", -11, -8, -6, 4, [(-11, 2), (-8, 1), (-6, 3)]),
+            ("Pruebas de pago en sandbox", qa1, "QA", -8, -5, -5, 6, [(-8, 2), (-7, 2), (-5, 1)]),
+            ("Ajustar textos de la tienda", dev1, "Desarrollo", -4, -3, -1, 3, [(-4, 2), (-1, 2)]),
+        ]
+        a_las = lambda dia, hora: datetime.combine(hoy + timedelta(days=dia), datetime.min.time()) + timedelta(hours=hora)  # noqa: E731
+        for titulo, persona, area, ini, ven, cierre, est, horas in entregas:
+            act = models.Actividad(
+                titulo=titulo, descripcion="Entrega de ejemplo para las gráficas del panel.", tipo_actividad="Pruebas" if area == "QA" else "Tarea",
+                prioridad="Media", estado="COMPLETADA", completada=True, creador_id=admin.id, asignado_a_id=persona.id,
+                area_id=areas[area].id, lider_catalogo_id=lider_a.id,
+                fecha_inicio=hoy + timedelta(days=ini), fecha_vencimiento=hoy + timedelta(days=ven),
+                estimacion_max_hrs=est, horas_utilizadas=round(sum(h for _, h in horas), 2),
+            )
+            db.add(act)
+            db.flush()
+            for dia, h in horas:
+                db.add(models.RegistroHoras(actividad_id=act.id, fecha=hoy + timedelta(days=dia), horas=h,
+                                            nota="Registro de ejemplo", usuario_id=persona.id))
+            # La bitácora guarda UTC: 20:00 UTC = 14:00 en México, mismo día
+            for usuario_id, campo, anterior, nuevo, dia in [
+                (admin.id, "creada", None, titulo, ini - 1),
+                (persona.id, "estado", "PENDIENTE", "EN_PROGRESO", ini),
+                (persona.id, "estado", "EN_PROGRESO", "COMPLETADA", cierre),
+            ]:
+                db.add(models.HistorialActividad(actividad_id=act.id, usuario_id=usuario_id, campo=campo,
+                                                 valor_anterior=anterior, valor_nuevo=nuevo, creado=a_las(dia, 20)))
+
         db.commit()
-        print(f"Datos de ejemplo cargados: {len(areas)} áreas, 6 usuarios, 2 líderes, {len(datos)} actividades.")
+        print(f"Datos de ejemplo cargados: {len(areas)} áreas, 6 usuarios, 2 líderes, {len(datos) + len(entregas)} actividades.")
         print("Cuentas: admin@example.com (admin), qa1@, qa2@, dev1@, diseno1@, sinarea@ (todas @example.com).")
     finally:
         db.close()

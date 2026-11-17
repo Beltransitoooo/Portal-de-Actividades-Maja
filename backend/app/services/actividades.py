@@ -545,3 +545,26 @@ def listar_historial(db: Session, actividad_id: int, usuario_actual: models.Usua
         }
         for f in filas
     ]
+
+
+def listar_cierres(db: Session, usuario_actual: models.Usuario):
+    """Fecha de cierre de cada actividad COMPLETADA visible: el último cambio de estado a COMPLETADA
+    en la bitácora. Las completadas sin ese registro (anteriores a la bitácora) no aparecen; el
+    cliente decide cómo tratarlas. Una sola consulta en lugar de pedir el historial de cada actividad.
+    """
+    visibles = (
+        _filtrar_visibles(db.query(models.Actividad), usuario_actual)
+        .filter(models.Actividad.estado == "COMPLETADA")
+        .with_entities(models.Actividad.id)
+    )
+    filas = (
+        db.query(models.HistorialActividad.actividad_id, func.max(models.HistorialActividad.creado))
+        .filter(
+            models.HistorialActividad.campo == "estado",
+            models.HistorialActividad.valor_nuevo == "COMPLETADA",
+            models.HistorialActividad.actividad_id.in_(visibles),
+        )
+        .group_by(models.HistorialActividad.actividad_id)
+        .all()
+    )
+    return [{"actividad_id": actividad_id, "fecha_cierre": fecha} for actividad_id, fecha in filas]

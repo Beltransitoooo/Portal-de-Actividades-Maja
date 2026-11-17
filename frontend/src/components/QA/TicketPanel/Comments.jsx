@@ -68,15 +68,15 @@ export const Comments = ({ ticket, me }) => {
         <div className="flex flex-col gap-5">
             <form onSubmit={submit} noValidate className="border border-gray-100 rounded-xl p-4 flex flex-col gap-3">
                 <div>
-                    <label htmlFor={ids.text} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Comentario</label>
+                    <label htmlFor={ids.text} className="block text-[12px] font-bold text-gray-500 mb-1">Comentario</label>
                     <textarea id={ids.text} rows={3} maxLength={2000} value={text} onChange={(e) => setText(e.target.value)} placeholder="Notas, hallazgos o acuerdos sobre esta actividad" className={`${inputClass} p-3 resize-none`} />
                 </div>
                 <div>
-                    <label htmlFor={ids.url} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Enlace de evidencia (opcional)</label>
+                    <label htmlFor={ids.url} className="block text-[12px] font-bold text-gray-500 mb-1">Enlace de evidencia (opcional)</label>
                     <input id={ids.url} type="url" inputMode="url" maxLength={500} value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className={`${inputClass} h-10`} />
                 </div>
                 {error && <div role="alert" className="bg-red-50 border-l-4 border-red-500 text-red-700 text-xs p-3 rounded font-medium">{error}</div>}
-                <button type="submit" disabled={saving} className="h-10 bg-[#07152F] hover:bg-[#0e71af] disabled:opacity-60 text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                <button type="submit" disabled={saving} className="h-10 bg-[#07152F] hover:bg-[#0e71af] disabled:opacity-60 text-white text-[12px] font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
                     <Send className="w-3.5 h-3.5" aria-hidden="true" />
                     {saving ? 'Publicando...' : 'Publicar'}
                 </button>

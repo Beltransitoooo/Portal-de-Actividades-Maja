@@ -73,7 +73,7 @@ export const UserDropdown = () => {
                     
                     {/* Cabecera */}
                     <div className="px-4 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-700 to-blue-600">
-                        <p className="text-xs font-medium text-blue-50 uppercase tracking-wider">
+                        <p className="text-[13px] font-medium text-blue-50">
                             Sesión iniciada como
                         </p>
                         <div className="flex items-center mt-1">
@@ -103,7 +103,7 @@ export const UserDropdown = () => {
                                 <Settings className="h-5 w-5 text-blue-600" aria-hidden="true" />
                             </div>
                             <span className="font-medium text-gray-700">Configuración</span>
-                            <span className="ml-auto text-[9px] font-bold uppercase tracking-wider text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">Próximamente</span>
+                            <span className="ml-auto text-[11px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">Próximamente</span>
                         </button>
 
                         <button 
@@ -129,7 +129,7 @@ export const UserDropdown = () => {
                     </div>
                     <div className="min-w-0">
                         <p className="text-base font-black text-[#07152F] truncate">{username}</p>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{roleLabel}</p>
+                        <p className="text-[12px] font-bold text-gray-500 mt-1">{roleLabel}</p>
                     </div>
                 </div>
 
