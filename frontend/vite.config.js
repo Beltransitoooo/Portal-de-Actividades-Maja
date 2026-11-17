@@ -8,4 +8,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  test: {
+    // Node por defecto; los archivos de componentes piden jsdom con `// @vitest-environment jsdom`
+    environment: 'node',
+    setupFiles: ['./src/test/setup.js'],
+  },
 })

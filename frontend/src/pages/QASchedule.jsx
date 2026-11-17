@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
     ClipboardList, Hourglass, Clock3, CheckCircle2, Flag, CalendarClock,
-    ChevronDown, Users, Gauge, TrendingUp, RotateCcw, Ban, Eye, ShieldCheck, Activity
+    ChevronDown, Users, TrendingUp, RotateCcw, Ban, Eye, ShieldCheck, Activity, History as HistoryIcon
 } from 'lucide-react';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { PageHeader } from '../components/Shared/PageHeader';
@@ -10,12 +10,13 @@ import { MonthSwitcher } from '../components/Shared/MonthSwitcher';
 import { ExportBar } from '../components/Shared/ExportBar';
 import { ActivityFilters } from '../components/QA/ActivityFilters';
 import { QATicketPanel } from '../components/QA/QATicketPanel';
+import { ScheduleHistoryModal } from '../components/QA/ScheduleHistoryModal';
 import { useQAData } from '../hooks/useQAData';
 import { useActivityFilters } from '../hooks/useActivityFilters';
 import { STATUS_CONFIG } from '../services/qaData';
 import { toLocalDateStr, formatDateMx } from '../utils/dates';
 import { distributeHours, fmtHours, getEquivalentWorkingDays } from '../utils/schedule';
-import { dayCapacity, CAPACITY_SUMMARY, WEEKDAY_SCHEDULE_TEXT, SATURDAY_SCHEDULE_TEXT } from '../utils/capacity';
+import { WEEKDAY_SCHEDULE_TEXT, SATURDAY_SCHEDULE_TEXT } from '../utils/capacity';
 import { toCsv, downloadCsv } from '../utils/csv';
 import { printPage } from '../utils/print';
 
@@ -26,19 +27,6 @@ const fmtH = fmtHours;
 
 // Rayado diagonal que marca visualmente las actividades bloqueadas en la barra
 const BLOCKED_STRIPES = 'repeating-linear-gradient(135deg, rgba(0,0,0,0.30) 0 5px, transparent 5px 10px)';
-
-// Chip con el resultado de una actividad cerrada: cuánto tiempo tomó frente a lo estimado
-const ResultBadge = ({ estimated, logged }) => {
-    const over = estimated > 0 && logged > estimated;
-    return (
-        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[8px] font-black uppercase tracking-wider whitespace-nowrap ${
-            over ? 'bg-red-50 border-red-200 text-red-700' : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-        }`}>
-            <CheckCircle2 className="w-2.5 h-2.5" aria-hidden="true" />
-            Tomó {fmtH(logged)}h{over ? ` (+${fmtH(logged - estimated)})` : ''}
-        </span>
-    );
-};
 
 // Estado actual de la actividad (con icono para no depender solo del color)
 const StatusPill = ({ status }) => {
@@ -70,6 +58,7 @@ export const QASchedule = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [memberFilter, setMemberFilter] = useState('');
     const [selectedTicketId, setSelectedTicketId] = useState(null);
+    const [historyOpen, setHistoryOpen] = useState(false);
 
     const { teamUsers, tasks, leaders, me, isLoading, loadError, reload } = useQAData();
     const { filters, setFilter, reset, matches, activeCount } = useActivityFilters();
@@ -96,36 +85,36 @@ export const QASchedule = () => {
         .sort((a, b) => a.startDate.localeCompare(b.startDate) || (a.dueDate || '').localeCompare(b.dueDate || '')),
     [tasks, monthStart, monthEnd, memberFilter, matches]);
 
+    // Las completadas salen de la línea de tiempo y se consultan en el historial
+    const activeTasks = useMemo(() => monthTasks.filter(t => !t.completada), [monthTasks]);
+    const completedTasks = useMemo(() => monthTasks.filter(t => t.completada), [monthTasks]);
+
     // Reparto de la estimación por día (mismo que usa el calendario) de cada actividad visible
     const distributions = useMemo(
-        () => new Map(monthTasks.map(t => [t.db_id, distributeHours(t.maxHours, t.startDate, t.dueDate || t.startDate)])),
-        [monthTasks]
+        () => new Map(activeTasks.map(t => [t.db_id, distributeHours(t.maxHours, t.startDate, t.dueDate || t.startDate)])),
+        [activeTasks]
     );
 
-    const { totalEstimated, totalLogged, completedCount, onTimeCount, plannedByDay, realByDay, blockedCount, reviewCount } = useMemo(() => {
+    // Resumen del mes: cuenta todas las actividades (también las completadas);
+    // "Horas reales" por día suma solo las filas visibles en la línea de tiempo.
+    const { totalEstimated, totalLogged, completedCount, onTimeCount, realByDay, blockedCount, reviewCount } = useMemo(() => {
         const est = monthTasks.reduce((s, t) => s + (parseFloat(t.maxHours) || 0), 0);
         const logged = monthTasks.reduce((s, t) => s + (parseFloat(t.loggedHours) || 0), 0);
-        const completed = monthTasks.filter(t => t.completada);
-        const onTime = completed.filter(t => !t.maxHours || t.loggedHours <= t.maxHours);
-        const planned = days.map(d => {
-            const dateStr = toLocalDateStr(d);
-            return monthTasks.reduce((sum, t) => sum + (distributions.get(t.db_id)?.[dateStr] || 0), 0);
-        });
+        const onTime = completedTasks.filter(t => !t.maxHours || t.loggedHours <= t.maxHours);
         const real = days.map(d => {
             const dateStr = toLocalDateStr(d);
-            return monthTasks.reduce((sum, t) => sum + (t.hoursByDate[dateStr] || 0), 0);
+            return activeTasks.reduce((sum, t) => sum + (t.hoursByDate[dateStr] || 0), 0);
         });
         return {
             totalEstimated: est,
             totalLogged: logged,
-            completedCount: completed.length,
+            completedCount: completedTasks.length,
             onTimeCount: onTime.length,
-            plannedByDay: planned,
             realByDay: real,
             blockedCount: monthTasks.filter(t => t.status === 'BLOQUEADA').length,
             reviewCount: monthTasks.filter(t => t.status === 'EN REVISIÓN').length,
         };
-    }, [monthTasks, days, distributions]);
+    }, [monthTasks, activeTasks, completedTasks, days]);
 
     const getUserTheme = (assigneeRawId) => {
         const user = teamUsers.find(u => u.raw_id === assigneeRawId);
@@ -166,6 +155,17 @@ export const QASchedule = () => {
                     title="Cronograma"
                     subtitle="Línea de tiempo del mes: la estimación de cada actividad se reparte entre sus días de ejecución y se compara con las horas reales de cada día."
                 >
+                    <button
+                        type="button"
+                        onClick={() => setHistoryOpen(true)}
+                        disabled={isLoading || Boolean(loadError)}
+                        className="no-print h-10 px-4 bg-white border border-gray-200 hover:border-gray-300 rounded-lg shadow-sm flex items-center gap-2 text-[10px] font-bold text-[#07152F] uppercase tracking-widest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <HistoryIcon className="w-3.5 h-3.5 text-gray-500" aria-hidden="true" />
+                        Historial
+                        <span className="tabular-nums text-gray-500">({completedTasks.length})</span>
+                    </button>
+
                     <ExportBar onCsv={exportCsv} onPrint={printPage} />
 
                     {/* Filtro por integrante (select nativo transparente sobre el control visual) */}
@@ -239,7 +239,18 @@ export const QASchedule = () => {
                             />
                         </div>
 
-                        {monthTasks.length === 0 ? (
+                        {monthTasks.length > 0 && activeTasks.length === 0 ? (
+                            <div className="w-full flex flex-col items-center justify-center text-center bg-white border border-gray-200 rounded-2xl shadow-sm py-20 px-6">
+                                <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center border border-gray-100 mb-4 text-gray-500">
+                                    <CheckCircle2 className="w-6 h-6" aria-hidden="true" />
+                                </div>
+                                <p className="text-sm font-bold text-[#07152F]">Todas las actividades de {MONTH_NAMES[month]} están completadas</p>
+                                <p className="text-xs text-gray-500 mt-1.5 max-w-[320px]">Consulta cómo se movieron en el historial.</p>
+                                <button type="button" onClick={() => setHistoryOpen(true)} className="mt-5 h-10 px-5 bg-[#07152F] hover:bg-[#0e71af] text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-colors">
+                                    Ver historial
+                                </button>
+                            </div>
+                        ) : monthTasks.length === 0 ? (
                             <div className="w-full flex flex-col items-center justify-center text-center bg-white border border-gray-200 rounded-2xl shadow-sm py-20 px-6">
                                 <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center border border-gray-100 mb-4 text-gray-500">
                                     <CalendarClock className="w-6 h-6" aria-hidden="true" />
@@ -290,7 +301,7 @@ export const QASchedule = () => {
                                         </div>
 
                                         {/* Filas de actividades */}
-                                        {monthTasks.map(task => {
+                                        {activeTasks.map(task => {
                                             const theme = getUserTheme(task.assignee_raw_id);
                                             const endDate = task.dueDate || task.startDate;
                                             const clampedStart = task.startDate < monthStart;
@@ -331,9 +342,7 @@ export const QASchedule = () => {
                                                                 <Clock3 className="w-2.5 h-2.5" aria-hidden="true" />
                                                                 {fmtH(logged)}h
                                                             </span>
-                                                            {task.completada
-                                                                ? <ResultBadge estimated={estimated} logged={logged} />
-                                                                : <StatusPill status={task.status} />}
+                                                            <StatusPill status={task.status} />
                                                         </div>
                                                         {task.leaderName && (
                                                             <p className="flex items-center gap-1 pl-7 text-[9px] font-semibold text-slate-500 min-w-0">
@@ -374,7 +383,6 @@ export const QASchedule = () => {
                                                                 style={isBlocked ? { backgroundImage: BLOCKED_STRIPES } : undefined}
                                                                 className={`w-full h-8 flex items-center gap-1.5 px-2 text-white shadow-sm transition-all hover:shadow-md hover:brightness-110 ${theme.main} ${isBlocked ? 'ring-2 ring-red-600 ring-offset-1' : ''} ${clampedStart ? 'rounded-l-none border-l-2 border-white/60 border-dashed' : 'rounded-l-md'} ${clampedEnd ? 'rounded-r-none border-r-2 border-white/60 border-dashed' : 'rounded-r-md'}`}
                                                             >
-                                                                {task.completada && <CheckCircle2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
                                                                 {isBlocked && <Ban className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
                                                                 {task.status === 'EN REVISIÓN' && <Eye className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
                                                                 {isCritical && <Flag className="w-3 h-3 shrink-0" aria-hidden="true" />}
@@ -410,30 +418,8 @@ export const QASchedule = () => {
                                             );
                                         })}
 
-                                        {/* Carga planeada por día */}
-                                        <div className="flex border-t-2 border-slate-200 bg-slate-50/80">
-                                            <div className={`${LABEL_COL} bg-slate-50/80 px-4 py-2.5 flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest`}>
-                                                <Gauge className="w-3.5 h-3.5" aria-hidden="true" />
-                                                Carga planeada
-                                                <span className="font-bold normal-case tracking-normal">(h por día)</span>
-                                            </div>
-                                            <div className="flex-1 grid" style={dayGridStyle}>
-                                                {days.map((d, i) => {
-                                                    const dow = d.getDay();
-                                                    const capacity = dayCapacity(d);
-                                                    const load = plannedByDay[i];
-                                                    const over = capacity > 0 && load > capacity + 0.05;
-                                                    return (
-                                                        <div key={i} className={`py-2.5 text-center text-[9px] tabular-nums ${i > 0 ? 'border-l border-slate-100' : ''} ${over ? 'bg-red-50 text-red-700 font-black' : 'text-slate-600 font-bold'}`}>
-                                                            {dow === 0 ? '—' : load > 0 ? fmtH(load) : ''}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-
                                         {/* Horas reales por día */}
-                                        <div className="flex border-t border-slate-200 bg-slate-50/80">
+                                        <div className="flex border-t-2 border-slate-200 bg-slate-50/80">
                                             <div className={`${LABEL_COL} bg-slate-50/80 px-4 py-2.5 flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest`}>
                                                 <Activity className="w-3.5 h-3.5" aria-hidden="true" />
                                                 Horas reales
@@ -463,11 +449,18 @@ export const QASchedule = () => {
 
                         <p className="text-[10px] text-gray-500 font-medium -mt-2 px-1">
                             La estimación se reparte entre los días de ejecución según la jornada ({WEEKDAY_SCHEDULE_TEXT} entre semana; sábado {SATURDAY_SCHEDULE_TEXT}; domingo se descansa). Bajo cada barra se muestran las horas reales de cada día: en rojo cuando superan lo planeado.
-                            En "Carga planeada", el rojo indica que las actividades de ese día suman más horas de las disponibles ({CAPACITY_SUMMARY}).
+                            Las actividades completadas salen de la línea de tiempo y se consultan en Historial.
                         </p>
                     </>
                 )}
             </div>
+
+            <ScheduleHistoryModal
+                isOpen={historyOpen}
+                onClose={() => setHistoryOpen(false)}
+                tasks={completedTasks}
+                monthLabel={`${MONTH_NAMES[month]} ${year}`}
+            />
 
             <QATicketPanel
                 allTasks={tasks}

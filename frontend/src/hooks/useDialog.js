@@ -44,7 +44,8 @@ export const useDialog = (isOpen, onClose) => {
             }
             if (event.key !== 'Tab' || !dialogRef.current) return;
 
-            const focusables = Array.from(dialogRef.current.querySelectorAll(FOCUSABLE_SELECTOR));
+            // tabIndex -1 (p. ej. días del calendario fuera del recorrido) no cuenta como primero/último
+            const focusables = Array.from(dialogRef.current.querySelectorAll(FOCUSABLE_SELECTOR)).filter(el => el.tabIndex >= 0);
             if (focusables.length === 0) {
                 event.preventDefault();
                 return;

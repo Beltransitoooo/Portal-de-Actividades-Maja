@@ -2,32 +2,7 @@ import { useState, useEffect } from 'react';
 import { listHistory } from '../../../services/qaApi';
 import { toUserMessage } from '../../../services/authService';
 import { formatDateTimeMx } from '../../../utils/dates';
-import { STATUS_LABELS } from '../../../services/qaData';
-
-const quote = (value) => (value ? `"${value}"` : 'vacío');
-
-// Convierte una fila de la bitácora en una frase legible
-const describe = (entry) => {
-    const from = entry.valor_anterior;
-    const to = entry.valor_nuevo;
-    switch (entry.campo) {
-        case 'creada': return 'creó la actividad';
-        case 'eliminada': return 'eliminó la actividad';
-        case 'estado': return `cambió el estado de ${STATUS_LABELS[from] || from} a ${STATUS_LABELS[to] || to}`;
-        case 'titulo': return `cambió el título de ${quote(from)} a ${quote(to)}`;
-        case 'descripcion': return 'actualizó la descripción';
-        case 'prioridad': return `cambió la prioridad de ${from || 'vacío'} a ${to || 'vacío'}`;
-        case 'tipo_actividad': return `cambió el tipo de ${from || 'vacío'} a ${to || 'vacío'}`;
-        case 'fecha_inicio': return `cambió la fecha de inicio de ${from || 'sin fecha'} a ${to || 'sin fecha'}`;
-        case 'fecha_vencimiento': return `cambió el vencimiento de ${from || 'sin fecha'} a ${to || 'sin fecha'}`;
-        case 'estimacion_max_hrs': return `cambió la estimación de ${from || '0'} h a ${to || '0'} h`;
-        case 'motivo_bloqueo': return to ? `indicó el motivo del bloqueo: ${quote(to)}` : 'quitó el motivo del bloqueo';
-        case 'asignado_a': return `reasignó la actividad de ${from} a ${to}`;
-        case 'lider_catalogo': return `cambió el líder técnico de ${from} a ${to}`;
-        case 'horas': return to ? `registró ${to}` : `eliminó el registro de ${from}`;
-        default: return `modificó ${entry.campo}`;
-    }
-};
+import { describeHistoryEntry } from '../../../utils/history';
 
 // Bitácora de cambios de la actividad: quién hizo qué y cuándo.
 export const History = ({ ticket }) => {
@@ -52,7 +27,7 @@ export const History = ({ ticket }) => {
                 <li key={entry.id} className="relative">
                     <span aria-hidden="true" className="absolute -left-[27px] top-1 w-3 h-3 rounded-full bg-white border-2 border-[#0e71af]"></span>
                     <p className="text-xs text-[#07152F] leading-relaxed break-words">
-                        <span className="font-bold">{entry.usuario_nombre || 'Persona eliminada'}</span> {describe(entry)}
+                        <span className="font-bold">{entry.usuario_nombre || 'Persona eliminada'}</span> {describeHistoryEntry(entry)}
                     </p>
                     <p className="text-[10px] text-gray-500 tabular-nums mt-0.5">{formatDateTimeMx(entry.creado)}</p>
                 </li>

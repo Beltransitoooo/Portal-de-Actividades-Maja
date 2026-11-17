@@ -4,6 +4,7 @@ import { createActivity, updateActivity } from '../../services/qaApi';
 import { toUserMessage } from '../../services/authService';
 import { useDialog } from '../../hooks/useDialog';
 import { WEEKDAY_HOURS, SATURDAY_HOURS } from '../../utils/capacity';
+import { DateRangeField } from '../Shared/DateRangeField';
 
 const PRIORITIES = ['Crítica', 'Alta', 'Media', 'Baja'];
 
@@ -34,8 +35,7 @@ export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers =
         priority: `${uid}-priority`,
         assignee: `${uid}-assignee`,
         leader: `${uid}-leader`,
-        startDate: `${uid}-start`,
-        dueDate: `${uid}-due`,
+        dates: `${uid}-dates`,
         hours: `${uid}-hours`,
     };
 
@@ -161,8 +161,7 @@ export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers =
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label htmlFor={ids.assignee} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Persona Asignada</label>
                                     <select id={ids.assignee} value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} disabled={!canChooseAssignee} className={`${fieldClass} bg-slate-50 p-2.5 rounded-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed`}>
@@ -183,17 +182,17 @@ export const QANewTicketModal = ({ ticket = null, onClose, onSubmit, teamUsers =
                                         ))}
                                     </select>
                                 </div>
-                            </div>
+                        </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor={ids.startDate} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Fecha de Inicio</label>
-                                    <input id={ids.startDate} type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={`${fieldClass} bg-slate-50 p-2.5 rounded-md cursor-pointer`} />
-                                </div>
-                                <div>
-                                    <label htmlFor={ids.dueDate} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5">Fecha de Vencimiento</label>
-                                    <input id={ids.dueDate} type="date" value={dueDate} min={startDate || undefined} onChange={(e) => setDueDate(e.target.value)} className={`${fieldClass} bg-slate-50 p-2.5 rounded-md cursor-pointer`} />
-                                </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                            <div className="md:col-span-2">
+                                <DateRangeField
+                                    id={ids.dates}
+                                    label="Fechas de ejecución"
+                                    start={startDate}
+                                    end={dueDate}
+                                    onChange={(s, e) => { setStartDate(s); setDueDate(e); }}
+                                />
                             </div>
 
                             <div className="bg-slate-50 border border-gray-200 rounded-lg p-4 flex flex-col justify-center">

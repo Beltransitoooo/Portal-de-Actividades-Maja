@@ -5,6 +5,7 @@ import { toUserMessage } from '../../../services/authService';
 import { toLocalDateStr, formatDateMx } from '../../../utils/dates';
 import { fmtHours, parseLocalDate } from '../../../utils/schedule';
 import { dayCapacity } from '../../../utils/capacity';
+import { DateRangeField } from '../../Shared/DateRangeField';
 
 // Registro de horas por día de una actividad. La suma de los registros es la hora utilizada.
 export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
@@ -102,19 +103,24 @@ export const HoursLog = ({ ticket, me, onChanged, allTasks = [] }) => {
                     <Clock3 className="w-4 h-4 text-[#0e71af]" aria-hidden="true" />
                     Registrar horas
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <label htmlFor={ids.date} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Día</label>
-                        <input id={ids.date} type="date" value={date} max={todayStr} onChange={(e) => setDate(e.target.value)} className={inputClass} />
-                    </div>
+                <DateRangeField
+                    id={ids.date}
+                    label="Día"
+                    single
+                    start={date}
+                    max={todayStr}
+                    maxMonths={1}
+                    onChange={(d) => setDate(d || todayStr)}
+                />
+                <div className="grid grid-cols-[110px_1fr] gap-3">
                     <div>
                         <label htmlFor={ids.hours} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Horas</label>
                         <input id={ids.hours} type="number" step="0.5" min="0.5" max="24" value={hours} onChange={(e) => setHours(e.target.value)} placeholder="Ej: 2.5" className={inputClass} />
                     </div>
-                </div>
-                <div>
-                    <label htmlFor={ids.note} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Nota (opcional)</label>
-                    <input id={ids.note} type="text" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="¿Qué hiciste?" className={`${inputClass} font-medium`} />
+                    <div>
+                        <label htmlFor={ids.note} className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Nota (opcional)</label>
+                        <input id={ids.note} type="text" maxLength={300} value={note} onChange={(e) => setNote(e.target.value)} placeholder="¿Qué hiciste?" className={`${inputClass} font-medium`} />
+                    </div>
                 </div>
                 {warnings.length > 0 && (
                     <div role="status" className="bg-amber-50 border-l-4 border-amber-400 text-amber-800 text-xs p-3 rounded font-medium flex flex-col gap-1">
